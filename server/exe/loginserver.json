@@ -1,0 +1,18 @@
+{
+    "Config":
+    {
+        "m_AccountVerifyOn":false
+    },
+    "m_AccountData":{
+        "12345":{
+            "name":"hlx"
+        },
+        "你好":{
+            "name":"hlx"
+        }
+    },
+    "m_ServerList":[
+        "192.168.1.168:9500",
+        "192.168.1.4:9500"
+    ]
+}

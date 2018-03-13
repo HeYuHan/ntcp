@@ -1,0 +1,678 @@
+var ROOM_MAX_PLAYER_COUNT = 1;
+var PaiMessageResponse;
+(function (PaiMessageResponse) {
+    PaiMessageResponse[PaiMessageResponse["RESULT_NONE"] = 0] = "RESULT_NONE";
+    PaiMessageResponse[PaiMessageResponse["RESULT_PENG"] = 1] = "RESULT_PENG";
+    PaiMessageResponse[PaiMessageResponse["RESULT_GANG"] = 2] = "RESULT_GANG";
+    PaiMessageResponse[PaiMessageResponse["RESULT_HU"] = 3] = "RESULT_HU";
+    PaiMessageResponse[PaiMessageResponse["RESULT_XI"] = 4] = "RESULT_XI";
+    PaiMessageResponse[PaiMessageResponse["RESULT_ANGANG"] = 5] = "RESULT_ANGANG";
+})(PaiMessageResponse || (PaiMessageResponse = {}));
+var RoomPlayer = (function () {
+    function RoomPlayer() {
+        this.index = 0;
+        this.shou_pai = [];
+        this.di_pai = [];
+        this.qi_pai = [];
+        this.tian_ting = false;
+        this.tian_hu = false;
+        this.jiao_pai_array = [];
+        this.an_gang_array = [];
+        this.hu_pai_info = null;
+        this.hui_pai = false;
+        this.hui_pai_uid = 0;
+        this.result_msg = null;
+    }
+    RoomPlayer.prototype.AddDiPais = function (pais) {
+        if (typeof (pais) == "number") {
+            this.di_pai.push(pais);
+        }
+        for (var i = 0; i < pais.length; i++) {
+            this.di_pai.push(pais[i]);
+        }
+    };
+    RoomPlayer.prototype.AddQiPais = function (pais) {
+        if (typeof (pais) == "number") {
+            this.qi_pai.push(pais);
+        }
+        for (var i = 0; i < pais.length; i++) {
+            this.qi_pai.push(pais[i]);
+        }
+    };
+    RoomPlayer.prototype.SetPlayerInfo = function (client, openid) {
+        this.client = client;
+        this.openid = openid;
+        client.player = this;
+    };
+    RoomPlayer.prototype.SortPai = function () {
+        this.shou_pai.sort();
+    };
+    RoomPlayer.prototype.MoPai = function (pai) {
+        this.shou_pai.push(pai);
+    };
+    RoomPlayer.prototype.ChuPai = function (value) {
+        var index = this.shou_pai.indexOf(value);
+        if (index >= 0) {
+            this.shou_pai.splice(index, 1);
+            return true;
+        }
+        return false;
+    };
+    RoomPlayer.prototype.GetShouPaiSize = function () {
+        return this.shou_pai.length;
+    };
+    RoomPlayer.prototype.PrintShouPai = function () {
+        var msg = "";
+        for (var i = 0; i < this.shou_pai.length; i++) {
+            msg += (this.shou_pai[i] + ",");
+        }
+        Debug.Log("palyer index:" + this.index + " shou pai:" + msg);
+    };
+    RoomPlayer.prototype.Peng = function (value) {
+        var temp_shou = [];
+        var temp_di = [];
+        for (var i = 0; i < this.shou_pai.length; i++) {
+            var pai = this.shou_pai[i];
+            if (temp_di.length < 2 && Pai.Equal(pai, value)) {
+                temp_di.push(pai);
+            }
+            else {
+                temp_shou.push(pai);
+            }
+        }
+        if (temp_di.length > 1) {
+            temp_di.push(value);
+            this.AddDiPais(temp_di);
+            this.shou_pai = temp_shou;
+            return true;
+        }
+        return false;
+    };
+    RoomPlayer.prototype.AnGang = function (value) {
+        var temp_shou = [];
+        var temp_di = [];
+        for (var i = 0; i < this.shou_pai.length; i++) {
+            var pai = this.shou_pai[i];
+            if (temp_di.length < 4 && Pai.Equal(pai, value)) {
+                temp_di.push(pai);
+            }
+            else {
+                temp_shou.push(pai);
+            }
+        }
+        if (temp_di.length > 3) {
+            this.AddDiPais(temp_di);
+            this.shou_pai = temp_shou;
+            return true;
+        }
+        return false;
+    };
+    RoomPlayer.prototype.Gang = function (value) {
+        var temp_shou = [];
+        var temp_di = [];
+        for (var i = 0; i < this.shou_pai.length; i++) {
+            var pai = this.shou_pai[i];
+            if (temp_di.length < 3 && Pai.Equal(pai, value)) {
+                temp_di.push(pai);
+            }
+            else {
+                temp_shou.push(pai);
+            }
+        }
+        if (temp_di.length > 2) {
+            temp_di.push(value);
+            this.AddDiPais(temp_di);
+            this.shou_pai = temp_shou;
+            return true;
+        }
+        return false;
+    };
+    RoomPlayer.prototype.CaculateHu = function (pais) {
+        this.hui_pai = false;
+        this.hu_pai_info = pais.CaculateDiHu(this.shou_pai, this.di_pai, this.an_gang_array, true);
+        this.hu_pai_info.CaculateTotleScore();
+    };
+    RoomPlayer.prototype.Hu = function (pai, pais) {
+        var ret = false;
+        var caulater = new CheckPaiNode();
+        for (var i = 0; i < this.shou_pai.length; i++) {
+            caulater.AddOriginPai(pais.GetPaiDetail(this.shou_pai[i]));
+        }
+        caulater.AddOriginPai(pais.GetPaiDetail(pai));
+        var result_array = caulater.CheckWin();
+        this.hu_pai_info = null;
+        this.hui_pai = false;
+        ret = result_array != null;
+        if (ret) {
+            this.hui_pai = true;
+            var di_info_array = [];
+            for (var i = 0; i < result_array.length; i++) {
+                var shou = Pai.DetailToNumberArray(result_array[i]);
+                this.di_pai.sort(PaiDui.SortPaiArray);
+                var info = pais.CaculateDiHu(shou, this.di_pai, this.an_gang_array, false);
+                info.CaculateOtherScore(pais.GetPaiDetail(pai));
+                info.CaculateTotleScore();
+                di_info_array.push(info);
+            }
+            this.hu_pai_info = di_info_array[0];
+            for (var i = 1; i < di_info_array.length; i++) {
+                if (this.hu_pai_info.totle_socre < di_info_array[i].totle_socre) {
+                    this.hu_pai_info = di_info_array[i];
+                }
+            }
+        }
+        return ret;
+    };
+    RoomPlayer.prototype.ZiMo = function (pai, pais) {
+        var ret = false;
+        var caulater = new CheckPaiNode();
+        for (var i = 0; i < this.shou_pai.length; i++) {
+            caulater.AddOriginPai(pais.GetPaiDetail(this.shou_pai[i]));
+        }
+        var result_array = caulater.CheckWin();
+        this.hu_pai_info = null;
+        this.hui_pai = false;
+        ret = result_array != null;
+        if (ret) {
+            this.hui_pai = true;
+            var di_info_array = [];
+            for (var i = 0; i < result_array.length; i++) {
+                var shou = Pai.DetailToNumberArray(result_array[i]);
+                var info = pais.CaculateDiHu(shou, null, null, false);
+                info.CaculateOtherScore(pai);
+                info.CaculateTotleScore();
+                di_info_array.push(info);
+            }
+            this.hu_pai_info = di_info_array[0];
+            for (var i = 1; i < di_info_array.length; i++) {
+                if (this.hu_pai_info.totle_socre < di_info_array[i].totle_socre) {
+                    this.hu_pai_info = di_info_array[i];
+                }
+            }
+        }
+        return ret;
+    };
+    return RoomPlayer;
+}());
+var RoomState;
+(function (RoomState) {
+    RoomState[RoomState["IN_NONE"] = 0] = "IN_NONE";
+    RoomState[RoomState["IN_WAIT"] = 1] = "IN_WAIT";
+    RoomState[RoomState["IN_PLAY"] = 2] = "IN_PLAY";
+    RoomState[RoomState["IN_BLANCE"] = 3] = "IN_BLANCE";
+})(RoomState || (RoomState = {}));
+var Room = (function () {
+    function Room() {
+        this.TEST_PAI_INDEX = 0;
+        this.m_timer = new Timer(0.1, true);
+        this.state = RoomState.IN_NONE;
+        this.room_players = [];
+        this.pais = null;
+        this.m_clients = [];
+        this.next_mo_palyer = 0;
+        this.next_chu_palyer = 0;
+        this.wait_result_players = [];
+        this.players_result_msg_count = 0;
+        this.wait_result = false;
+        this.last_chu_pai = 0;
+        this.last_mo_pai = 0;
+        this.chu_pai_count = 0;
+        this.last_chu_pai_player = null;
+        this.last_mo_pai_player = null;
+    }
+    Room.Create = function () {
+        var room = new Room();
+        room.uid = Room.uid_creater.Get();
+        Room.gRoomList.push(room);
+        return room;
+    };
+    Room.Get = function (uid) {
+        for (var i = 0; i < Room.gRoomList.length; i++) {
+            var room = Room.gRoomList[i];
+            if (room.uid == uid)
+                return room;
+        }
+        return null;
+    };
+    Room.Remove = function (uid) {
+        for (var i = 0; i < Room.gRoomList.length; i++) {
+            var room = Room.gRoomList[i];
+            if (room.uid == uid) {
+                Room.gRoomList.splice(i, 1);
+                return;
+            }
+        }
+    };
+    Room.prototype.AddClient = function (client) {
+        this.m_clients.push(client);
+    };
+    Room.prototype.RemoveClient = function (c) {
+        var index = this.m_clients.indexOf(c);
+        if (index > 0)
+            this.m_clients.splice(index, 1);
+    };
+    Room.prototype.Init = function () {
+        var self = this;
+        this.m_timer.OnUpdate = function (t) { self.OnUpdate(t); };
+        this.m_timer.Begin();
+    };
+    Room.prototype.OnUpdate = function (t) {
+    };
+    Room.prototype.Release = function () {
+        this.m_timer.Stop();
+        this.m_clients = [];
+        Room.Remove(this.uid);
+        Room.uid_creater.ReleaseValue(this.uid);
+    };
+    Room.prototype.ClientJoin = function (c) {
+        if (this.state == RoomState.IN_NONE)
+            this.state = RoomState.IN_WAIT;
+        else if (this.state > RoomState.IN_WAIT)
+            return;
+        this.AddClient(c);
+        var all_clients = [];
+        for (var i = 0; i < this.m_clients.length; i++) {
+            var other = this.m_clients[i];
+            all_clients.push({
+                uid: other.uid,
+                state: other.state,
+                info: other.info
+            });
+        }
+        for (var i = 0; i < this.m_clients.length; i++) {
+            this.m_clients[i].Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM, {
+                state: this.state,
+                clients: all_clients
+            }));
+        }
+    };
+    Room.prototype.ClientLeave = function (c) {
+        this.RemoveClient(c);
+        for (var i = 0; i < this.m_clients.length; i++) {
+            this.m_clients[i].Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM, { uid: c.uid }));
+        }
+    };
+    Room.prototype.ClientReady = function (c, ready) {
+        if (this.CheckStartGame())
+            return true;
+        for (var i = 0; i < this.m_clients.length; i++) {
+            this.m_clients[i].Send(CreateMsg(SERVER_MSG.SM_READY_GAME, { uid: c.uid, state: ready }));
+        }
+        return false;
+    };
+    Room.prototype.CheckStartGame = function () {
+        var len = this.m_clients.length;
+        if (len < ROOM_MAX_PLAYER_COUNT || this.state == RoomState.IN_PLAY || this.state == RoomState.IN_BLANCE)
+            return false;
+        for (var i = 0; i < len; i++) {
+            var c = this.m_clients[i];
+            if (!c.Ready()) {
+                return false;
+            }
+        }
+        this.StartGame();
+        return true;
+    };
+    Room.prototype.StartGame = function () {
+        this.state = RoomState.IN_PLAY;
+        this.room_players = [];
+        for (var i = 0; i < this.m_clients.length; i++) {
+            var p = new RoomPlayer();
+            p.index = i;
+            var c = this.m_clients[i];
+            c.state = State.IN_GAME;
+            p.SetPlayerInfo(c, c.info.openid);
+            this.room_players.push(p);
+        }
+        this.CreatePai();
+        for (var i = 0; i < this.room_players.length; i++) {
+            var p = this.room_players[i];
+            p.client.Send(CreateMsg(SERVER_MSG.SM_START_GAME, { shou: p.shou_pai, jiang: this.pais.jiang_pai, size2: this.pais.GetSize() }));
+        }
+        this.next_mo_palyer = 0;
+        this.CaculateResultPlayers(null);
+    };
+    Room.prototype.CaculateResultPlayers = function (player) {
+        this.wait_result = true;
+        this.wait_result_players = [];
+        this.players_result_msg_count = 0;
+        if (player) {
+            for (var i = player.index + 1; i < this.room_players.length; i++) {
+                this.wait_result_players.push(this.room_players[i]);
+            }
+            for (var i = 0; i < player.index; i++) {
+                this.wait_result_players.push(this.room_players[i]);
+            }
+        }
+        else {
+            this.wait_result_players = this.room_players;
+        }
+    };
+    Room.prototype.GetChuPaiPalyer = function () {
+        return this.room_players[this.next_chu_palyer];
+    };
+    Room.prototype.GetMoPaiPlayer = function () {
+        return this.room_players[this.next_mo_palyer];
+    };
+    Room.prototype.AutoUpdateNextPlayer = function () {
+        this.next_chu_palyer = this.next_mo_palyer % this.room_players.length;
+        this.next_mo_palyer = (this.next_mo_palyer + 1) % this.room_players.length;
+    };
+    Room.prototype.CreatePai = function () {
+        this.TEST_PAI_INDEX = 1;
+        this.pais = new PaiDui(true);
+        var test = 1;
+        for (var p = 0; p < this.room_players.length; p++) {
+            for (var i = 0; i < 22; i++) {
+                var pai = this.TEST_PAI_INDEX++;
+                this.pais.PopValue(pai);
+                this.room_players[p].MoPai(pai);
+            }
+        }
+    };
+    Room.prototype.MoPai = function () {
+        var player = this.room_players[this.next_mo_palyer];
+        this.AutoUpdateNextPlayer();
+        var pai = this.TEST_PAI_INDEX++;
+        this.last_mo_pai = pai;
+        this.last_mo_pai_player = player;
+        this.pais.PopValue(pai);
+        player.MoPai(pai);
+        for (var i = 0; i < this.room_players.length; i++) {
+            var p = this.room_players[i];
+            if (p.index == player.index) {
+                p.client.Send(CreateMsg(SERVER_MSG.SM_MO_PAI, {
+                    uid: player.client.uid,
+                    pai: pai,
+                    size1: p.GetShouPaiSize(),
+                    size2: this.pais.GetSize()
+                }));
+            }
+            else {
+                p.client.Send(CreateMsg(SERVER_MSG.SM_MO_PAI, {
+                    uid: player.client.uid,
+                    size1: player.GetShouPaiSize(),
+                    size2: this.pais.GetSize()
+                }));
+            }
+        }
+    };
+    Room.prototype.ClientChuPai = function (client, msg) {
+        var player = client.player;
+        var value = msg.pai;
+        if (player == null)
+            return;
+        if (player.index == this.next_chu_palyer) {
+            if (!player.ChuPai(value)) {
+                client.Send(CreateMsg(SERVER_MSG.SM_CHU_PAI, {
+                    uid: player.client.uid,
+                    error: "not found : " + value
+                }));
+                return;
+            }
+            ;
+            this.chu_pai_count++;
+            this.last_chu_pai = value;
+            this.last_chu_pai_player = player;
+            var send_msg1 = CreateMsg(SERVER_MSG.SM_CHU_PAI, {
+                uid: player.client.uid,
+                pai: value,
+                shou: player.shou_pai
+            });
+            var send_msg2 = CreateMsg(SERVER_MSG.SM_CHU_PAI, {
+                uid: player.client.uid,
+                pai: value,
+                size1: player.GetShouPaiSize()
+            });
+            for (var i = 0; i < this.room_players.length; i++) {
+                var p = this.room_players[i];
+                if (p.index == player.index)
+                    p.client.Send(send_msg1);
+                else
+                    p.client.Send(send_msg2);
+            }
+            this.CaculateResultPlayers(player);
+        }
+    };
+    Room.prototype.BroadCastMessageByPlayer = function (player, player_msg, other_msg) {
+        var nstring = new NString();
+        nstring.Append(other_msg);
+        for (var i = 0; i < this.room_players.length; i++) {
+            var p = this.room_players[i];
+            if (p.index == player.index) {
+                p.client.Send(player_msg);
+            }
+            else {
+                p.client.SendNString(nstring);
+            }
+        }
+        nstring = null;
+    };
+    Room.prototype.BroadCastMessage = function (msg) {
+        var nstring = new NString();
+        nstring.Append(msg);
+        for (var i = 0; i < this.room_players.length; i++) {
+            this.room_players[i].client.SendNString(nstring);
+        }
+        nstring = null;
+    };
+    Room.prototype.BalanceGame = function () {
+        this.state = RoomState.IN_BLANCE;
+        var msgs = [];
+        for (var i = 0; i < this.room_players.length; i++) {
+            var p = this.room_players[i];
+            p.client.state = State.IN_BLANCE;
+            if (p.hu_pai_info == null) {
+                p.CaculateHu(this.pais);
+            }
+            var msg = {
+                uid: p.client.uid,
+                shou: p.shou_pai,
+                di: p.di_pai,
+                score: p.hu_pai_info.totle_socre
+            };
+            if (p.hui_pai) {
+                msg.uid2 = p.hui_pai_uid;
+                msg.type1 = p.hu_pai_info.hu_pai_type,
+                    msg.type2 = p.hu_pai_info.hu_type;
+            }
+            msgs.push(msg);
+        }
+        this.BroadCastMessage(CreateMsg(SERVER_MSG.SM_GAME_BALANCE, msgs));
+    };
+    Room.prototype.CaculatePlayerTotleScore = function (player) {
+        var hu_pai_info = player.hu_pai_info;
+        player.hui_pai_uid = this.last_chu_pai_player == null ? player.client.uid : this.last_chu_pai_player.client.uid;
+        var score = hu_pai_info.totle_socre;
+        if (this.last_mo_pai_player.index == player.index) {
+            hu_pai_info.hu_pai_type |= HuPaiType.ZI_MO;
+            hu_pai_info.hu_type_score += 10;
+        }
+        if (this.chu_pai_count == 0) {
+            hu_pai_info.hu_pai_type |= HuPaiType.TIANG_HU;
+            hu_pai_info.di_hu_score *= 4;
+        }
+        else if (player.tian_ting) {
+            hu_pai_info.hu_pai_type |= HuPaiType.TIANG_TING;
+            hu_pai_info.di_hu_score *= 2;
+        }
+        if (hu_pai_info.xi_array.length == 0) {
+            hu_pai_info.di_hu_score *= 2;
+        }
+        hu_pai_info.CaculateTotleScore();
+    };
+    Room.prototype.ClientResponseChuPai = function (client, msg) {
+        if (client.player.index == this.next_chu_palyer) {
+            if (msg.type == PaiMessageResponse.RESULT_HU) {
+                var ret = client.player.ZiMo(this.pais.GetPaiDetail(this.last_mo_pai), this.pais);
+                if (ret) {
+                    var hu_pai_info = client.player.hu_pai_info;
+                    this.CaculatePlayerTotleScore(client.player);
+                    this.BroadCastMessage(CreateMsg(SERVER_MSG.SM_HU_PAI, {
+                        uid: client.uid,
+                        uid2: client.uid,
+                        type1: hu_pai_info.hu_pai_type,
+                        type2: hu_pai_info.hu_type,
+                        pai: this.last_mo_pai
+                    }));
+                    this.BalanceGame();
+                }
+                Debug.Log("client zi mo:" + ret + " uid:" + client.uid);
+                return;
+            }
+            else if (msg.type == PaiMessageResponse.RESULT_GANG) {
+                if (client.player.AnGang(this.last_chu_pai)) {
+                    this.next_mo_palyer = client.player.index;
+                    var player_msg = {
+                        uid: client.uid,
+                        pai: this.last_chu_pai,
+                        shou: client.player.shou_pai,
+                        di: client.player.di_pai
+                    };
+                    var other_msg = {
+                        uid: client.uid,
+                        pai: this.last_chu_pai,
+                        di: client.player.di_pai,
+                        size1: client.player.GetShouPaiSize()
+                    };
+                    this.BroadCastMessageByPlayer(client.player, CreateMsg(SERVER_MSG.SM_GANG_PAI, player_msg), CreateMsg(SERVER_MSG.SM_GANG_PAI, other_msg));
+                    this.wait_result = false;
+                    this.MoPai();
+                }
+                return;
+            }
+        }
+        if (!this.wait_result)
+            return;
+        if (msg.type == PaiMessageResponse.RESULT_PENG) {
+            if (client.player.Peng(this.last_chu_pai)) {
+                this.next_mo_palyer = client.player.index;
+                this.AutoUpdateNextPlayer();
+                var player_msg = {
+                    uid: client.uid,
+                    pai: this.last_chu_pai,
+                    shou: client.player.shou_pai,
+                    di: client.player.di_pai
+                };
+                var other_msg = {
+                    uid: client.uid,
+                    pai: this.last_chu_pai,
+                    di: client.player.di_pai,
+                    size1: client.player.GetShouPaiSize()
+                };
+                this.BroadCastMessageByPlayer(client.player, CreateMsg(SERVER_MSG.SM_PENG_PAI, player_msg), CreateMsg(SERVER_MSG.SM_PENG_PAI, other_msg));
+                this.wait_result = false;
+            }
+            return;
+        }
+        else if (msg.type == PaiMessageResponse.RESULT_GANG) {
+            if (client.player.Gang(this.last_chu_pai)) {
+                this.next_mo_palyer = client.player.index;
+                var player_msg = {
+                    uid: client.uid,
+                    pai: this.last_chu_pai,
+                    shou: client.player.shou_pai,
+                    di: client.player.di_pai
+                };
+                var other_msg = {
+                    uid: client.uid,
+                    pai: this.last_chu_pai,
+                    di: client.player.di_pai,
+                    size1: client.player.GetShouPaiSize()
+                };
+                this.BroadCastMessageByPlayer(client.player, CreateMsg(SERVER_MSG.SM_GANG_PAI, player_msg), CreateMsg(SERVER_MSG.SM_GANG_PAI, other_msg));
+                this.wait_result = false;
+                this.MoPai();
+            }
+            return;
+        }
+        Debug.Log("wait_result_players:" + this.wait_result_players.length);
+        Debug.Log("players_result_msg_count:" + this.players_result_msg_count);
+        var find = false;
+        for (var i = 0; i < this.wait_result_players.length; i++) {
+            if (client.player.index == this.wait_result_players[i].index) {
+                this.wait_result_players[i].result_msg = msg;
+                this.players_result_msg_count++;
+                find = true;
+                break;
+            }
+        }
+        if (!find && this.wait_result_players.length > 0)
+            return;
+        for (var i = 0; i < this.wait_result_players.length; i++) {
+            var p = this.wait_result_players[i];
+            var ret_msg = p.result_msg;
+            if (ret_msg.type == PaiMessageResponse.RESULT_HU) {
+                var ret = p.Hu(this.last_chu_pai, this.pais);
+                if (ret) {
+                    p.MoPai(this.last_chu_pai);
+                    var hu_pai_info = p.hu_pai_info;
+                    p.hui_pai_uid = this.last_chu_pai_player.client.uid;
+                    var broad_msg = {
+                        uid: p.client.uid,
+                        target_uid: this.GetChuPaiPalyer().client.uid,
+                        pai: this.last_chu_pai
+                    };
+                    this.BroadCastMessage(CreateMsg(SERVER_MSG.SM_HU_PAI, broad_msg));
+                }
+                return;
+            }
+        }
+        if (this.players_result_msg_count == this.wait_result_players.length) {
+            this.wait_result = false;
+            this.MoPai();
+        }
+    };
+    Room.prototype.ClientHuanPai = function (client, msg) {
+        var player = client.player;
+        if (player == null)
+            return;
+        var old_pais = msg;
+        var new_pais = [];
+        var ok = true;
+        var error_pai = -1;
+        if (old_pais.length > 0) {
+            for (var i = 0; i < old_pais.length; i++) {
+                if (old_pais[i] > 120 && player.ChuPai(old_pais[i])) {
+                    var pai = this.pais.Get();
+                    if (pai > 0) {
+                        new_pais.push(pai);
+                        player.MoPai(pai);
+                    }
+                    else {
+                        error_pai = old_pais[i];
+                        ok = false;
+                        break;
+                    }
+                }
+                else {
+                    error_pai = old_pais[i];
+                    ok = false;
+                    break;
+                }
+            }
+        }
+        else {
+            ok = false;
+        }
+        if (ok) {
+            player.AddDiPais(old_pais);
+            var self_msg = CreateMsg(SERVER_MSG.SM_HUAN_PAI, {
+                uid: client.uid,
+                shou: player.shou_pai,
+                di: player.di_pai
+            });
+            var other_msg = CreateMsg(SERVER_MSG.SM_HUAN_PAI, {
+                uid: client.uid,
+                di: player.di_pai
+            });
+            this.BroadCastMessageByPlayer(client.player, self_msg, other_msg);
+        }
+        else {
+            client.Send(CreateMsg(SERVER_MSG.SM_HUAN_PAI, { error: "pai not found:" + error_pai }));
+        }
+    };
+    Room.uid_creater = new RandomInt(100000, 999999, false);
+    Room.gRoomList = [];
+    return Room;
+}());
