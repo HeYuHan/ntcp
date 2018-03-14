@@ -1,0 +1,63 @@
+2018-03-13T22:35:07.377+0800 I CONTROL  [main] Trying to start Windows service 'MongoDB'
+2018-03-13T22:35:07.410+0800 I CONTROL  [initandlisten] MongoDB starting : pid=6664 port=27017 dbpath=E:\Share\ntcp\server\info\db 64-bit host=DESKTOP-8DO1H12
+2018-03-13T22:35:07.410+0800 I CONTROL  [initandlisten] targetMinOS: Windows 7/Windows Server 2008 R2
+2018-03-13T22:35:07.410+0800 I CONTROL  [initandlisten] db version v3.6.3
+2018-03-13T22:35:07.410+0800 I CONTROL  [initandlisten] git version: 9586e557d54ef70f9ca4b43c26892cd55257e1a5
+2018-03-13T22:35:07.414+0800 I CONTROL  [initandlisten] OpenSSL version: OpenSSL 1.0.1u-fips  22 Sep 2016
+2018-03-13T22:35:07.414+0800 I CONTROL  [initandlisten] allocator: tcmalloc
+2018-03-13T22:35:07.414+0800 I CONTROL  [initandlisten] modules: none
+2018-03-13T22:35:07.427+0800 I CONTROL  [initandlisten] build environment:
+2018-03-13T22:35:07.427+0800 I CONTROL  [initandlisten]     distmod: 2008plus-ssl
+2018-03-13T22:35:07.427+0800 I CONTROL  [initandlisten]     distarch: x86_64
+2018-03-13T22:35:07.427+0800 I CONTROL  [initandlisten]     target_arch: x86_64
+2018-03-13T22:35:07.428+0800 I CONTROL  [initandlisten] options: { config: "E:\Share\ntcp\server\info\config.cfg", service: true, storage: { dbPath: "E:\Share\ntcp\server\info\db" }, systemLog: { destination: "file", path: "E:\Share\ntcp\server\info\log\mongod.log" } }
+2018-03-13T22:35:07.487+0800 I -        [initandlisten] Detected data files in E:\Share\ntcp\server\info\db created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2018-03-13T22:35:07.498+0800 I STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=3566M,session_max=20000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000),statistics_log=(wait=0),verbose=(recovery_progress),
+2018-03-13T22:35:07.887+0800 I STORAGE  [initandlisten] WiredTiger message [1520951707:887146][6664:140728667169104], txn-recover: Main recovery loop: starting at 1/134528
+2018-03-13T22:35:08.028+0800 I STORAGE  [initandlisten] WiredTiger message [1520951708:28147][6664:140728667169104], txn-recover: Recovering log 1 through 2
+2018-03-13T22:35:08.139+0800 I STORAGE  [initandlisten] WiredTiger message [1520951708:139031][6664:140728667169104], txn-recover: Recovering log 2 through 2
+2018-03-13T22:35:08.810+0800 I CONTROL  [initandlisten] 
+2018-03-13T22:35:08.810+0800 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2018-03-13T22:35:08.810+0800 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2018-03-13T22:35:08.810+0800 I CONTROL  [initandlisten] 
+2018-03-13T22:35:08.810+0800 I CONTROL  [initandlisten] ** WARNING: This server is bound to localhost.
+2018-03-13T22:35:08.810+0800 I CONTROL  [initandlisten] **          Remote systems will be unable to connect to this server. 
+2018-03-13T22:35:08.810+0800 I CONTROL  [initandlisten] **          Start the server with --bind_ip <address> to specify which IP 
+2018-03-13T22:35:08.810+0800 I CONTROL  [initandlisten] **          addresses it should serve responses from, or with --bind_ip_all to
+2018-03-13T22:35:08.810+0800 I CONTROL  [initandlisten] **          bind to all interfaces. If this behavior is desired, start the
+2018-03-13T22:35:08.810+0800 I CONTROL  [initandlisten] **          server with --bind_ip 127.0.0.1 to disable this warning.
+2018-03-13T22:35:08.810+0800 I CONTROL  [initandlisten] 
+2018-03-13T22:35:08.811+0800 I CONTROL  [initandlisten] 
+2018-03-13T22:35:08.811+0800 I CONTROL  [initandlisten] ** WARNING: The file system cache of this machine is configured to be greater than 40% of the total memory. This can lead to increased memory pressure and poor performance.
+2018-03-13T22:35:08.811+0800 I CONTROL  [initandlisten] See http://dochub.mongodb.org/core/wt-windows-system-file-cache
+2018-03-13T22:35:08.811+0800 I CONTROL  [initandlisten] 
+2018-03-13T22:35:09.703+0800 I FTDC     [initandlisten] Initializing full-time diagnostic data capture with directory 'E:/Share/ntcp/server/info/db/diagnostic.data'
+2018-03-13T22:35:09.727+0800 I NETWORK  [initandlisten] waiting for connections on port 27017
+2018-03-13T22:35:09.727+0800 I STORAGE  [initandlisten] Service running
+2018-03-13T22:47:59.255+0800 I NETWORK  [listener] connection accepted from 127.0.0.1:60409 #1 (1 connection now open)
+2018-03-13T22:47:59.319+0800 I NETWORK  [conn1] received client metadata from 127.0.0.1:60409 conn: { driver: { name: "nodejs", version: "3.0.4" }, os: { type: "Windows_NT", name: "win32", architecture: "x64", version: "10.0.16299" }, platform: "Node.js v8.4.0, LE, mongodb-core: 3.0.4" }
+2018-03-13T22:57:38.844+0800 I NETWORK  [conn1] end connection 127.0.0.1:60409 (0 connections now open)
+2018-03-13T22:57:45.759+0800 I NETWORK  [listener] connection accepted from 127.0.0.1:60623 #2 (1 connection now open)
+2018-03-13T22:57:45.760+0800 I NETWORK  [conn2] received client metadata from 127.0.0.1:60623 conn: { driver: { name: "nodejs", version: "3.0.4" }, os: { type: "Windows_NT", name: "win32", architecture: "x64", version: "10.0.16299" }, platform: "Node.js v8.4.0, LE, mongodb-core: 3.0.4" }
+2018-03-13T22:57:53.466+0800 I COMMAND  [conn2] command ntcp.user command: find { find: "user", filter: { openid: "123456789" }, $db: "ntcp" } planSummary: COLLSCAN keysExamined:0 docsExamined:2 cursorExhausted:1 numYields:1 nreturned:0 reslen:97 locks:{ Global: { acquireCount: { r: 4 } }, Database: { acquireCount: { r: 2 } }, Collection: { acquireCount: { r: 2 } } } protocol:op_query 122ms
+2018-03-13T23:00:09.016+0800 I NETWORK  [listener] connection accepted from 127.0.0.1:60766 #3 (2 connections now open)
+2018-03-13T23:00:09.119+0800 I NETWORK  [conn3] received client metadata from 127.0.0.1:60766 conn: { driver: { name: "nodejs", version: "3.0.4" }, os: { type: "Windows_NT", name: "win32", architecture: "x64", version: "10.0.16299" }, platform: "Node.js v7.4.0, LE, mongodb-core: 3.0.4", application: { name: "MongoDB Compass Community" } }
+2018-03-13T23:00:09.992+0800 I WRITE    [thread4] remove config.system.sessions command: { q: { _id: { id: UUID("9bcdaf86-6ffe-49f4-b651-ea77ef913e5a"), uid: BinData(0, E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855) } }, limit: 0 } planSummary: IDHACK keysExamined:0 docsExamined:0 ndeleted:0 numYields:0 locks:{ Global: { acquireCount: { r: 2, w: 2 } }, Database: { acquireCount: { w: 1, W: 1 } }, Collection: { acquireCount: { w: 1 } } } 145ms
+2018-03-13T23:00:09.993+0800 I COMMAND  [thread4] command config.$cmd command: delete { delete: "system.sessions", ordered: false, $db: "config" } numYields:0 reslen:29 locks:{ Global: { acquireCount: { r: 3, w: 3 } }, Database: { acquireCount: { w: 2, W: 1 } }, Collection: { acquireCount: { w: 2 } } } protocol:op_msg 151ms
+2018-03-13T23:00:10.262+0800 I NETWORK  [listener] connection accepted from 127.0.0.1:60768 #4 (3 connections now open)
+2018-03-13T23:00:11.269+0800 I NETWORK  [listener] connection accepted from 127.0.0.1:60770 #5 (4 connections now open)
+2018-03-13T23:00:12.275+0800 I NETWORK  [listener] connection accepted from 127.0.0.1:60772 #6 (5 connections now open)
+2018-03-13T23:00:12.377+0800 I COMMAND  [conn4] command admin command: dbStats { dbStats: 1, lsid: { id: UUID("9bcdaf86-6ffe-49f4-b651-ea77ef913e5a") }, $db: "admin" } numYields:0 reslen:240 locks:{ Global: { acquireCount: { r: 2 } }, Database: { acquireCount: { R: 1 } } } protocol:op_query 101ms
+2018-03-13T23:00:13.279+0800 I NETWORK  [listener] connection accepted from 127.0.0.1:60774 #7 (6 connections now open)
+2018-03-13T23:47:02.062+0800 I NETWORK  [conn6] end connection 127.0.0.1:60772 (5 connections now open)
+2018-03-13T23:47:02.062+0800 I NETWORK  [conn4] end connection 127.0.0.1:60768 (3 connections now open)
+2018-03-13T23:47:02.062+0800 I NETWORK  [conn3] end connection 127.0.0.1:60766 (1 connection now open)
+2018-03-13T23:47:02.062+0800 I NETWORK  [conn7] end connection 127.0.0.1:60774 (4 connections now open)
+2018-03-13T23:47:02.062+0800 I NETWORK  [conn5] end connection 127.0.0.1:60770 (2 connections now open)
+2018-03-13T23:47:05.406+0800 I NETWORK  [conn2] end connection 127.0.0.1:60623 (0 connections now open)
+2018-03-13T23:47:18.881+0800 I CONTROL  [serviceShutdown] got SERVICE_CONTROL_PRESHUTDOWN request from Windows Service Control Manager, will terminate after current cmd ends
+2018-03-13T23:47:19.063+0800 I NETWORK  [serviceShutdown] shutdown: going to close listening sockets...
+2018-03-13T23:47:19.241+0800 I FTDC     [serviceShutdown] Shutting down full-time diagnostic data capture
+2018-03-13T23:47:19.605+0800 I STORAGE  [serviceShutdown] WiredTigerKVEngine shutting down
+2018-03-13T23:47:21.944+0800 I STORAGE  [serviceShutdown] shutdown: removing fs lock...
+2018-03-13T23:47:22.047+0800 I CONTROL  [serviceShutdown] now exiting

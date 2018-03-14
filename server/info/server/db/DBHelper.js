@@ -3,12 +3,12 @@ var MongoClient = require('mongodb');
 var DBHelper=(function(){
     function DBHelper(){
     }
+    DBHelper.Instance = new DBHelper();
     DBHelper.Connect= async function (url,data_base){
         var db = await MongoClient.connect(url);
-        var helper = new DBHelper();
-        helper.db=db;
-        helper.db_base=db.db(data_base);
-        return helper;
+        DBHelper.Instance.db=db;
+        DBHelper.Instance.db_base=db.db(data_base);
+        return DBHelper.Instance;
     }
     DBHelper.prototype.GetUserInfo= async function(openid,auto_create){
         let collection = await this.db_base.collection('user');

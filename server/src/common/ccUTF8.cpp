@@ -26,6 +26,7 @@
 #include "ccUTF8.h"
 #include <stdarg.h>
 #include "ConvertUTF.h"
+#include <string.h>
 
 namespace StringUtils {
 

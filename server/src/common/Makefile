@@ -9,6 +9,7 @@ CFLAGS = -c -fPIC
 CFLAGS += -I.
 CFLAGS += -I./$(RAKNET_SOURCE_DIR)/Source
 CFLAGS += -I/usr/local
+CFLAGS += -std=gnu++11
 
 EVENT_LIB = /usr/local/lib/libevent.a 
 EVENT_LIB_CORE = /usr/local/lib/libevent_core.a 
