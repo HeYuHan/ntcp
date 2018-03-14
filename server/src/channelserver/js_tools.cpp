@@ -60,7 +60,7 @@ jsval c_string_to_jsval(JSContext* cx, const char* v, size_t length /* = -1 */)
 }
 static NS_MAP::unordered_map<void*, js_proxy_t*> _native_js_global_map;
 static NS_MAP::unordered_map<JSObject*, js_proxy_t*> _js_native_global_map;
-std::unordered_map<std::string, js_type_class_t*> _js_global_type_map;
+NS_MAP::unordered_map<std::string, js_type_class_t*> _js_global_type_map;
 //server
 JSObject* jsb_ref_create_jsobject(JSContext *cx, void *ref, js_type_class_t *typeClass, const char* debug, bool create_proxy)
 {

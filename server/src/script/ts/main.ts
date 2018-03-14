@@ -92,13 +92,20 @@ class RandomInt{
 
 
 
-ScriptLoader.ROOT_PATH="E:/Share/ntcp_server/src/script/js/";
+ScriptLoader.ROOT_PATH="E:/Share/ntcp/server/src/script/js/";
 require("server.js");
 require("client.js");
 require("pai.js");
 require("room.js");
 require("message_type.js");
-JServer.Start();
+var server = new JServer();
+var ret = server.Init({
+    ip:"127.0.0.1",
+    port:9400,
+    max_client:50
+});
+Debug.Log("init server ret:"+ret);
+server.Start();
 
 // function start(){
 //     this.pai_list=[];

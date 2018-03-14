@@ -8,7 +8,10 @@ class JServer{
         Debug.Log("accept new client uid:"+uid);
         var client=new JClient(uid);
     }
-    public static Start(){
-        new JServer();
+    public Init(config):boolean{
+        return this.native.Init(JSON.stringify(config));
+    }
+    public Start():number{
+        return this.native.Start();
     }
 }

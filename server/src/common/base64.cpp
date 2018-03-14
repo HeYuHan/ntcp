@@ -1,5 +1,5 @@
-#include <base64.h>
-#include <string>
+#include "base64.h"
+#include <string.h>
 //base64编/解码用的基础字符集
 const char kBase64Alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 "abcdefghijklmnopqrstuvwxyz"

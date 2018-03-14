@@ -5,19 +5,15 @@
 #include "Server.h"
 enum
 {
-	addr = 0x100,
-	password,
-	data_path,
-	log_path,
+	script = 0x100,
+	flag_log,
 	flag_daemon
 };
 struct option long_options[]=
 {
-	{"addr",1,0,addr },
-	{"password",1,0,password },
-	{"data_path",1,0,data_path },
+	{"script",1,0,script },
+	{"log_path",1,0,flag_log },
 	{ "daemon",0,0,flag_daemon },
-	{ "log_path",1,0,log_path }
 };
 
 #pragma comment(lib,"./../3rd/spidermonkey/prebuilt/win32/mozjs-33.lib")
@@ -25,7 +21,6 @@ struct option long_options[]=
 
 int main(int argc,char **argv)
 {
-	gServer.Run();
 	bool as_daemon = false;
 	while (1)
 	{
@@ -34,19 +29,14 @@ int main(int argc,char **argv)
 		if (option <= 0)break;
 		switch (option)
 		{
-		case data_path:
-			//strcpy(gChannelServer.m_Config.data_config_path, optarg);
-			break;
-		case addr:
-			//strcpy(gChannelServer.m_Config.addr, optarg);
-			break;
-		case password:
-			//strcpy(gChannelServer.m_Config.pwd, optarg);
+		case script:
+			strcpy(gServer.m_MainScriptPath, optarg);
+			gServer.m_MainScriptPath[strlen(optarg)] = 0;
 			break;
 		case flag_daemon:
 			as_daemon = true;
 			break;
-		case log_path:
+		case flag_log:
 			gLogger.m_LogToFile = true;
 			strcpy(gLogger.filePath, optarg);
 			break;
@@ -63,5 +53,5 @@ int main(int argc,char **argv)
 		return -1;
 	}
 
-	return 	0;
+	return 	gServer.Run();
 }

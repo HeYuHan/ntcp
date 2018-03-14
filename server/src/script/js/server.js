@@ -7,8 +7,11 @@ var JServer = (function () {
         Debug.Log("accept new client uid:" + uid);
         var client = new JClient(uid);
     };
-    JServer.Start = function () {
-        new JServer();
+    JServer.prototype.Init = function (config) {
+        return this.native.Init(JSON.stringify(config));
+    };
+    JServer.prototype.Start = function () {
+        return this.native.Start();
     };
     return JServer;
 }());

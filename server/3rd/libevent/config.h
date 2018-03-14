@@ -10,6 +10,9 @@
 /* Define if libevent should not be compiled with thread support */
 /* #undef DISABLE_THREAD_SUPPORT */
 
+/* Define to 1 if you have the `accept4' function. */
+#define HAVE_ACCEPT4 1
+
 /* Define to 1 if you have the `arc4random' function. */
 /* #undef HAVE_ARC4RANDOM */
 
@@ -47,8 +50,17 @@
 /* Define if your system supports the epoll system calls */
 #define HAVE_EPOLL 1
 
+/* Define to 1 if you have the `epoll_create1' function. */
+#define HAVE_EPOLL_CREATE1 1
+
 /* Define to 1 if you have the `epoll_ctl' function. */
 #define HAVE_EPOLL_CTL 1
+
+/* Define to 1 if you have the <errno.h> header file. */
+#define HAVE_ERRNO_H 1
+
+/* Define to 1 if you have ERR_remove_thread_stat(). */
+/* #undef HAVE_ERR_REMOVE_THREAD_STATE */
 
 /* Define to 1 if you have the `eventfd' function. */
 #define HAVE_EVENTFD 1
@@ -86,6 +98,9 @@
 /* Define this if gethostbyname_r takes 6 arguments */
 /* #undef HAVE_GETHOSTBYNAME_R_6_ARG */
 
+/* Define to 1 if you have the `getifaddrs' function. */
+#define HAVE_GETIFADDRS 1
+
 /* Define to 1 if you have the `getnameinfo' function. */
 #define HAVE_GETNAMEINFO 1
 
@@ -93,13 +108,13 @@
 #define HAVE_GETPROTOBYNUMBER 1
 
 /* Define to 1 if you have the `getservbyname' function. */
-/* #undef HAVE_GETSERVBYNAME */
+#define HAVE_GETSERVBYNAME 1
 
 /* Define to 1 if you have the `gettimeofday' function. */
 #define HAVE_GETTIMEOFDAY 1
 
-/* Define to 1 if you have the `inet_aton' function. */
-#define HAVE_INET_ATON 1
+/* Define to 1 if you have the <ifaddrs.h> header file. */
+#define HAVE_IFADDRS_H 1
 
 /* Define to 1 if you have the `inet_ntop' function. */
 #define HAVE_INET_NTOP 1
@@ -119,11 +134,20 @@
 /* Define if the system has zlib */
 /* #undef HAVE_LIBZ */
 
+/* Define to 1 if you have the `mach_absolute_time' function. */
+/* #undef HAVE_MACH_ABSOLUTE_TIME */
+
+/* Define to 1 if you have the <mach/mach_time.h> header file. */
+/* #undef HAVE_MACH_MACH_TIME_H */
+
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the `mmap' function. */
 #define HAVE_MMAP 1
+
+/* Define to 1 if you have the `nanosleep' function. */
+#define HAVE_NANOSLEEP 1
 
 /* Define to 1 if you have the <netdb.h> header file. */
 #define HAVE_NETDB_H 1
@@ -134,14 +158,17 @@
 /* Define to 1 if you have the <netinet/in.h> header file. */
 #define HAVE_NETINET_IN_H 1
 
+/* Define to 1 if you have the <netinet/tcp.h> header file. */
+#define HAVE_NETINET_TCP_H 1
+
 /* Define if the system has openssl */
 /* #undef HAVE_OPENSSL */
 
-/* Define to 1 if you have the <openssl/bio.h> header file. */
-/* #undef HAVE_OPENSSL_BIO_H */
-
 /* Define to 1 if you have the `pipe' function. */
 #define HAVE_PIPE 1
+
+/* Define to 1 if you have the `pipe2' function. */
+#define HAVE_PIPE2 1
 
 /* Define to 1 if you have the `poll' function. */
 #define HAVE_POLL 1
@@ -178,6 +205,9 @@
 
 /* Define if F_SETFD is defined in <fcntl.h> */
 #define HAVE_SETFD 1
+
+/* Define to 1 if you have the `setrlimit' function. */
+#define HAVE_SETRLIMIT 1
 
 /* Define to 1 if you have the `sigaction' function. */
 #define HAVE_SIGACTION 1
@@ -248,6 +278,9 @@
 /* Define to 1 if `__ss_family' is a member of `struct sockaddr_storage'. */
 /* #undef HAVE_STRUCT_SOCKADDR_STORAGE___SS_FAMILY */
 
+/* Define to 1 if the system has the type `struct so_linger'. */
+/* #undef HAVE_STRUCT_SO_LINGER */
+
 /* Define to 1 if you have the `sysctl' function. */
 #define HAVE_SYSCTL 1
 
@@ -275,6 +308,9 @@
 /* Define to 1 if you have the <sys/queue.h> header file. */
 #define HAVE_SYS_QUEUE_H 1
 
+/* Define to 1 if you have the <sys/resource.h> header file. */
+#define HAVE_SYS_RESOURCE_H 1
+
 /* Define to 1 if you have the <sys/select.h> header file. */
 #define HAVE_SYS_SELECT_H 1
 
@@ -289,6 +325,9 @@
 
 /* Define to 1 if you have the <sys/sysctl.h> header file. */
 #define HAVE_SYS_SYSCTL_H 1
+
+/* Define to 1 if you have the <sys/timerfd.h> header file. */
+#define HAVE_SYS_TIMERFD_H 1
 
 /* Define to 1 if you have the <sys/time.h> header file. */
 #define HAVE_SYS_TIME_H 1
@@ -313,6 +352,9 @@
 
 /* Define if timercmp is defined in <sys/time.h> */
 #define HAVE_TIMERCMP 1
+
+/* Define to 1 if you have the `timerfd_create' function. */
+#define HAVE_TIMERFD_CREATE 1
 
 /* Define if timerisset is defined in <sys/time.h> */
 #define HAVE_TIMERISSET 1
@@ -341,8 +383,14 @@
 /* Define to 1 if you have the `unsetenv' function. */
 #define HAVE_UNSETENV 1
 
+/* Define to 1 if you have the `usleep' function. */
+#define HAVE_USLEEP 1
+
 /* Define to 1 if you have the `vasprintf' function. */
 #define HAVE_VASPRINTF 1
+
+/* Define if waitpid() supports WNOWAIT */
+/* #undef HAVE_WAITPID_WITH_WNOWAIT */
 
 /* Define if kqueue works correctly with pipes */
 /* #undef HAVE_WORKING_KQUEUE */
@@ -350,15 +398,11 @@
 /* Define to 1 if you have the <zlib.h> header file. */
 /* #undef HAVE_ZLIB_H */
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #define LT_OBJDIR ".libs/"
 
-/* Define to 1 if your C compiler doesn't accept -c and -o together. */
-/* #undef NO_MINUS_C_MINUS_O */
-
 /* Numeric representation of the version */
-#define NUMERIC_VERSION 0x02001600
+#define NUMERIC_VERSION 0x02010800
 
 /* Name of package */
 #define PACKAGE "libevent"
@@ -367,19 +411,19 @@
 #define PACKAGE_BUGREPORT ""
 
 /* Define to the full name of this package. */
-#define PACKAGE_NAME ""
+#define PACKAGE_NAME "libevent"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING ""
+#define PACKAGE_STRING "libevent 2.1.8-stable"
 
 /* Define to the one symbol short name of this package. */
-#define PACKAGE_TARNAME ""
+#define PACKAGE_TARNAME "libevent"
 
 /* Define to the home page for this package. */
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION ""
+#define PACKAGE_VERSION "2.1.8-stable"
 
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */
@@ -415,8 +459,51 @@
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #define TIME_WITH_SYS_TIME 1
 
+/* Enable extensions on AIX 3, Interix.  */
+#ifndef _ALL_SOURCE
+# define _ALL_SOURCE 1
+#endif
+/* Enable GNU extensions on systems that have them.  */
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE 1
+#endif
+/* Enable threading extensions on Solaris.  */
+#ifndef _POSIX_PTHREAD_SEMANTICS
+# define _POSIX_PTHREAD_SEMANTICS 1
+#endif
+/* Enable extensions on HP NonStop.  */
+#ifndef _TANDEM_SOURCE
+# define _TANDEM_SOURCE 1
+#endif
+/* Enable general extensions on Solaris.  */
+#ifndef __EXTENSIONS__
+# define __EXTENSIONS__ 1
+#endif
+
+
 /* Version number of package */
-#define VERSION "2.0.22-stable"
+#define VERSION "2.1.8-stable"
+
+/* Enable large inode numbers on Mac OS X 10.5.  */
+#ifndef _DARWIN_USE_64_BIT_INODE
+# define _DARWIN_USE_64_BIT_INODE 1
+#endif
+
+/* Number of bits in a file offset, on hosts where this is settable. */
+/* #undef _FILE_OFFSET_BITS */
+
+/* Define for large files, on AIX-style hosts. */
+/* #undef _LARGE_FILES */
+
+/* Define to 1 if on MINIX. */
+/* #undef _MINIX */
+
+/* Define to 2 if the system does not provide POSIX.1 features except with
+   this defined. */
+/* #undef _POSIX_1_SOURCE */
+
+/* Define to 1 if you need to in order for `stat' and other things to work. */
+/* #undef _POSIX_SOURCE */
 
 /* Define to appropriate substitue if compiler doesnt have __func__ */
 /* #undef __func__ */

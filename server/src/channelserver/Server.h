@@ -14,8 +14,10 @@ public:
 	virtual void OnTcpAccept(int socket, sockaddr*);
 	virtual bool Init();
 	virtual int Run();
+	int Loop();
 	Client* GetClient(uint uid);
 	void RemoveClient(uint uid);
+	char m_MainScriptPath[512];
 public:
 	JSObject* m_JSObject;
 public:

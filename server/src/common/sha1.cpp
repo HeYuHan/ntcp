@@ -40,9 +40,9 @@ See header file for version history and test vectors.
 #define S_R3(v,w,x,y,z,i) {z+=(((w|x)&y)|(w&x))+SHABLK(i)+0x8F1BBCDC+ROL32(v,5);w=ROL32(w,30);}
 #define S_R4(v,w,x,y,z,i) {z+=(w^x^y)+SHABLK(i)+0xCA62C1D6+ROL32(v,5);w=ROL32(w,30);}
 
-#pragma warning(push)
+//#pragma warning(push)
 // Disable compiler warning 'Conditional expression is constant'
-#pragma warning(disable: 4127)
+//#pragma warning(disable: 4127)
 
 CSHA1::CSHA1()
 {
@@ -254,7 +254,7 @@ bool CSHA1::GetHash(UINT_8* pbDest20) const
 	return true;
 }
 
-#pragma warning(pop)
+//#pragma warning(pop)
 
 void CaculateSha1(const char * text, char * out)
 {

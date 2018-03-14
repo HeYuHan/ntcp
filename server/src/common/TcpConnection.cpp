@@ -98,12 +98,12 @@ void TcpConnection::HandShake()
 	
 	int size = Read(stream->read_offset,stream->read_buff_end-stream->read_offset);
 	// 解析http请求头信息
-	std::istringstream stream(stream->read_position);
+	std::istringstream string_stream(stream->read_position);
 	std::string header;
 	std::string::size_type pos = 0;
 	std::string websocketKey;
 	bool find = false;
-	while (std::getline(stream, header) && header != "\r")
+	while (std::getline(string_stream, header) && header != "\r")
 	{
 		header.erase(header.end() - 1);
 		pos = header.find(": ", 0);
@@ -143,7 +143,7 @@ void TcpConnection::HandShake()
 	response += serverKey;
 	response += "Upgrade: websocket\r\n\r\n";
 	int res_size = response.size();
-	int ret = Send((void*)response.c_str(), res_size);
+	Send((void*)response.c_str(), res_size);
 	this->stream->Reset();
 }
 void TcpConnection::ReadEvent(bufferevent * bev, void * arg)

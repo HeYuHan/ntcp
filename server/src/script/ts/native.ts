@@ -1,6 +1,7 @@
 declare class Server{
     public OnAccept:(uid:number)=>void;
-    public GetMaxClient():number;
+    public Init(json:string):boolean;
+    public Start():number;
     public static Get():Server;
 }
 declare class Client{
