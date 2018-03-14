@@ -27,6 +27,7 @@
 #include "jsfriendapi.h"
 #include "mozilla/Maybe.h"
 #include <common.h>
+#include <typeinfo>
 
 // Probably we can get rid of this struct, but since a lot of code
 // depends on it, we cannot remove it easily
@@ -76,7 +77,7 @@ typedef struct js_type_class {
     ScriptingRootHolder parentProto;
 } js_type_class_t;
 
-extern std::unordered_map<std::string, js_type_class_t*> _js_global_type_map;
+extern NS_MAP::unordered_map<std::string, js_type_class_t*> _js_global_type_map;
 
 template< typename DERIVED >
 class TypeTest

@@ -42,12 +42,16 @@ private:
 extern Logger gLogger;
 #define log_warn(__format__,...) \
 	gLogger.GetLogger().warn(__format__,__VA_ARGS__)
+
 #define log_info(__format__,...) \
 	gLogger.GetLogger().info(__format__,__VA_ARGS__)
+
 #define log_debug(__format__,...) \
 	gLogger.GetLogger().debug(__format__,__VA_ARGS__)
+
 #define log_error(__format__,...) \
 	gLogger.GetLogger().error(__format__,__VA_ARGS__)
+
 #define log_lasterror() \
 	log_error("%s",strerror(errno))
 

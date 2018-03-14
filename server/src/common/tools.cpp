@@ -5,6 +5,7 @@
 #include <string.h>
 #include "common.h"
 #ifdef LINUX
+#include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/signal.h>
 #endif // LINUX

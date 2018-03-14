@@ -8,14 +8,17 @@ RAKNET_SOURCE_DIR = ../../3rd/RakNet
 CFLAGS = -c -fPIC
 CFLAGS += -I.
 CFLAGS += -I./$(RAKNET_SOURCE_DIR)/Source
+CFLAGS += -I./$(SPIDERMONKEY_HEAD_DIR)
 CFLAGS += -I/usr/local
-CFLAGS += -std=gnu++11
+CFLAGS += -std=c++11
 
 EVENT_LIB = /usr/local/lib/libevent.a 
 EVENT_LIB_CORE = /usr/local/lib/libevent_core.a 
 EVENT_LIB_EXT = /usr/local/lib/libevent_extra.a 
 LOG_LIB = /usr/local/lib/liblog4cpp.a
 RAKNET_LIB = ../../3rd/RakNet/Lib/libraknet.a
+
+
 
 EVENT_LIB_PREFIX = --prefix=/usr/local
 LOG_LIB_PREFIX = --prefix=/usr/local
@@ -25,7 +28,7 @@ SOURCES = $(wildcard *.cpp) $(wildcard json/*.cpp)
 OBJS    = $(patsubst %.cpp,objs/%.o,$(SOURCES))
 
 PF = LINUX
-DEPS_LIB = $(LOG_LIB) $(EVENT_LIB) $(RAKNET_LIB) 
+DEPS_LIB = $(LOG_LIB) $(EVENT_LIB) $(RAKNET_LIB)
 
 ifneq ($(shell uname), Linux) 
 	PF = MACOS

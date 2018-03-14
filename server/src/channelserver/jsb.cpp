@@ -6,6 +6,7 @@
 #include <FileReader.h>
 #include <Timer.h>
 #include <HttpConnection3.h>
+#include <json/json.h>
 using namespace JS;
 
 struct NativeString
@@ -43,28 +44,58 @@ bool js_Server_Constructor(JSContext *cx, uint32_t argc, jsval *vp)
 	JS_ReportError(cx, "js_Server_Create : wrong number of arguments");
 	return false;
 }
-bool js_Server_GetServerName(JSContext *cx, uint32_t argc, jsval *vp)
+
+
+
+
+bool js_Server_Init(JSContext *cx, uint32_t argc, jsval *vp)
 {
 	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
 	bool ok = true;
-	if (argc == 0)
+	if (argc == 1)
 	{
-		const char* serverName = "ChannelServer";
-		JS::RootedValue jsret(cx);
-		jsret = std_string_to_jsval(cx,serverName);
-		args.rval().set(jsret);
+		char* json = JS_EncodeStringToUTF8(cx, JS::RootedString(cx, JS::ToString(cx, args.get(0))));
+		bool ret = false;
+		Json::Reader reader;
+		Json::Value root;
+		do 
+		{
+			if (!reader.parse(json, root))break;
+			std::string ip = root["ip"].asString();
+			int port = root["port"].asInt();
+			int max_client = root["max_client"].asInt();
+			ret = gServer.m_OnLineClients.Initialize(max_client);
+			ret = ret && gServer.CreateTcpServer(ip.c_str(), port, max_client);
+		} while (0);
+		args.rval().set(BOOLEAN_TO_JSVAL(ret));
 		return true;
 	}
 	return false;
 }
-bool js_Server_GetMaxClient(JSContext *cx, uint32_t argc, jsval *vp)
+bool js_Server_Loop(JSContext *cx, uint32_t argc, jsval *vp)
 {
 	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
 	bool ok = true;
 	if (argc == 0)
 	{
-		int size = gServer.m_OnLineClients.Size();
-		args.rval().set(INT_TO_JSVAL(size));
+		args.rval().set(INT_TO_JSVAL(gServer.Loop()));
+		return true;
+	}
+	return false;
+}
+bool js_Server_Platfrom(JSContext *cx, uint32_t argc, jsval *vp)
+{
+	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+	bool ok = true;
+	if (argc == 0)
+	{
+#ifdef WIN32
+		int p = 1;
+#else
+		int p = 2;
+#endif // WIN32
+
+		args.rval().set(INT_TO_JSVAL(p));
 		return true;
 	}
 	return false;
@@ -89,18 +120,13 @@ void js_register_Server(JSContext *cx, JS::HandleObject global)
 		JS_PS_END
 	};
 	static JSFunctionSpec funcs[] = {
-		JS_FN("GetMaxClient", js_Server_GetMaxClient, 0, JSPROP_PERMANENT | JSPROP_ENUMERATE),
-		/*JS_FN("getBlendFunc", js_cocos2dx_LayerColor_getBlendFunc, 0, JSPROP_PERMANENT | JSPROP_ENUMERATE),
-		JS_FN("setBlendFunc", js_cocos2dx_LayerColor_setBlendFunc, 1, JSPROP_PERMANENT | JSPROP_ENUMERATE),
-		JS_FN("changeWidth", js_cocos2dx_LayerColor_changeWidth, 1, JSPROP_PERMANENT | JSPROP_ENUMERATE),
-		JS_FN("init", js_cocos2dx_LayerColor_initWithColor, 1, JSPROP_PERMANENT | JSPROP_ENUMERATE),
-		JS_FN("changeHeight", js_cocos2dx_LayerColor_changeHeight, 1, JSPROP_PERMANENT | JSPROP_ENUMERATE),
-		JS_FN("ctor", js_cocos2dx_LayerColor_ctor, 0, JSPROP_PERMANENT | JSPROP_ENUMERATE),*/
+		JS_FN("Init", js_Server_Init, 1, JSPROP_PERMANENT | JSPROP_ENUMERATE),
+		JS_FN("Start", js_Server_Loop, 0, JSPROP_PERMANENT | JSPROP_ENUMERATE),
 		JS_FS_END
 	};
 	static JSFunctionSpec st_funcs[] = {
 		JS_FN("Get", js_Server_Constructor, 0, JSPROP_PERMANENT | JSPROP_ENUMERATE),
-		JS_FN("GetServerName", js_Server_GetServerName, 0, JSPROP_PERMANENT | JSPROP_ENUMERATE),
+		JS_FN("Platfrom", js_Server_Platfrom, 0, JSPROP_PERMANENT | JSPROP_ENUMERATE),
 		JS_FS_END
 	};
 
@@ -228,7 +254,7 @@ bool js_Client_Disconnect(JSContext *cx, uint32_t argc, jsval *vp)
 	Client* cobj = (Client *)(proxy ? proxy->ptr : NULL);
 	if (cobj == NULL)
 	{
-		log_error("Client Invalid Native Object");
+		log_error("Client Invalid Native Object:%s",__FUNCTION__);
 		return false;
 	}
 	if (argc == 0) {
@@ -247,7 +273,7 @@ bool js_Client_Send(JSContext *cx, uint32_t argc, jsval *vp)
 	Client* cobj = (Client *)(proxy ? proxy->ptr : NULL);
 	if (cobj == NULL)
 	{
-		log_error("Client Invalid Native Object");
+		log_error("Client Invalid Native Object:%s",__FUNCTION__);
 		return false;
 	}
 	if (argc == 1) {
@@ -269,7 +295,7 @@ bool js_Client_SendNString(JSContext *cx, uint32_t argc, jsval *vp)
 	Client* cobj = (Client *)(proxy ? proxy->ptr : NULL);
 	if (cobj == NULL)
 	{
-		log_error("Client Invalid Native Object");
+		log_error("Client Invalid Native Object:%s",__FUNCTION__);
 		return false;
 	}
 	if (argc == 1) {

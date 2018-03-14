@@ -85,10 +85,20 @@ var RandomInt = (function () {
     };
     return RandomInt;
 }());
-ScriptLoader.ROOT_PATH = "E:/Share/ntcp_server/src/script/js/";
+if (Server.Platfrom() == 1)
+    ScriptLoader.ROOT_PATH = "E:/Share/ntcp/server/src/script/js/";
+else
+    ScriptLoader.ROOT_PATH = "../script/js/";
 require("server.js");
 require("client.js");
 require("pai.js");
 require("room.js");
 require("message_type.js");
-JServer.Start();
+var server = new JServer();
+var ret = server.Init({
+    ip: "127.0.0.1",
+    port: 9400,
+    max_client: 50
+});
+Debug.Log("init server ret:" + ret);
+server.Start();

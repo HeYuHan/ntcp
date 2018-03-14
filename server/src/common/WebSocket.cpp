@@ -6,7 +6,7 @@
 #else
 #include <winsock.h>
 #endif // !WIN32
-
+#include <string.h>
 enum WS_Status
 {
 	WS_STATUS_CONNECT = 0,
@@ -60,7 +60,7 @@ int WebSokcetParser::DecodeFrame(char * frameData, int frameSize, int &outHead, 
 	}
 	// 操作码
 	unsigned long long payloadLength = 0;
-	char payloadFieldExtraBytes = 0;
+	int payloadFieldExtraBytes = 0;
 	char opcode = frameData[0] & 0x0f;
 	if (opcode == WS_TEXT_FRAME || opcode == WS_BINARY_FRAME)
 	{
@@ -97,7 +97,7 @@ int WebSokcetParser::DecodeFrame(char * frameData, int frameSize, int &outHead, 
 	{
 		ret = WS_PARSE_RESULT_ERROR;
 	}
-	if (payloadLength > (frameLength - (2 + 4 + payloadFieldExtraBytes)))
+	if (payloadLength > (unsigned long long)(frameLength - (2 + 4 + payloadFieldExtraBytes)))
 	{
 		outHead = 0;
 		outSize = 0;
@@ -109,7 +109,7 @@ int WebSokcetParser::DecodeFrame(char * frameData, int frameSize, int &outHead, 
 		// header: 2字节, masking key: 4字节
 		const char *maskingKey = &frameData[2 + payloadFieldExtraBytes];
 		char *payloadData = &frameData[2 + payloadFieldExtraBytes+4];
-		for (int i = 0; i < payloadLength; i++)
+		for (size_t i = 0; i < payloadLength; i++)
 		{
 			payloadData[i] = payloadData[i] ^ maskingKey[i % 4];
 		}
@@ -127,7 +127,7 @@ int WebSokcetParser::EncodeFrame(char * frameData, int frameSize, int emptySize,
 	const int messageLength = frameSize;
 	uint8 payloadFieldExtraBytes = 0;
 	// header: 2字节, mask位设置为0(不加密), 则后面的masking key无须填写, 省略4字节
-	uint8 frameHeaderSize = 2;
+	//uint8 frameHeaderSize = 2;
 	char frameHeader[12] = { 0 };
 
 	// fin位为1, 扩展位为0, 操作位为frameType

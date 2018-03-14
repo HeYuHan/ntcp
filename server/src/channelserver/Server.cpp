@@ -41,6 +41,7 @@ void RegisterJS()
 	engine->RegisterJSClass(js_register_File);
 	engine->RegisterJSClass(js_register_Timer);
 	engine->RegisterJSClass(js_register_Http);
+	
 
 	engine->Start();
 	auto _global = engine->GetGlobalObject();
@@ -50,7 +51,7 @@ void RegisterJS()
 	//engine->Eval("JSON.parse([1]);");
 	//JS::RootedValue rval3(_cx);
 	//bool ret = engine->Eval("var today = Server.GetServerName();return today",rval3);
-	engine->RunScript("E:/Share/ntcp_server/src/script/js/main.js");
+	engine->RunScript(gServer.m_MainScriptPath);
 
 	//JS::RootedObject obj2(_cx, _global);
 	//JSAutoCompartment ac4(_cx, obj2);
@@ -79,10 +80,6 @@ bool Server::Init()
 		return false;
 	}
 	RegisterJS();
-	if (!m_OnLineClients.Initialize(20))
-	{
-		return false;
-	}
 	return true;
 }
 
@@ -92,9 +89,14 @@ int Server::Run()
 {
 	
 	Init();
-	CreateTcpServer("192.168.2.103", 9300, 50);
+	//CreateTcpServer("192.168.2.103", 9300, 50);
 	
-	return BaseServer::Run();
+	return Init() ? 0 : -1;
+}
+
+int Server::Loop()
+{
+	 return BaseServer::Run();
 }
 
 Client * Server::GetClient(uint uid)
