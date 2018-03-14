@@ -83,7 +83,23 @@ bool js_Server_Loop(JSContext *cx, uint32_t argc, jsval *vp)
 	}
 	return false;
 }
+bool js_Server_Platfrom(JSContext *cx, uint32_t argc, jsval *vp)
+{
+	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+	bool ok = true;
+	if (argc == 0)
+	{
+#ifdef WIN32
+		int p = 1;
+#else
+		int p = 2;
+#endif // WIN32
 
+		args.rval().set(INT_TO_JSVAL(p));
+		return true;
+	}
+	return false;
+}
 //void js_character_finalize(JSFreeOp* fop, JSObject* obj);
 void js_register_Server(JSContext *cx, JS::HandleObject global)
 {
@@ -110,7 +126,7 @@ void js_register_Server(JSContext *cx, JS::HandleObject global)
 	};
 	static JSFunctionSpec st_funcs[] = {
 		JS_FN("Get", js_Server_Constructor, 0, JSPROP_PERMANENT | JSPROP_ENUMERATE),
-
+		JS_FN("Platfrom", js_Server_Platfrom, 0, JSPROP_PERMANENT | JSPROP_ENUMERATE),
 		JS_FS_END
 	};
 

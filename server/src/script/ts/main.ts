@@ -92,7 +92,8 @@ class RandomInt{
 
 
 
-ScriptLoader.ROOT_PATH="E:/Share/ntcp/server/src/script/js/";
+if(Server.Platfrom() == 1)ScriptLoader.ROOT_PATH="E:/Share/ntcp/server/src/script/js/";
+else ScriptLoader.ROOT_PATH="../script/js/";
 require("server.js");
 require("client.js");
 require("pai.js");

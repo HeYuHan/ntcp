@@ -3,6 +3,7 @@ declare class Server{
     public Init(json:string):boolean;
     public Start():number;
     public static Get():Server;
+    public static Platfrom():number;
 }
 declare class Client{
     public static Get(uid:number):Client;
