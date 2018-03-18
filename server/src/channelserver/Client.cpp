@@ -25,7 +25,7 @@ void Client::OnMessage()
 		JSContext *_cx = engine->GetGlobalContext();
 		JS::RootedObject obj2(_cx, m_JSClient);
 		JSAutoCompartment ac4(_cx, obj2);
-		jsval val = STRING_TO_JSVAL(JS_NewStringCopyN(engine->GetGlobalContext(), data_start, data_end-data_start));
+		jsval val = c_string_to_jsval(engine->GetGlobalContext(), data_start, data_end-data_start);
 		engine->CallFunction(OBJECT_TO_JSVAL(m_JSClient), "OnMessage", JS::HandleValueArray::fromMarkedLocation(1, &val));
 		return;
 	}

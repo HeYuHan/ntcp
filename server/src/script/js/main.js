@@ -1,3 +1,6 @@
+var ROOM_MAX_PLAYER_COUNT = 2;
+var DEFINE_RANDOM_TEST = false;
+var INFO_SERVER_URL = "http://ntcp.wohnb.com/ntcp/";
 var ScriptLoader = (function () {
     function ScriptLoader() {
         this.scripts = {};
@@ -35,25 +38,39 @@ var RandomInt = (function () {
             for (var i = min; i < max; i++) {
                 this.recoders.push(i);
             }
-            var len = max - min;
-            if (len > 1) {
-                for (var i = len - 1; i > 0; --i) {
-                    var value = this.recoders[i];
-                    var rand_index = Math.floor((Math.random() * this.max)) % i;
-                    this.recoders[i] = this.recoders[rand_index];
-                    this.recoders[rand_index] = value;
+            if (!DEFINE_RANDOM_TEST) {
+                var len = max - min;
+                if (len > 1) {
+                    for (var i = len - 1; i > 0; --i) {
+                        var value = this.recoders[i];
+                        var rand_index = Math.floor((Math.random() * this.max)) % i;
+                        this.recoders[i] = this.recoders[rand_index];
+                        this.recoders[rand_index] = value;
+                    }
                 }
             }
         }
     }
+    RandomInt.prototype.Insert = function (newvalue) {
+        if (newvalue >= this.min && newvalue <= this.max)
+            return false;
+        if (this.recoders.indexOf(newvalue) >= 0)
+            return false;
+        var index = Math.floor(Math.random() * this.recoders.length);
+        var value = this.recoders[index];
+        this.recoders[index] = newvalue;
+        this.recoders.push(value);
+    };
     RandomInt.prototype.Get = function () {
         if (this.repeat) {
             var range = this.max - this.min;
             return Math.floor(Math.random() * range) + this.min;
         }
         else {
-            if (this.recoders.length == 0)
+            if (this.recoders.length == 0) {
+                Debug.Log("random recoder is empty");
                 throw "random recoder is empty";
+            }
             return this.recoders.pop();
         }
     };
@@ -96,8 +113,6 @@ require("room.js");
 require("message_type.js");
 var server = new JServer();
 var ret = server.Init({
-    ip: "127.0.0.1",
-    port: 9400,
     max_client: 50
 });
 Debug.Log("init server ret:" + ret);

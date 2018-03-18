@@ -17,6 +17,7 @@ public:
 	TcpListener();
 	~TcpListener();
 public:
+	bool CreateTcpServer(const char *addr, int max_client);
 	bool CreateTcpServer(const char *ip, int port, int max_client);
 	static void ListenEvent(evconnlistener *listener, evutil_socket_t fd, sockaddr *sock, int socklen, void *arg);
 	virtual void OnTcpAccept(int socket, sockaddr*)=0;

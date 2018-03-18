@@ -1,4 +1,3 @@
-var ROOM_MAX_PLAYER_COUNT = 1;
 var PaiMessageResponse;
 (function (PaiMessageResponse) {
     PaiMessageResponse[PaiMessageResponse["RESULT_NONE"] = 0] = "RESULT_NONE";
@@ -172,7 +171,7 @@ var RoomPlayer = (function () {
         var result_array = caulater.CheckWin();
         this.hu_pai_info = null;
         this.hui_pai = false;
-        ret = result_array != null;
+        ret = result_array.length > 0;
         if (ret) {
             this.hui_pai = true;
             var di_info_array = [];
@@ -200,11 +199,12 @@ var RoomState;
     RoomState[RoomState["IN_WAIT"] = 1] = "IN_WAIT";
     RoomState[RoomState["IN_PLAY"] = 2] = "IN_PLAY";
     RoomState[RoomState["IN_BLANCE"] = 3] = "IN_BLANCE";
+    RoomState[RoomState["IN_END"] = 4] = "IN_END";
 })(RoomState || (RoomState = {}));
 var Room = (function () {
     function Room() {
-        this.TEST_PAI_INDEX = 0;
         this.m_timer = new Timer(0.1, true);
+        this.info = null;
         this.state = RoomState.IN_NONE;
         this.room_players = [];
         this.pais = null;
@@ -220,9 +220,14 @@ var Room = (function () {
         this.last_chu_pai_player = null;
         this.last_mo_pai_player = null;
     }
-    Room.Create = function () {
-        var room = new Room();
-        room.uid = Room.uid_creater.Get();
+    Room.Create = function (info) {
+        var room = Room.Get(info.roomid);
+        if (room) {
+            return room;
+        }
+        room = new Room();
+        room.uid = info.roomid;
+        room.info = info;
         Room.gRoomList.push(room);
         return room;
     };
@@ -262,7 +267,27 @@ var Room = (function () {
         this.m_timer.Stop();
         this.m_clients = [];
         Room.Remove(this.uid);
-        Room.uid_creater.ReleaseValue(this.uid);
+        for (var i = 0; i < this.room_players.length; i++) {
+            this.room_players[i].client.player = null;
+        }
+        this.room_players = [];
+        this.pais = null;
+        this.state = RoomState.IN_END;
+        var http = new Http();
+        var room = this;
+        http.OnResponse = function (state, msg) {
+            var json = JSON.parse(msg);
+            if (state == 200 && !json.error) {
+                Debug.Log("release room:" + msg);
+            }
+            else {
+                Debug.Log("release room error:" + json.error);
+            }
+        };
+        http.Get(INFO_SERVER_URL + "playEnd?data=" + EncodeUriMsg({
+            roomid: this.info.roomid,
+            hashcode: this.info.hashcode
+        }));
     };
     Room.prototype.ClientJoin = function (c) {
         if (this.state == RoomState.IN_NONE)
@@ -280,10 +305,20 @@ var Room = (function () {
             });
         }
         for (var i = 0; i < this.m_clients.length; i++) {
-            this.m_clients[i].Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM, {
-                state: this.state,
-                clients: all_clients
-            }));
+            var other = this.m_clients[i];
+            if (other.uid == c.uid) {
+                other.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM, {
+                    self: c.uid,
+                    state: this.state,
+                    clients: all_clients
+                }));
+            }
+            else {
+                other.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM, {
+                    state: this.state,
+                    clients: all_clients
+                }));
+            }
         }
     };
     Room.prototype.ClientLeave = function (c) {
@@ -359,25 +394,23 @@ var Room = (function () {
         this.next_mo_palyer = (this.next_mo_palyer + 1) % this.room_players.length;
     };
     Room.prototype.CreatePai = function () {
-        this.TEST_PAI_INDEX = 1;
         this.pais = new PaiDui(true);
         var test = 1;
         for (var p = 0; p < this.room_players.length; p++) {
             for (var i = 0; i < 22; i++) {
-                var pai = this.TEST_PAI_INDEX++;
-                this.pais.PopValue(pai);
+                var pai = this.pais.Get();
                 this.room_players[p].MoPai(pai);
             }
         }
+        this.pais.MoJiangPai();
     };
     Room.prototype.MoPai = function () {
         var player = this.room_players[this.next_mo_palyer];
         this.AutoUpdateNextPlayer();
-        var pai = this.TEST_PAI_INDEX++;
+        var pai = this.pais.Get();
+        player.MoPai(pai);
         this.last_mo_pai = pai;
         this.last_mo_pai_player = player;
-        this.pais.PopValue(pai);
-        player.MoPai(pai);
         for (var i = 0; i < this.room_players.length; i++) {
             var p = this.room_players[i];
             if (p.index == player.index) {
@@ -466,6 +499,7 @@ var Room = (function () {
                 p.CaculateHu(this.pais);
             }
             var msg = {
+                playcount: this.info.playcount,
                 uid: p.client.uid,
                 shou: p.shou_pai,
                 di: p.di_pai,
@@ -479,6 +513,7 @@ var Room = (function () {
             msgs.push(msg);
         }
         this.BroadCastMessage(CreateMsg(SERVER_MSG.SM_GAME_BALANCE, msgs));
+        this.Release();
     };
     Room.prototype.CaculatePlayerTotleScore = function (player) {
         var hu_pai_info = player.hu_pai_info;
@@ -615,6 +650,7 @@ var Room = (function () {
                     };
                     this.BroadCastMessage(CreateMsg(SERVER_MSG.SM_HU_PAI, broad_msg));
                 }
+                this.BalanceGame();
                 return;
             }
         }
@@ -672,7 +708,6 @@ var Room = (function () {
             client.Send(CreateMsg(SERVER_MSG.SM_HUAN_PAI, { error: "pai not found:" + error_pai }));
         }
     };
-    Room.uid_creater = new RandomInt(100000, 999999, false);
     Room.gRoomList = [];
     return Room;
 }());

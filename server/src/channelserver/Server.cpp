@@ -80,6 +80,7 @@ bool Server::Init()
 		return false;
 	}
 	RegisterJS();
+
 	return true;
 }
 
@@ -89,7 +90,6 @@ int Server::Run()
 {
 	
 	Init();
-	//CreateTcpServer("192.168.2.103", 9300, 50);
 	
 	return Init() ? 0 : -1;
 }

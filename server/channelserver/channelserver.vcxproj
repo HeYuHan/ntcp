@@ -69,7 +69,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)3rd\log4cpp\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)3rd\pthread\include;$(SolutionDir)3rd\libevent\WIN32-Code\nmake;$(SolutionDir)3rd\libevent\include;$(SolutionDir)3rd\RakNet\Source;$(SolutionDir)src\common;$(SolutionDir)src\common\linux;$(SolutionDir)3rd\spidermonkey\include\win32</IncludePath>
+    <IncludePath>$(SolutionDir)3rd\icon\include;$(SolutionDir)3rd\log4cpp\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)3rd\pthread\include;$(SolutionDir)3rd\libevent\WIN32-Code\nmake;$(SolutionDir)3rd\libevent\include;$(SolutionDir)3rd\RakNet\Source;$(SolutionDir)src\common;$(SolutionDir)src\common\linux;$(SolutionDir)3rd\spidermonkey\include\win32</IncludePath>
     <OutDir>$(SolutionDir)exe\</OutDir>
     <IntDir>$(SolutionDir)Temp\</IntDir>
     <TargetName>channelserver</TargetName>

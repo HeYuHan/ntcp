@@ -1,3 +1,12 @@
+//人数限制
+let ROOM_MAX_PLAYER_COUNT=2;
+//关闭随机
+let DEFINE_RANDOM_TEST=false;
+
+let INFO_SERVER_URL="http://ntcp.wohnb.com/ntcp/";
+
+
+
 class ScriptLoader{
     public static ROOT_PATH:string;
     private scripts={};
@@ -40,18 +49,30 @@ class RandomInt{
             for(var i=min;i<max;i++){
                 this.recoders.push(i);
             }
-            var len=max-min;
-            if(len>1)
+            if(!DEFINE_RANDOM_TEST)
             {
-                for(var i=len-1;i>0;--i)
+                var len=max-min;
+                if(len>1)
                 {
-                    var value=this.recoders[i];
-                    var rand_index=Math.floor((Math.random()*this.max))%i;
-                    this.recoders[i]=this.recoders[rand_index];
-                    this.recoders[rand_index]=value;
+                    for(var i=len-1;i>0;--i)
+                    {
+                        var value=this.recoders[i];
+                        var rand_index=Math.floor((Math.random()*this.max))%i;
+                        this.recoders[i]=this.recoders[rand_index];
+                        this.recoders[rand_index]=value;
+                    }
                 }
             }
+
         }
+    }
+    public Insert(newvalue:number):boolean{
+        if( newvalue>= this.min && newvalue <= this.max)return false;
+        if(this.recoders.indexOf(newvalue)>=0)return false;
+        var index=Math.floor(Math.random()*this.recoders.length);
+        var value=this.recoders[index];
+        this.recoders[index]=newvalue;
+        this.recoders.push(value);
     }
     public Get():number{
         if(this.repeat){
@@ -60,7 +81,10 @@ class RandomInt{
         }
         else
         {
-            if(this.recoders.length == 0)throw "random recoder is empty";
+            if(this.recoders.length == 0){
+                Debug.Log("random recoder is empty");
+                throw "random recoder is empty";
+            }
             return this.recoders.pop();
         }
     }
@@ -94,6 +118,10 @@ class RandomInt{
 
 if(Server.Platfrom() == 1)ScriptLoader.ROOT_PATH="E:/Share/ntcp/server/src/script/js/";
 else ScriptLoader.ROOT_PATH="../script/js/";
+
+
+
+
 require("server.js");
 require("client.js");
 require("pai.js");
@@ -101,8 +129,6 @@ require("room.js");
 require("message_type.js");
 var server = new JServer();
 var ret = server.Init({
-    ip:"127.0.0.1",
-    port:9400,
     max_client:50
 });
 Debug.Log("init server ret:"+ret);

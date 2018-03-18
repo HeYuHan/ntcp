@@ -7,6 +7,9 @@
 #include <Timer.h>
 #include <HttpConnection3.h>
 #include <json/json.h>
+#include <ccUTF8.h>
+
+
 using namespace JS;
 
 struct NativeString
@@ -54,18 +57,27 @@ bool js_Server_Init(JSContext *cx, uint32_t argc, jsval *vp)
 	bool ok = true;
 	if (argc == 1)
 	{
-		char* json = JS_EncodeStringToUTF8(cx, JS::RootedString(cx, JS::ToString(cx, args.get(0))));
+		std::string data;
+		GetJSString(cx, args.get(0), data);
 		bool ret = false;
 		Json::Reader reader;
 		Json::Value root;
 		do 
 		{
-			if (!reader.parse(json, root))break;
-			std::string ip = root["ip"].asString();
-			int port = root["port"].asInt();
-			int max_client = root["max_client"].asInt();
+			if (!reader.parse(data, root))break;
+			std::string addr = gServer.m_Addr;
+			int max_client = 50;
+			if (root.isMember("addr"))
+			{
+				addr = root["addr"].asString();
+			}
+			if (root.isMember("max_client"))
+			{
+				max_client = root["max_client"].asInt();
+			}
 			ret = gServer.m_OnLineClients.Initialize(max_client);
-			ret = ret && gServer.CreateTcpServer(ip.c_str(), port, max_client);
+			ret = ret && gServer.CreateTcpServer(addr.c_str(), max_client);
+			log_debug("create server in %s max_client %d", addr.c_str(),max_client);
 		} while (0);
 		args.rval().set(BOOLEAN_TO_JSVAL(ret));
 		return true;
@@ -157,8 +169,9 @@ bool js_Log_Debug(JSContext *cx, uint32_t argc, jsval *vp)
 	bool ok = true;
 	JS::RootedObject obj(cx, args.thisv().toObjectOrNull());
 	if (argc == 1) {
-		char* log=JS_EncodeStringToUTF8(cx, JS::RootedString(cx, JS::ToString(cx, args.get(0))));
-		log_debug("%s", log);
+		std::string data;
+		GetJSString(cx, args.get(0), data);
+		log_debug("%s", data.c_str());
 		args.rval().setUndefined();
 		return true;
 	}
@@ -277,9 +290,10 @@ bool js_Client_Send(JSContext *cx, uint32_t argc, jsval *vp)
 		return false;
 	}
 	if (argc == 1) {
-		char* msg = JS_EncodeStringToUTF8(cx, JS::RootedString(cx, JS::ToString(cx, args.get(0))));
+		std::string msg;
+		GetJSString(cx, args.get(0), msg);
 		cobj->BeginWrite();
-		cobj->WriteData(msg, strlen(msg));
+		cobj->WriteData(msg.c_str(), msg.size());
 		cobj->EndWrite();
 		args.rval().setUndefined();
 		return true;
@@ -372,7 +386,8 @@ bool js_File_Read(JSContext *cx, uint32_t argc, jsval *vp)
 {
 	CallArgs args = CallArgsFromVp(argc, vp);
 	if (argc == 1) {
-		const char* path = JS_EncodeStringToUTF8(cx, JS::RootedString(cx, JS::ToString(cx, args.get(0))));
+		std::string path;
+		GetJSString(cx, args.get(0), path);
 		std::string ret;
 		bool ok = ReadText(ret, path);
 		if (ok)
@@ -394,8 +409,10 @@ bool js_File_Write(JSContext *cx, uint32_t argc, jsval *vp)
 {
 	CallArgs args = CallArgsFromVp(argc, vp);
 	if (argc == 2) {
-		const char* path = JS_EncodeStringToUTF8(cx, JS::RootedString(cx, JS::ToString(cx, args.get(0))));
-		const char* content = JS_EncodeStringToUTF8(cx, JS::RootedString(cx, JS::ToString(cx, args.get(1))));
+		std::string path;
+		GetJSString(cx, args.get(0), path);
+		std::string content;
+		GetJSString(cx, args.get(1), content);
 		std::string ret;
 		bool ok = WriteText(content, path);
 		JS::RootedValue jsret(cx);
@@ -410,8 +427,9 @@ bool js_File_LoadScript(JSContext *cx, uint32_t argc, jsval *vp)
 {
 	CallArgs args = CallArgsFromVp(argc, vp);
 	if (argc == 1) {
-		const char* path = JS_EncodeStringToUTF8(cx, JS::RootedString(cx, JS::ToString(cx, args.get(0))));
-		bool ok = ScriptingCore::GetInstance()->RunScript(path);
+		std::string path;
+		GetJSString(cx, args.get(0), path);
+		bool ok = ScriptingCore::GetInstance()->RunScript(path.c_str());
 		JS::RootedValue jsret(cx);
 		jsret = BOOLEAN_TO_JSVAL(ok);
 		args.rval().set(jsret);
@@ -693,8 +711,9 @@ bool js_Http_Get(JSContext *cx, uint32_t argc, jsval *vp)
 	js_proxy_t *proxy = jsb_get_js_proxy(obj);
 	JSHttp* cobj = (JSHttp*)(proxy ? proxy->ptr : NULL);
 	if (argc == 1) {
-		const char* url = JS_EncodeStringToUTF8(cx, JS::RootedString(cx, JS::ToString(cx, args.get(0))));
-		bool ok = gHttpManager.Get(url, cobj);
+		std::string url;
+		GetJSString(cx, args.get(0),url);
+		bool ok = gHttpManager.Get(url.c_str(), cobj);
 		args.rval().set(BOOLEAN_TO_JSVAL(ok));
 		return true;
 	}
@@ -709,9 +728,11 @@ bool js_Http_Post(JSContext *cx, uint32_t argc, jsval *vp)
 	js_proxy_t *proxy = jsb_get_js_proxy(obj);
 	JSHttp* cobj = (JSHttp*)(proxy ? proxy->ptr : NULL);
 	if (argc == 2) {
-		const char* url = JS_EncodeStringToUTF8(cx, JS::RootedString(cx, JS::ToString(cx, args.get(0))));
-		const char* data = JS_EncodeStringToUTF8(cx, JS::RootedString(cx, JS::ToString(cx, args.get(1))));
-		bool ok = gHttpManager.Post(url,data,cobj);
+		std::string url;
+		std::string data;
+		GetJSString(cx, args.get(0),url);
+		GetJSString(cx, args.get(1),data);
+		bool ok = gHttpManager.Post(url.c_str(),data.c_str(),cobj);
 		args.rval().set(BOOLEAN_TO_JSVAL(ok));
 		return true;
 	}
@@ -833,7 +854,8 @@ bool js_String_Append(JSContext *cx, uint32_t argc, jsval *vp)
 	js_proxy_t *proxy = jsb_get_js_proxy(obj);
 	NativeString* cobj = (NativeString*)(proxy ? proxy->ptr : NULL);
 	if (argc == 1) {
-		const char* data = JS_EncodeStringToUTF8(cx, JS::RootedString(cx, JS::ToString(cx, args.get(0))));
+		std::string data;
+		GetJSString(cx, args.get(0), data);
 		cobj->Append(data);
 		args.rval().setUndefined();
 		return true;

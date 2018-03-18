@@ -3,15 +3,19 @@
 #include <tools.h>
 #include <getopt.h>
 #include "Server.h"
+#include <HttpConnection3.h>
+#include <Timer.h>
 enum
 {
 	script = 0x100,
+	flag_addr,
 	flag_log,
 	flag_daemon
 };
 struct option long_options[]=
 {
 	{"script",1,0,script },
+	{"addr",1,0,flag_addr },
 	{"log_path",1,0,flag_log },
 	{ "daemon",0,0,flag_daemon },
 };
@@ -21,6 +25,15 @@ struct option long_options[]=
 
 int main(int argc,char **argv)
 {
+//
+//#ifdef WIN32  
+//	WSAData wsaData;
+//	WSAStartup(MAKEWORD(2, 0), &wsaData);
+//#endif
+//	for (int i = 0; i < 10;i++)gHttpManager.Get("https://www.baidu.com");
+//	Timer::Loop();
+//	_CrtDumpMemoryLeaks();
+//	return 0;
 	bool as_daemon = false;
 	while (1)
 	{
@@ -32,6 +45,10 @@ int main(int argc,char **argv)
 		case script:
 			strcpy(gServer.m_MainScriptPath, optarg);
 			gServer.m_MainScriptPath[strlen(optarg)] = 0;
+			break;
+		case flag_addr:
+			strcpy(gServer.m_Addr, optarg);
+			gServer.m_Addr[strlen(optarg)] = 0;
 			break;
 		case flag_daemon:
 			as_daemon = true;

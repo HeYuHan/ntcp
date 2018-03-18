@@ -35,7 +35,7 @@ void http_request_done(struct evhttp_request *req, void *arg)
 	}*/
 	struct evhttp_connection* connection = NULL;
 	IHttpInterface * http = static_cast<IHttpInterface*>(arg);
-	if (NULL != http)
+	if (NULL != http && http->IsSet())
 	{
 		gHttpManager.SetInterface(http);
 		http->OnResponse();
@@ -43,12 +43,12 @@ void http_request_done(struct evhttp_request *req, void *arg)
 	}
 	else
 	{
-		connection = static_cast<struct evhttp_connection*>(arg);
+		connection = static_cast<evhttp_connection*>(arg);
 		if (NULL != connection)
 		{
 			evhttp_connection_free(connection);
 		}
-		evhttp_request_free(req);
+		
 	}
 }
 
@@ -87,7 +87,7 @@ bool HttpManager::Request(const char * url, const  char * data, int port, int fl
 	{
 		sprintf(&query_path[index], "?%s", query);
 	}
-	if (flag == EVHTTP_REQ_POST)
+	if (flag == EVHTTP_REQ_POST && data != NULL)
 	{
 		evbuffer_add(req->output_buffer, data, strlen(data));
 	}
@@ -108,7 +108,7 @@ bool HttpManager::Get(const char * url, IHttpInterface * user_data)
 
 bool HttpManager::Post(const char * url, const char * data, int port, IHttpInterface * user_data)
 {
-	return Request(url, NULL, port, EVHTTP_REQ_POST, user_data);
+	return Request(url, data, port, EVHTTP_REQ_POST, user_data);
 }
 
 bool HttpManager::Post(const char * url, const char * data, IHttpInterface * user_data)
@@ -118,9 +118,13 @@ bool HttpManager::Post(const char * url, const char * data, IHttpInterface * use
 
 void HttpManager::CleanInterface(IHttpInterface * http)
 {
+	
+	if (http->state > 0)
+	{
+		if (http->connection)evhttp_connection_free(http->connection);
+		//if (http->request)evhttp_request_free(http->request);
+	}
 	http->state = 0;
-	if(http->connection)evhttp_connection_free(http->connection);
-	if(http->request)evhttp_request_free(http->request);
 	http->connection = NULL;
 	http->request = NULL;
 }
@@ -156,6 +160,11 @@ int IHttpInterface::ReadBuffer(void * data, int size)
 int IHttpInterface::GetState()
 {
 	return state;
+}
+
+bool IHttpInterface::IsSet()
+{
+	return this->connection!=NULL && this->request != NULL;
 }
 
 event_base * IHttpInterface::GetEventBase()

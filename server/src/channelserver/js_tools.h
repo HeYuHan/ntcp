@@ -4,6 +4,9 @@
 #include <jsapi.h>
 #include <string>
 #include "spidermonkey_specifics.h"
+
+void GetJSString(JSContext *cx, JS::HandleValue str, std::string &ret);
+bool js_utf8_to_utf16(JSContext *cx, JS::HandleValue str,std::string &ret);
 jsval std_string_to_jsval(JSContext* cx, const std::string& v);
 jsval c_string_to_jsval(JSContext* cx, const char* v, size_t length=-1);
 JSObject* jsb_ref_create_jsobject(JSContext *cx, void *ref, js_type_class_t *typeClass, const char* debug,bool create_proxy=true);

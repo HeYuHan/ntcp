@@ -18,6 +18,7 @@ public:
 	Client* GetClient(uint uid);
 	void RemoveClient(uint uid);
 	char m_MainScriptPath[512];
+	char m_Addr[128];
 public:
 	JSObject* m_JSObject;
 public:

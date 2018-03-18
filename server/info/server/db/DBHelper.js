@@ -21,8 +21,13 @@ var DBHelper=(function(){
                 diamond:0,
                 gold:500
             }
-            await collection.insert(new_recoder);
-            return new_recoder;
+            let insert_ret =  await collection.insert(new_recoder);
+            if(insert_ret.result.ok){
+                return insert_ret.ops;
+            }
+            else {
+                return [];
+            }
         }
         return array;
     }
@@ -31,9 +36,34 @@ var DBHelper=(function(){
         let ret = await collection.find({});
         return ret.toArray();
     }
-    DBHelper.prototype.UpdateUser=async function(key,value,multi){
+    DBHelper.prototype.UpdateUser=async function(openid,value){
         let collection = await this.db_base.collection('user');
-        return await collection.update(key,{$set:value},{multi:multi?true:false});
+        return await collection.update({openid:openid},{$set:value},{multi:false}).result;
+    }
+    DBHelper.prototype.GetUserRoom= async function(openid){
+        let collection = await this.db_base.collection('room');
+        let ret = await collection.find({openid:openid});
+        return ret.toArray();
+    }
+    DBHelper.prototype.InsertRoom=async function(room){
+        if(!room.hashcode)return [];
+        let collection = await this.db_base.collection('room');
+        let find_ret = await collection.find({hashcode:room.hashcode}).toArray();
+        if(find_ret.length > 0){
+            return find_ret;
+        }
+        let insert_ret =  await collection.insert(room);
+        if(insert_ret.result.ok){
+            return insert_ret.ops;
+        }
+        else {
+            return [];
+        }
+    }
+    DBHelper.prototype.UpdateRoom=async function(hashcode,value){
+        let collection = await this.db_base.collection('room');
+        let ret = await collection.update({hashcode:hashcode},{$set:value},{multi:false});
+        return ret.result;
     }
     return DBHelper;
 }());

@@ -13,6 +13,7 @@ public:
 	int GetBufferLength();
 	int ReadBuffer(void *data, int size);
 	int GetState();
+	bool IsSet();
 	virtual struct event_base* GetEventBase();
 private:
 	struct evhttp_connection* connection;

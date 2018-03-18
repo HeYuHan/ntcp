@@ -206,7 +206,7 @@ var Pai = (function () {
             return ret;
         }
         else {
-            ret.value = value % 125;
+            ret.value = value % 120;
             ret.type = PaiType.PAI_XI;
             return ret;
         }
@@ -235,12 +235,20 @@ var PaiDui = (function () {
         this.jiang_pai = [];
         this.jiang_pai_type = JiangType.NONE;
         this.pai_detail_array = [];
-        var pai_len = include_xipai ? 125 : 120;
-        this.pais = new RandomInt(1, pai_len + 1, false);
-        this.jiang_pai.push(this.pais.Get());
-        this.jiang_pai.push(this.pais.Get());
-        this.CaculateJiangPaiType();
+        this.includ_xipai = false;
+        this.pais = new RandomInt(1, 121, false);
+        this.includ_xipai = this.includ_xipai;
     }
+    PaiDui.prototype.MoJiangPai = function () {
+        this.jiang_pai.push(this.pais.Get());
+        this.jiang_pai.push(this.pais.Get());
+        if (this.includ_xipai) {
+            for (var i = 121; i < 126; i++) {
+                this.pais.Insert(i);
+            }
+        }
+        this.CaculateJiangPaiType();
+    };
     PaiDui.prototype.GetPaiDetail = function (num) {
         var ret = this.pai_detail_array[num];
         if (!ret) {
@@ -506,7 +514,6 @@ var CheckPaiNode = (function () {
     }
     CheckPaiNode.prototype.Reset = function () {
         this.is_win = false;
-        this.win_node = [];
         for (var i = 0; i < this.pai_list.length; i++) {
             this.pai_list[i].Reset();
         }
@@ -532,7 +539,12 @@ var CheckPaiNode = (function () {
             return p1.type - p2.type;
     };
     CheckPaiNode.prototype.CheckWin = function () {
+        this.win_node = [];
         this.pai_list.sort(this.Sort);
+        var msg = "";
+        for (var i = 0; i < this.pai_list.length; i++) {
+            msg += "[" + this.pai_list[i].type + " " + this.pai_list[i].value + "],";
+        }
         var type = 0;
         var num = 0;
         for (var i = 0; i < this.pai_list.length; i++) {
@@ -560,10 +572,7 @@ var CheckPaiNode = (function () {
                 }
             }
         }
-        if (this.win_node.length > 0) {
-            return this.win_node;
-        }
-        return null;
+        return this.win_node;
     };
     CheckPaiNode.prototype.Check = function (p) {
         this.ClearBrother(p);
@@ -741,7 +750,6 @@ var CheckPaiNode = (function () {
                     win_info2.push(win_info[i][j]);
                 }
             }
-            win_info = null;
             this.win_node.push(win_info2);
         }
     };

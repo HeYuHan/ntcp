@@ -15,7 +15,7 @@ var DB_URL="mongodb://localhost:27017"
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(process.env.PORT || '9800');
 app.set('port', port);
 
 
@@ -27,6 +27,11 @@ var server = http.createServer(app);
 //connect DB
 DBHelper.Connect(DB_URL,"ntcp").then((DBHelper)=>{
   console.log("connected db :" + DB_URL);
+  DBHelper.InsertRoom({
+    hashcode:"sadfasdfasdf",
+    openid:"12345",
+    info:"hlx"
+  });
   /**
  * Listen on provided port, on all network interfaces.
  */

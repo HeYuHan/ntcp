@@ -52,8 +52,6 @@ class JClient{
     }
     public RegisterAllMessage(){
         this.m_MessageCallback={};
-        this.m_MessageCallback[CLIENT_MSG.CM_LOGIN]=this.Login;
-        this.m_MessageCallback[CLIENT_MSG.CM_CREATE_ROOM]=this.CreateRoom;
         this.m_MessageCallback[CLIENT_MSG.CM_ENTER_ROOM]=this.EnterRoom;
         this.m_MessageCallback[CLIENT_MSG.CM_LEAVE_ROOM]=this.LeaveRoom;
         this.m_MessageCallback[CLIENT_MSG.CM_READY_GAME]=this.ReadyGame;
@@ -69,22 +67,6 @@ class JClient{
             Debug.Log("msg hander is null id : "+msg.id);
         }
     }
-    public Login(msg){
-        Debug.Log("client login openid:"+msg.openid);
-        var send_msg={
-            uid:this.uid
-        }
-        this.info.openid=msg.openid;
-        this.state=State.IN_LOBBY;
-        this.Send(CreateMsg(SERVER_MSG.SM_LOGIN,send_msg));
-    }
-    public CreateRoom(msg){
-        var room=Room.Create();
-        this.Send(CreateMsg(SERVER_MSG.SM_CREATE_ROOM,{
-            room_uid:room.uid,
-            self:msg.self
-        }));
-    }
     public EnterRoom(msg){
         Debug.Log("EnterRoom:"+this.uid+" room_id:"+msg.room_uid);
         var room_uid=msg.room_uid;
@@ -97,9 +79,25 @@ class JClient{
         }
         else
         {
-            this.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM,{
-                error:"room not found:"+room_uid
-            }));
+            var http = new Http();
+            var client=this;
+            http.OnResponse=function(state,msg){
+                Debug.Log("check room ret:"+msg);
+                var json = JSON.parse(msg);
+                if(state == 200 && !json.error){
+                    var room = Room.Create(json);
+                    client.state=State.IN_ROOM;
+                    client.room=room;
+                    room.ClientJoin(client);
+                }
+                else{
+                    this.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM,{
+                        error:"room not found:"+room_uid
+                    }));
+                }
+            }
+            http.Get(INFO_SERVER_URL + "checkRoom?data="+EncodeUriMsg({roomid:room_uid}));
+            
         }
     }
     public LeaveRoom(msg){

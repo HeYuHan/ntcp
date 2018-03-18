@@ -215,7 +215,7 @@ class Pai{
         }
         else
         {
-            ret.value=value%125;
+            ret.value=value%120;
             ret.type= PaiType.PAI_XI;
             return ret;
         }
@@ -242,11 +242,20 @@ class PaiDui{
     public jiang_pai:Array<number>=[];
     public jiang_pai_type:JiangType=JiangType.NONE;
     private pai_detail_array:Array<PaiDetail>=[];
+    private includ_xipai=false;
     constructor(include_xipai:boolean){
-        var pai_len=include_xipai?125:120;
-        this.pais=new RandomInt(1,pai_len+1,false);
+        this.pais=new RandomInt(1,121,false);
+        this.includ_xipai=this.includ_xipai;
+    }
+    public MoJiangPai(){
         this.jiang_pai.push(this.pais.Get());
         this.jiang_pai.push(this.pais.Get());
+        
+        if(this.includ_xipai){
+            for(var i=121;i<126;i++){
+                this.pais.Insert(i);
+            }
+        }
         this.CaculateJiangPaiType();
     }
     public GetPaiDetail(num:number):PaiDetail{
@@ -539,7 +548,6 @@ class CheckPaiNode{
     public win_node:Array<Array<PaiDetail>>=[];
     public Reset(){
         this.is_win=false;
-        this.win_node=[];
         for(var i=0;i<this.pai_list.length;i++){
             this.pai_list[i].Reset();
         }
@@ -567,7 +575,14 @@ class CheckPaiNode{
             return p1.type-p2.type;
     }
     public CheckWin(){
+        this.win_node=[];
         this.pai_list.sort(this.Sort);
+        var msg = "";
+        for(var i=0;i<this.pai_list.length;i++)
+        {
+            msg += "["+this.pai_list[i].type+" "+this.pai_list[i].value +"],"
+        }
+        
         var type = 0;
         var num = 0;
         for(var i =0;i<this.pai_list.length;i++)
@@ -601,10 +616,7 @@ class CheckPaiNode{
                 }
             }
         }
-        if(this.win_node.length>0){
-            return this.win_node;
-        }
-        return null;
+        return this.win_node;
     }
     public Check(p:PaiNode){
         this.ClearBrother(p);
@@ -825,7 +837,6 @@ class CheckPaiNode{
                     win_info2.push(win_info[i][j]);
                 }
             }
-            win_info=null;
             this.win_node.push(win_info2);
         }
     }

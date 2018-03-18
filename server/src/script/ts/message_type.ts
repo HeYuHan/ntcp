@@ -1,6 +1,4 @@
 enum CLIENT_MSG{
-    CM_LOGIN=1,
-    CM_CREATE_ROOM,
     CM_ENTER_ROOM,
     CM_LEAVE_ROOM,
     CM_READY_GAME,
@@ -11,8 +9,6 @@ enum CLIENT_MSG{
     CM_HUAN_PAI,//换牌
 }
 enum SERVER_MSG{
-    SM_LOGIN=1,
-    SM_CREATE_ROOM,
     SM_ENTER_ROOM,
     SM_LEAVE_ROOM,
     SM_READY_GAME,
@@ -27,4 +23,7 @@ enum SERVER_MSG{
 }
 function CreateMsg(id:number,msg:any):string{
     return JSON.stringify([id,msg]);
+}
+function EncodeUriMsg(msg){
+    return encodeURIComponent(JSON.stringify(msg));
 }
