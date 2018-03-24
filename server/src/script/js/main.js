@@ -1,6 +1,6 @@
 var ROOM_MAX_PLAYER_COUNT = 2;
-var DEFINE_RANDOM_TEST = false;
-var INFO_SERVER_URL = "http://ntcp.wohnb.com/ntcp/";
+var DEFINE_RANDOM_TEST = true;
+var INFO_SERVER_URL = "http://127.0.0.1:9800/private/";
 var ScriptLoader = (function () {
     function ScriptLoader() {
         this.scripts = {};
@@ -83,11 +83,12 @@ var RandomInt = (function () {
         }
         return false;
     };
-    RandomInt.prototype.ReleaseValue = function (value) {
-        if (!this.repeat) {
-            var index = this.recoders.indexOf(value);
-            if (index >= 0)
-                this.recoders.splice(index, 1);
+    RandomInt.prototype.ReleaseValue = function (newvalue) {
+        if (newvalue >= this.min && newvalue <= this.max && this.recoders.indexOf(newvalue) < 0) {
+            var index = Math.floor(Math.random() * this.recoders.length);
+            var value = this.recoders[index];
+            this.recoders[index] = newvalue;
+            this.recoders.push(value);
         }
     };
     RandomInt.prototype.GetRecoderList = function () {
@@ -105,7 +106,7 @@ var RandomInt = (function () {
 if (Server.Platfrom() == 1)
     ScriptLoader.ROOT_PATH = "E:/Share/ntcp/server/src/script/js/";
 else
-    ScriptLoader.ROOT_PATH = "../script/js/";
+    ScriptLoader.ROOT_PATH = "./js/";
 require("server.js");
 require("client.js");
 require("pai.js");

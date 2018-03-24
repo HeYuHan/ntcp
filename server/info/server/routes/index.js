@@ -33,8 +33,8 @@ async function CreateRoom(openid){
     room.CaculateHash();
     let insert_ret = await DBHelper.InsertRoom(room);
     if(insert_ret.length > 0) {
-      return insert_ret[0];
       GlobalRoom[room.roomid.toString()]=insert_ret[0];
+      return insert_ret[0];
     }
     return null;
   } catch (error) {
@@ -55,13 +55,13 @@ async function SyncRoomToDB(){
   }
 }
 function GetRoom(roomid){
-  return GlobalRoom[roomid];
+  return GlobalRoom[roomid.toString()];
 }
 function ReleaseRoom(roomid){
-  var room = GlobalRoom[roomid];
+  var room = GlobalRoom[roomid.toString()];
   if(room){
     RoomIDCreater.ReleaseValue(parseInt(roomid));
-    delete GlobalRoom[roomid];
+    delete GlobalRoom[roomid.toString()];
     
   }
 }
@@ -73,8 +73,7 @@ var ERROR_PARSE_ARG = 10004;
 var ERROR_UPDATE_ROOM_INFO = 10005;
 function ParseGetArg(req,res,query){
   try {
-    var data = decodeURIComponent(req.query[query]);
-    var json=JSON.parse(data);
+    var json=JSON.parse(decodeURIComponent(req.query[query]));
     return json;
   } catch (error) {
     console.error("parse get arg:"+error.message);
@@ -172,7 +171,7 @@ router.get('/private/releaseRoom',function(req,res,next){
   }
 });
 //request in channel only
-router.get('/playEnd',function(req,res,next){
+router.get('/private/playEnd',function(req,res,next){
   console.log("playEnd:"+req.query.data);
   var data = ParseGetArg(req,res,"data");
   if(!data) return;

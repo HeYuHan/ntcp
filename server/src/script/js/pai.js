@@ -15,6 +15,7 @@ var HuPaiRateType;
     HuPaiRateType[HuPaiRateType["AN_KE"] = 2] = "AN_KE";
     HuPaiRateType[HuPaiRateType["MING_GANG"] = 3] = "MING_GANG";
     HuPaiRateType[HuPaiRateType["AN_GANG"] = 4] = "AN_GANG";
+    HuPaiRateType[HuPaiRateType["JIAO_PAI"] = 5] = "JIAO_PAI";
 })(HuPaiRateType || (HuPaiRateType = {}));
 var HuType;
 (function (HuType) {
@@ -46,12 +47,13 @@ var HuPaiInfo = (function () {
         this.xi_array = [];
         this.sun_zi_array = [];
         this.dui_zi_array = [];
-        this.wen_qiang_count = 0;
+        this.jiao_pai_array = [];
+        this.hu_pai_array = [];
         this.di_hu_score = 0;
         this.totle_socre = 0;
-        this.hu_type_score = 0;
         this.wen_qiang_score = 0;
-        this.hu_pai = false;
+        this.xi_pai_score = 0;
+        this.san_long_ju_hu_score = 0;
     }
     HuPaiInfo.prototype.Print = function () {
         Debug.Log("------------ming ke---------------");
@@ -66,75 +68,118 @@ var HuPaiInfo = (function () {
         Pai.PrintDetailArray(this.sun_zi_array);
         Debug.Log("------------dui zi---------------");
         Pai.PrintDetailArray(this.dui_zi_array);
+        Debug.Log("------------jiao pai---------------");
+        Pai.PrintDetailArray(this.jiao_pai_array);
         Debug.Log("------------xi---------------");
         Pai.PrintDetailArray(this.xi_array);
-        Debug.Log("wen qiang:" + this.wen_qiang_count);
         Debug.Log("HuType:" + HuType[this.hu_type]);
         Debug.Log("HuPaiType:" + this.hu_pai_type);
         Debug.Log("dihu:" + this.di_hu_score);
+        Debug.Log("xi:" + this.xi_pai_score);
         Debug.Log("wenqiang:" + this.wen_qiang_score);
-        Debug.Log("type:" + this.hu_type_score);
         Debug.Log("totle:" + this.totle_socre);
         Debug.Log("-------------end--------------\n\n");
     };
     HuPaiInfo.SortInfo = function (a, b) {
         return a.totle_socre - b.totle_socre;
     };
-    HuPaiInfo.prototype.CaculateTotleScore = function () {
-        this.totle_socre = this.di_hu_score + this.wen_qiang_score + this.hu_type_score;
-    };
-    HuPaiInfo.prototype.CaculateOtherScore = function (hu_pai) {
-        if (hu_pai == null)
-            return;
-        for (var i = 0; i < this.sun_zi_array.length; i++) {
-            var d = this.sun_zi_array[i];
-            if (d.pai.value == 1 && d.pai.type == PaiType.PAI_TONG) {
-                this.wen_qiang_count++;
+    HuPaiInfo.prototype.CaculateTotleScore = function (hu_pai) {
+        switch (this.xi_array.length) {
+            case 0:
+                this.hu_pai_type |= HuPaiType.QIONG_XI;
+                this.xi_pai_score = 0;
+                break;
+            case 1:
+                this.xi_pai_score = 10;
+            case 2:
+                this.xi_pai_score = 30;
+                break;
+            case 3:
+                this.xi_pai_score = 50;
+                break;
+            case 4:
+                this.xi_pai_score = 100;
+                break;
+            case 5:
+                this.xi_pai_score = 200;
+                break;
+        }
+        this.totle_socre = this.di_hu_score + this.san_long_ju_hu_score + this.wen_qiang_score + this.xi_pai_score;
+        if (hu_pai) {
+            var wen_qiang_count = 0;
+            for (var i = 0; i < this.sun_zi_array.length; i++) {
+                var d = this.sun_zi_array[i];
+                if (d.pai.value == 1 && d.pai.type == PaiType.PAI_TONG) {
+                    wen_qiang_count++;
+                }
+                if (!hu_pai)
+                    continue;
+                if ((d.pai.value == hu_pai.pai.value - 1) && d.pai.type == hu_pai.pai.type) {
+                    if (this.hu_pai_type == 0)
+                        this.hu_pai_type |= HuPaiType.YA_ZI;
+                }
+                else if ((d.pai.value == hu_pai.pai.value || (d.pai.value == hu_pai.pai.value - 2)) && d.pai.type == hu_pai.pai.type) {
+                    if (this.hu_pai_type == 0)
+                        this.hu_pai_type |= HuPaiType.BIAN_ZHANG;
+                }
             }
-            if ((d.pai.value == hu_pai.pai.value - 1) && d.pai.type == hu_pai.pai.type) {
-                if (this.hu_pai_type == 0)
-                    this.hu_pai_type |= HuPaiType.YA_ZI;
+            for (var i = 0; i < this.dui_zi_array.length; i++) {
+                var d = this.dui_zi_array[i];
+                if (d.pai.value == hu_pai.pai.value && d.pai.type == hu_pai.pai.type) {
+                    this.hu_pai_type |= HuPaiType.DANG_DIAO;
+                }
             }
-            else if ((d.pai.value == hu_pai.pai.value || (d.pai.value == hu_pai.pai.value - 2)) && d.pai.type == hu_pai.pai.type) {
-                if (this.hu_pai_type == 0)
-                    this.hu_pai_type |= HuPaiType.BIAN_ZHANG;
+            if (wen_qiang_count > 0) {
+                this.hu_pai_type |= HuPaiType.WEN_QIAN;
+                switch (wen_qiang_count) {
+                    case 1:
+                        this.wen_qiang_score = 20;
+                        break;
+                    case 2:
+                        this.wen_qiang_score = 50;
+                        break;
+                    case 3:
+                        this.wen_qiang_score = 100;
+                        break;
+                    case 4:
+                        this.wen_qiang_score = 200;
+                        break;
+                }
             }
-        }
-        for (var i = 0; i < this.dui_zi_array.length; i++) {
-            var d = this.dui_zi_array[i];
-            if (d.pai.value == hu_pai.pai.value && d.pai.type == hu_pai.pai.type) {
-                this.hu_pai_type |= HuPaiType.DANG_DIAO;
+            if (this.hu_pai_type & HuPaiType.DANG_DIAO) {
+                this.totle_socre += 10;
             }
-        }
-        if (this.wen_qiang_count > 0)
-            this.hu_pai_type |= HuPaiType.WEN_QIAN;
-        if (this.wen_qiang_count > 0 && (this.an_ke_array.length + this.ming_ke_array.length) > 0 && this.sun_zi_array.length == this.wen_qiang_count) {
-            this.hu_type = HuType.PIAO_HU;
-        }
-        else if (this.sun_zi_array.length == 7) {
-            this.hu_type = HuType.QING_HU;
-        }
-        else {
-            this.hu_type = HuType.TAZI_HU;
-        }
-        if (this.wen_qiang_count > 0) {
-            switch (this.wen_qiang_count) {
-                case 1:
-                    this.wen_qiang_score = 20;
-                    break;
-                case 2:
-                    this.wen_qiang_score = 50;
-                    break;
-                case 3:
-                    this.wen_qiang_score = 100;
-                    break;
-                case 4:
-                    this.wen_qiang_score = 200;
-                    break;
+            if (this.hu_pai_type & HuPaiType.YA_ZI) {
+                this.totle_socre += 10;
             }
-        }
-        if (this.hu_pai_type > 0) {
-            this.hu_type_score = 10;
+            if (this.hu_pai_type & HuPaiType.BIAN_ZHANG) {
+                this.totle_socre += 10;
+            }
+            if (this.hu_pai_type & HuPaiType.ZI_MO) {
+                this.totle_socre += 10;
+            }
+            if (this.hu_pai_type & HuPaiType.TIANG_HU) {
+                this.totle_socre *= 4;
+            }
+            else if (this.hu_pai_type & HuPaiType.TIANG_TING) {
+                this.totle_socre *= 2;
+            }
+            else if (this.hu_pai_type & HuPaiType.QIONG_XI) {
+                this.totle_socre *= 2;
+            }
+            if (wen_qiang_count > 0 && (this.an_ke_array.length + this.ming_ke_array.length) > 0 && this.sun_zi_array.length == wen_qiang_count) {
+                this.hu_type = HuType.PIAO_HU;
+                this.totle_socre += 50;
+                this.totle_socre *= 2;
+            }
+            else if (this.sun_zi_array.length == 7) {
+                this.hu_type = HuType.QING_HU;
+                this.totle_socre += 100;
+            }
+            else {
+                this.hu_type = HuType.TAZI_HU;
+                this.totle_socre += 20;
+            }
         }
     };
     return HuPaiInfo;
@@ -160,12 +205,32 @@ var Pai = (function () {
         }
         return pai;
     };
+    Pai.SortNumber = function (a, b) {
+        var p1 = Pai.GetPaiByNumber(a);
+        var p2 = Pai.GetPaiByNumber(b);
+        if (p1.type == p2.type) {
+            if (p1.value == p2.value) {
+                return p1.num - p2.num;
+            }
+            else
+                return p1.value - p2.value;
+        }
+        else
+            return p1.type - p2.type;
+    };
     Pai.DetailToNumberArray = function (details) {
         var ret = [];
         for (var i = 0; i < details.length; i++) {
             ret.push(details[i].pai.num);
         }
         return ret;
+    };
+    Pai.PrintNumberArray = function (nums) {
+        var msg = "";
+        for (var i = 0; i < nums.length; i++) {
+            msg += Pai.GetPaiByNumber(nums[i]).ToString();
+        }
+        Debug.Log(msg);
     };
     Pai.PrintDetailArray = function (details) {
         var msg = "";
@@ -179,6 +244,9 @@ var Pai = (function () {
             return true;
         var pai1 = Pai.GetPaiByNumber(n1);
         var pai2 = Pai.GetPaiByNumber(n2);
+        return (pai1.value == pai2.value && pai1.type == pai2.type);
+    };
+    Pai.Equal2 = function (pai1, pai2) {
         return (pai1.value == pai2.value && pai1.type == pai2.type);
     };
     Pai.IsLaoJiang = function (ret) {
@@ -219,7 +287,11 @@ var PaiDetail = (function () {
         this.pai = null;
         this.is_jiang = false;
         this.is_laojiang = false;
+        this.equal_jiang_value = false;
     }
+    PaiDetail.Equal = function (p1, p2) {
+        return Pai.Equal2(p1.pai, p2.pai);
+    };
     return PaiDetail;
 }());
 var JiangType;
@@ -236,18 +308,16 @@ var PaiDui = (function () {
         this.jiang_pai_type = JiangType.NONE;
         this.pai_detail_array = [];
         this.includ_xipai = false;
-        this.pais = new RandomInt(1, 121, false);
+        this.jiang_pai[0] = Math.floor(Math.random() * 120) + 1;
+        this.jiang_pai[1] = Math.floor(Math.random() * 120) + 1;
+        this.pais = new RandomInt(1, this.includ_xipai ? 126 : 121, false);
+        this.pais.PopValue(this.jiang_pai[0]);
+        this.pais.PopValue(this.jiang_pai[1]);
         this.includ_xipai = this.includ_xipai;
-    }
-    PaiDui.prototype.MoJiangPai = function () {
-        this.jiang_pai.push(this.pais.Get());
-        this.jiang_pai.push(this.pais.Get());
-        if (this.includ_xipai) {
-            for (var i = 121; i < 126; i++) {
-                this.pais.Insert(i);
-            }
-        }
         this.CaculateJiangPaiType();
+    }
+    PaiDui.prototype.GetMaxSize = function () {
+        return this.includ_xipai ? 125 : 120;
     };
     PaiDui.prototype.GetPaiDetail = function (num) {
         var ret = this.pai_detail_array[num];
@@ -256,6 +326,9 @@ var PaiDui = (function () {
             ret.pai = Pai.GetPaiByNumber(num);
             ret.is_jiang = this.IsJiangPai(num);
             ret.is_laojiang = Pai.IsLaoJiang(ret.pai);
+            var j1 = Pai.GetPaiByNumber(this.jiang_pai[0]);
+            var j2 = Pai.GetPaiByNumber(this.jiang_pai[1]);
+            ret.equal_jiang_value = (j1.value == ret.pai.value || j2.value == ret.pai.value);
             this.pai_detail_array[num] = ret;
         }
         return ret;
@@ -304,41 +377,89 @@ var PaiDui = (function () {
         return this.pais.GetRecoderSize();
     };
     PaiDui.GetHuPaiRate = function (jiang_pai_type, pai_detail, type) {
-        var ret = 1;
-        switch (jiang_pai_type) {
-            case JiangType.HIGH_SAME:
-                {
-                    ret = 8;
-                    break;
-                }
-            case JiangType.HIGH_NORMAL:
-                {
-                    if (pai_detail.is_laojiang)
-                        ret = 4;
-                    else
-                        ret = 2;
-                    break;
-                }
-            case JiangType.NORMAL_SAME:
-                {
-                    ret = 4;
-                    break;
-                }
-            case JiangType.NORMAL:
-                {
-                    ret = 2;
-                    break;
-                }
-        }
+        var hu = 2;
+        var rate = 1;
         if (pai_detail.is_jiang) {
-            if (type == HuPaiRateType.MING_KE) {
-                ret *= 2;
-            }
-            else if (type == HuPaiRateType.AN_KE) {
-                ret *= 3;
+            switch (jiang_pai_type) {
+                case JiangType.HIGH_SAME:
+                    {
+                        rate = 16;
+                        break;
+                    }
+                case JiangType.HIGH_NORMAL:
+                    {
+                        if (pai_detail.is_laojiang)
+                            rate = 8;
+                        else
+                            rate = 4;
+                        break;
+                    }
+                case JiangType.NORMAL_SAME:
+                    {
+                        rate = 8;
+                        break;
+                    }
+                case JiangType.NORMAL:
+                    {
+                        rate = 4;
+                        break;
+                    }
             }
         }
-        return ret;
+        else if (pai_detail.is_laojiang) {
+            switch (jiang_pai_type) {
+                case JiangType.HIGH_SAME:
+                    {
+                        rate = 8;
+                        break;
+                    }
+                case JiangType.HIGH_NORMAL:
+                    {
+                        if (pai_detail.is_laojiang)
+                            rate = 4;
+                        else
+                            rate = 1;
+                        break;
+                    }
+                case JiangType.NORMAL_SAME:
+                    {
+                        rate = 2;
+                        break;
+                    }
+                case JiangType.NORMAL:
+                    {
+                        rate = 2;
+                        break;
+                    }
+            }
+        }
+        else if (pai_detail.equal_jiang_value) {
+            rate = 2;
+        }
+        hu = hu * rate;
+        if (pai_detail.is_jiang) {
+            if (type == HuPaiRateType.AN_KE) {
+                hu *= 3;
+            }
+            else if (type == HuPaiRateType.JIAO_PAI) {
+                hu *= 4;
+            }
+        }
+        else {
+            if (type == HuPaiRateType.AN_KE) {
+                hu *= 2;
+            }
+            else if (type == HuPaiRateType.MING_GANG) {
+                hu *= 4;
+            }
+            else if (type == HuPaiRateType.AN_GANG) {
+                hu *= 6;
+            }
+            else if (type == HuPaiRateType.JIAO_PAI) {
+                hu *= 8;
+            }
+        }
+        return hu;
     };
     PaiDui.SortPaiArray = function (a, b) {
         var p1 = Pai.GetPaiByNumber(a);
@@ -353,11 +474,7 @@ var PaiDui = (function () {
         else
             return p1.type - p2.type;
     };
-    PaiDui.prototype.CaculateDiHu = function (shou_pai, di_pai, an_gang, sort) {
-        if (sort) {
-            shou_pai.sort(PaiDui.SortPaiArray);
-            di_pai.sort(PaiDui.SortPaiArray);
-        }
+    PaiDui.prototype.CaculateDiHu = function (shou_pai, di_pai, an_gang, jiao_pai, only_gang_ke) {
         var ming_ke_array = [];
         var an_ke_array = [];
         var ming_gang_array = [];
@@ -365,6 +482,7 @@ var PaiDui = (function () {
         var xi_pai_array = [];
         var sun_zi_array = [];
         var dui_zi_array = [];
+        var jiao_pai_array = [];
         var temp_array = [];
         for (var i = 0; i < shou_pai.length; i++) {
             var detail = this.GetPaiDetail(shou_pai[i]);
@@ -373,11 +491,37 @@ var PaiDui = (function () {
                 continue;
             }
             temp_array.push(detail);
-            if (temp_array.length > 1 && i < shou_pai.length - 1) {
-                if (temp_array[0].pai.value == temp_array[1].pai.value) {
-                    var detail2 = this.GetPaiDetail(shou_pai[i + 1]);
-                    if (temp_array[0].pai.value == detail2.pai.value) {
+            if (temp_array.length > 1 && temp_array[0].pai.type != temp_array[1].pai.type) {
+                temp_array = [temp_array[1]];
+                continue;
+            }
+            if (temp_array.length < 2)
+                continue;
+            if (only_gang_ke) {
+                if (temp_array.length < 3)
+                    continue;
+                if (temp_array[2].pai.type != temp_array[0].pai.type) {
+                    temp_array = [temp_array[1], temp_array[2]];
+                    continue;
+                }
+                if (temp_array[0].pai.value == temp_array[1].pai.value && temp_array[0].pai.value == temp_array[2].pai.value) {
+                    if (jiao_pai.indexOf(temp_array[0].pai.num) < 0)
                         an_ke_array.push(temp_array[0]);
+                    temp_array = [];
+                    continue;
+                }
+                else {
+                    temp_array = [temp_array[1], temp_array[2]];
+                    continue;
+                }
+                continue;
+            }
+            if (temp_array[0].pai.value == temp_array[1].pai.value) {
+                if (i < shou_pai.length - 1) {
+                    var detail2 = this.GetPaiDetail(shou_pai[i + 1]);
+                    if (PaiDetail.Equal(temp_array[0], detail2)) {
+                        if (jiao_pai.indexOf(temp_array[0].pai.num) < 0)
+                            an_ke_array.push(temp_array[0]);
                         temp_array = [];
                         i++;
                         continue;
@@ -388,7 +532,14 @@ var PaiDui = (function () {
                         continue;
                     }
                 }
-                else if ((temp_array[0].pai.value + 1) == temp_array[1].pai.value && temp_array[0].pai.type == temp_array[1].pai.type) {
+                else {
+                    dui_zi_array.push(temp_array[0]);
+                    temp_array = [];
+                    continue;
+                }
+            }
+            else {
+                if (i < shou_pai.length - 1) {
                     var detail2 = this.GetPaiDetail(shou_pai[i + 1]);
                     if ((temp_array[0].pai.value == detail2.pai.value - 2) && detail2.pai.type == temp_array[0].pai.type) {
                         sun_zi_array.push(temp_array[0]);
@@ -396,49 +547,63 @@ var PaiDui = (function () {
                         i++;
                         continue;
                     }
+                    else {
+                        temp_array = [temp_array[1]];
+                        continue;
+                    }
                 }
                 else {
-                    temp_array = [];
+                    temp_array = [temp_array[1]];
                     continue;
                 }
-            }
-            else if (temp_array.length > 1 && Pai.Equal(temp_array[0].pai.num, temp_array[1].pai.num)) {
-                dui_zi_array.push(temp_array[0]);
-                temp_array = [];
-                continue;
             }
         }
         temp_array = [];
         for (var i = 0; di_pai != null && i < di_pai.length; i++) {
-            var detail = this.GetPaiDetail(shou_pai[i]);
+            var detail = this.GetPaiDetail(di_pai[i]);
             if (detail.pai.type == PaiType.PAI_XI) {
                 xi_pai_array.push(detail);
                 continue;
             }
             temp_array.push(detail);
-            if (temp_array.length > 2 && i < shou_pai.length - 1) {
-                if (temp_array[0].pai.value == temp_array[1].pai.value && temp_array[0].pai.value == temp_array[2].pai.value) {
-                    var detail2 = this.GetPaiDetail(shou_pai[i + 1]);
+            if (temp_array.length > 1 && temp_array[0].pai.type != temp_array[1].pai.type) {
+                temp_array = [temp_array[1]];
+                continue;
+            }
+            if (temp_array.length > 2 && temp_array[0].pai.type != temp_array[2].pai.type) {
+                temp_array = [temp_array[2]];
+                continue;
+            }
+            if (temp_array.length < 3)
+                continue;
+            if (temp_array[0].pai.value == temp_array[1].pai.value && temp_array[0].pai.value == temp_array[2].pai.value) {
+                if (i < di_pai.length - 1) {
+                    var detail2 = this.GetPaiDetail(di_pai[i + 1]);
                     if (temp_array[0].pai.value == detail2.pai.value) {
-                        if (an_gang.indexOf(detail2.pai.value)) {
-                            an_gang_array.push(temp_array[0]);
+                        if (an_gang.indexOf(detail2.pai.value) < 0) {
+                            ming_gang_array.push(temp_array[0]);
                         }
                         else {
-                            ming_gang_array.push(temp_array[0]);
+                            an_gang_array.push(temp_array[0]);
                         }
                         temp_array = [];
                         i++;
                         continue;
                     }
                     else {
-                        ming_ke_array.push(temp_array[0]);
+                        if (jiao_pai.indexOf(temp_array[0].pai.num) < 0)
+                            ming_ke_array.push(temp_array[0]);
                         temp_array = [];
                     }
                 }
                 else {
+                    if (jiao_pai.indexOf(temp_array[0].pai.num) < 0)
+                        ming_ke_array.push(temp_array[0]);
                     temp_array = [];
-                    continue;
                 }
+            }
+            else {
+                temp_array = [];
             }
         }
         var di_hu = 0;
@@ -446,31 +611,41 @@ var PaiDui = (function () {
         var an_ke_hu = 0;
         var ming_gang_hu = 0;
         var an_gang_hu = 0;
-        var ming_ke_base = 2;
-        var an_ke_base = 4;
-        var ming_gang_base = 8;
-        var an_gang_base = 12;
+        var jiao_hu = 0;
+        for (var i = 0; i < sun_zi_array.length; i++) {
+            var detail = sun_zi_array[i];
+            for (var k = 0; k < 3; k++) {
+                var detail2 = this.GetPaiDetail(detail.pai.num + k);
+                var index = ming_ke_array.indexOf(detail2);
+                if (index >= 0) {
+                    ming_ke_array.splice(index, 1);
+                    ming_gang_array.push(detail2);
+                }
+            }
+        }
         for (var i = 0; i < ming_ke_array.length; i++) {
             var detail = ming_ke_array[i];
-            var rate = PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.MING_KE);
-            ming_ke_hu += ming_ke_base * rate;
+            ming_ke_hu += PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.MING_KE);
         }
         for (var i = 0; i < an_ke_array.length; i++) {
             var detail = an_ke_array[i];
-            var rate = PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.AN_KE);
-            an_ke_hu += an_ke_base * rate;
+            an_ke_hu += PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.AN_KE);
         }
         for (var i = 0; i < ming_gang_array.length; i++) {
             var detail = ming_gang_array[i];
-            var rate = PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.MING_GANG);
-            ming_gang_hu += ming_gang_base * rate;
+            ming_gang_hu += PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.MING_GANG);
         }
         for (var i = 0; i < an_gang_array.length; i++) {
             var detail = an_gang_array[i];
-            var rate = PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.AN_GANG);
-            an_gang_hu += an_gang_base * rate;
+            an_gang_hu += PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.AN_GANG);
         }
-        var di_hu = ming_ke_hu + an_ke_hu + ming_gang_hu + an_gang_hu;
+        for (var i = 0; i < jiao_pai.length; i++) {
+            var detail = this.GetPaiDetail(jiao_pai[i]);
+            jiao_pai_array.push(detail);
+            jiao_hu += PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.JIAO_PAI);
+        }
+        Debug.Log("ming ke:" + ming_ke_hu + " an ke:" + an_ke_hu + " ming gang:" + ming_gang_hu + " an gang:" + an_gang_hu + " jiao hu:" + jiao_hu);
+        var di_hu = ming_ke_hu + an_ke_hu + ming_gang_hu + an_gang_hu + jiao_hu;
         var ret_info = new HuPaiInfo();
         ret_info.ming_ke_array = ming_ke_array;
         ret_info.an_ke_array = an_ke_array;
@@ -478,6 +653,7 @@ var PaiDui = (function () {
         ret_info.an_gang_array = an_gang_array;
         ret_info.sun_zi_array = sun_zi_array;
         ret_info.dui_zi_array = dui_zi_array;
+        ret_info.jiao_pai_array = jiao_pai_array;
         ret_info.di_hu_score = di_hu;
         return ret_info;
     };
@@ -750,7 +926,8 @@ var CheckPaiNode = (function () {
                     win_info2.push(win_info[i][j]);
                 }
             }
-            this.win_node.push(win_info2);
+            if (win_info2.length > 0)
+                this.win_node.push(win_info2);
         }
     };
     return CheckPaiNode;

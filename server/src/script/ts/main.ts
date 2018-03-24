@@ -1,11 +1,9 @@
 //人数限制
 let ROOM_MAX_PLAYER_COUNT=2;
 //关闭随机
-let DEFINE_RANDOM_TEST=false;
+let DEFINE_RANDOM_TEST=true;
 
-let INFO_SERVER_URL="http://ntcp.wohnb.com/ntcp/";
-
-
+let INFO_SERVER_URL="http://127.0.0.1:9800/private/";
 
 class ScriptLoader{
     public static ROOT_PATH:string;
@@ -97,11 +95,15 @@ class RandomInt{
         }
         return false;
     }
-    public ReleaseValue(value:number){
-        if(!this.repeat){
-            var index=this.recoders.indexOf(value);
-            if(index>=0)this.recoders.splice(index,1);
+    public ReleaseValue(newvalue:number){
+        if( newvalue>= this.min && newvalue <= this.max && this.recoders.indexOf(newvalue)<0)
+        {
+            var index=Math.floor(Math.random()*this.recoders.length);
+            var value=this.recoders[index];
+            this.recoders[index]=newvalue;
+            this.recoders.push(value);
         }
+        
     }
     public GetRecoderList():Array<number>{
         if(!this.repeat)return this.recoders.slice(0);
@@ -117,7 +119,7 @@ class RandomInt{
 
 
 if(Server.Platfrom() == 1)ScriptLoader.ROOT_PATH="E:/Share/ntcp/server/src/script/js/";
-else ScriptLoader.ROOT_PATH="../script/js/";
+else ScriptLoader.ROOT_PATH="./js/";
 
 
 

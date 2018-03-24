@@ -23,7 +23,7 @@ class RoomPlayer{
     public client:JClient;
     public openid:string;
     //天听
-    public tian_ting:boolean=false;
+    public tian_ting:boolean=true;
     //天胡
     public tian_hu:boolean =false;
     //叫牌
@@ -164,8 +164,39 @@ class RoomPlayer{
     }
     public CaculateHu(pais:PaiDui){
         this.hui_pai=false;
-        this.hu_pai_info = pais.CaculateDiHu(this.shou_pai,this.di_pai,this.an_gang_array,true);
-        this.hu_pai_info.CaculateTotleScore();
+        //this.di_pai.sort(PaiDui.SortPaiArray);
+        // var totle_di_info_array=[];
+        // for(var i=0;i<3;i++)
+        // {
+        //     for(var j=1;j<11;j++)
+        //     {
+        //         var num = i*40 +j;
+        //         var caulater= new CheckPaiNode();
+        //         for(var k=0;k<this.shou_pai.length;k++){
+        //             caulater.AddOriginPai(pais.GetPaiDetail(this.shou_pai[k]));
+        //         }
+        //         caulater.AddOriginPai(pais.GetPaiDetail(num));
+        //         var result_array = caulater.CheckWin();
+        //         for(var m=0;m<result_array.length;m++)
+        //         {
+        //             var shou=Pai.DetailToNumberArray(result_array[m]);
+        //             var info = pais.CaculateDiHu(shou,this.di_pai,this.an_gang_array,this.jiao_pai_array,false);
+        //             info.CaculateTotleScore(null);
+        //             info.hu_pai_array=shou;
+        //             totle_di_info_array.push(info);
+        //         }
+        //     }
+        // }
+        // this.hu_pai_info=totle_di_info_array[0];
+        // for(var i=1;i<totle_di_info_array.length;i++){
+        //     if(this.hu_pai_info.totle_socre < totle_di_info_array[i].totle_socre){
+        //         this.hu_pai_info = totle_di_info_array[i];
+        //     }
+        // }
+        this.shou_pai.sort(Pai.SortNumber);
+        this.di_pai.sort(Pai.SortNumber);
+        this.hu_pai_info = pais.CaculateDiHu(this.shou_pai,this.di_pai,this.an_gang_array,this.jiao_pai_array,true);
+        this.hu_pai_info.CaculateTotleScore(null);
     }
     public Hu(pai:number,pais:PaiDui):boolean{
         var ret =false;
@@ -181,12 +212,15 @@ class RoomPlayer{
         if(ret){
             this.hui_pai=true;
             var di_info_array:Array<HuPaiInfo>=[];
+            this.di_pai.sort(PaiDui.SortPaiArray);
             for(var i=0;i<result_array.length;i++){
                 var shou=Pai.DetailToNumberArray(result_array[i]);
-                this.di_pai.sort(PaiDui.SortPaiArray);
-                var info = pais.CaculateDiHu(shou,this.di_pai,this.an_gang_array,false);
-                info.CaculateOtherScore(pais.GetPaiDetail(pai));
-                info.CaculateTotleScore();
+                var info = pais.CaculateDiHu(shou,this.di_pai,this.an_gang_array,this.jiao_pai_array,false);
+                info.hu_pai_array=shou;
+                if(this.tian_ting){
+                    info.hu_pai_type |= HuPaiType.TIANG_TING;
+                }
+                info.CaculateTotleScore(pais.GetPaiDetail(pai));
                 di_info_array.push(info);
             }
             this.hu_pai_info=di_info_array[0];
@@ -210,13 +244,24 @@ class RoomPlayer{
         this.hui_pai=false;
         ret = result_array.length>0;
         if(ret){
+            // for(var i=0;i<result_array.length;i++){
+            //     Debug.Log(Pai.PrintDetailArray(result_array[i]));
+            // }
+            //天胡
+            this.tian_hu = pais.GetSize() == (pais.GetMaxSize()-22*ROOM_MAX_PLAYER_COUNT-3);
+            Debug.Log("tian hu:"+this.tian_hu+" pais.GetSize()"+pais.GetSize());
             this.hui_pai=true;
             var di_info_array:Array<HuPaiInfo>=[];
             for(var i=0;i<result_array.length;i++){
                 var shou=Pai.DetailToNumberArray(result_array[i]);
-                var info = pais.CaculateDiHu(shou,null,null,false);
-                info.CaculateOtherScore(pai);
-                info.CaculateTotleScore();
+                var info = pais.CaculateDiHu(shou,[],[],[],false);
+                info.hu_pai_array=shou;
+                info.hu_pai_type |= HuPaiType.ZI_MO;
+                //天胡
+                if(this.tian_hu){
+                    info.hu_pai_type |=HuPaiType.TIANG_HU;
+                }
+                info.CaculateTotleScore(pai);
                 di_info_array.push(info);
             }
             this.hu_pai_info=di_info_array[0];
@@ -252,7 +297,6 @@ class Room{
     private wait_result:boolean=false;
     private last_chu_pai:number=0;
     private last_mo_pai:number=0;
-    private chu_pai_count:number=0;
     //最后出牌的玩家
     private last_chu_pai_player:RoomPlayer=null;
     //最后摸牌的玩家
@@ -457,13 +501,19 @@ class Room{
                 this.room_players[p].MoPai(pai);
             }
         }
-        this.pais.MoJiangPai();
     }
     //摸牌
     public MoPai(){
         var player=this.room_players[this.next_mo_palyer];
         this.AutoUpdateNextPlayer();
-        var pai=this.pais.Get();
+        var pai = 0;
+        try{
+            pai=this.pais.Get();
+        }
+        catch{
+            this.BalanceGame();
+            return;
+        }
         player.MoPai(pai);
         this.last_mo_pai=pai;
         this.last_mo_pai_player=player;
@@ -502,9 +552,14 @@ class Room{
                 }));
                 return;
             };
-            this.chu_pai_count++;
+            
             this.last_chu_pai=value;
             this.last_chu_pai_player=player;
+            //谁摸谁出,出的牌和摸的牌不一样就不可能天听了.
+            if(!Pai.Equal(this.last_mo_pai,this.last_chu_pai))
+            {
+                player.tian_ting=false;
+            }
             var send_msg1=CreateMsg(SERVER_MSG.SM_CHU_PAI,{
                 uid:player.client.uid,
                 pai:value,
@@ -562,7 +617,9 @@ class Room{
                 uid:p.client.uid,
                 shou:p.shou_pai,
                 di:p.di_pai,
-                score:p.hu_pai_info.totle_socre
+                hu:p.hu_pai_info.hu_pai_array,
+                score:p.hu_pai_info.totle_socre,
+                
             }
             if(p.hui_pai){
                 msg.uid2=p.hui_pai_uid;
@@ -571,35 +628,37 @@ class Room{
             }
             msgs.push(msg);
         }
+        Debug.Log("Hu Pai La ........");
         this.BroadCastMessage(CreateMsg(SERVER_MSG.SM_GAME_BALANCE,msgs));
         this.Release();
+        
     }
-    public CaculatePlayerTotleScore(player:RoomPlayer){
-        var hu_pai_info = player.hu_pai_info;
-        player.hui_pai_uid=this.last_chu_pai_player==null?player.client.uid: this.last_chu_pai_player.client.uid;
-        var score = hu_pai_info.totle_socre;
-        //自摸
-        if(this.last_mo_pai_player.index == player.index){
-            hu_pai_info.hu_pai_type |= HuPaiType.ZI_MO;
-            hu_pai_info.hu_type_score += 10;
-        }
-        //天胡
-        if(this.chu_pai_count == 0){
-            hu_pai_info.hu_pai_type |=HuPaiType.TIANG_HU;
-            hu_pai_info.di_hu_score *= 4;
-        }
-        //天听
-        else if(player.tian_ting){
-            hu_pai_info.hu_pai_type |= HuPaiType.TIANG_TING;
-            hu_pai_info.di_hu_score *=2;
-        }
-        //穷喜
-        if(hu_pai_info.xi_array.length==0){
-            hu_pai_info.di_hu_score *=2;
-        }
-        hu_pai_info.CaculateTotleScore();
+    // public CaculatePlayerTotleScore(player:RoomPlayer){
+    //     var hu_pai_info = player.hu_pai_info;
+    //     player.hui_pai_uid=this.last_chu_pai_player==null?player.client.uid: this.last_chu_pai_player.client.uid;
+    //     var score = hu_pai_info.totle_socre;
+    //     //自摸
+    //     if(this.last_mo_pai_player.index == player.index){
+    //         hu_pai_info.hu_pai_type |= HuPaiType.ZI_MO;
+    //         hu_pai_info.hu_type_score += 10;
+    //     }
+    //     //天胡
+    //     if(this.chu_pai_count == 0){
+    //         hu_pai_info.hu_pai_type |=HuPaiType.TIANG_HU;
+    //         hu_pai_info.di_hu_score *= 4;
+    //     }
+    //     //天听
+    //     else if(player.tian_ting){
+    //         hu_pai_info.hu_pai_type |= HuPaiType.TIANG_TING;
+    //         hu_pai_info.di_hu_score *=2;
+    //     }
+    //     //穷喜
+    //     if(hu_pai_info.xi_array.length==0){
+    //         hu_pai_info.di_hu_score *=2;
+    //     }
+    //     hu_pai_info.CaculateTotleScore();
 
-    }
+    // }
     //玩家回复出牌或者发牌消息
     public ClientResponseChuPai(client:JClient,msg){
         //摸完牌后,自摸,杠,等操作
@@ -609,7 +668,7 @@ class Room{
                 var ret =client.player.ZiMo(this.pais.GetPaiDetail(this.last_mo_pai),this.pais);
                 if(ret){
                     var hu_pai_info=client.player.hu_pai_info;
-                    this.CaculatePlayerTotleScore(client.player);
+                    //this.CaculatePlayerTotleScore(client.player);
                     this.BroadCastMessage(CreateMsg(SERVER_MSG.SM_HU_PAI,{
                         uid:client.uid,
                         uid2:client.uid,
@@ -700,8 +759,6 @@ class Room{
             return;
         }
         
-        Debug.Log("wait_result_players:"+this.wait_result_players.length);
-        Debug.Log("players_result_msg_count:"+this.players_result_msg_count);
         var find=false;
         for(var i=0;i<this.wait_result_players.length;i++){
             if(client.player.index == this.wait_result_players[i].index)
@@ -730,9 +787,12 @@ class Room{
                         target_uid:this.GetChuPaiPalyer().client.uid,
                         pai:this.last_chu_pai
                     }
+                    
                     this.BroadCastMessage(CreateMsg(SERVER_MSG.SM_HU_PAI,broad_msg));
+                    this.BalanceGame();
+                    
                 }
-                this.BalanceGame();
+                
                 return;
             }
         }
@@ -757,7 +817,14 @@ class Room{
             {
                 if(old_pais[i]>120&&player.ChuPai(old_pais[i]))
                 {
-                    var pai=this.pais.Get();
+                    var pai = 0;
+                    try{
+                        pai=this.pais.Get();
+                    }
+                    catch{
+                        this.BalanceGame();
+                        return;
+                    }
                     if(pai>0)
                     {
                         new_pais.push(pai);

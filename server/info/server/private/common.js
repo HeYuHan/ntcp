@@ -19,6 +19,14 @@ var RandomInt = (function () {
             }
         }
     }
+    RandomInt.prototype.Insert=function(newvalue){
+        if( newvalue>= this.min && newvalue <= this.max)return false;
+        if(this.recoders.indexOf(newvalue)>=0)return false;
+        var index=Math.floor(Math.random()*this.recoders.length);
+        var value=this.recoders[index];
+        this.recoders[index]=newvalue;
+        this.recoders.push(value);
+    }
     RandomInt.prototype.Get = function () {
         if (this.repeat) {
             var range = this.max - this.min;
@@ -40,10 +48,12 @@ var RandomInt = (function () {
         return false;
     };
     RandomInt.prototype.ReleaseValue = function (value) {
-        if (!this.repeat) {
-            var index = this.recoders.indexOf(value);
-            if (index >= 0)
-                this.recoders.splice(index, 1);
+        if( newvalue>= this.min && newvalue <= this.max && this.recoders.indexOf(newvalue)<0)
+        {
+            var index=Math.floor(Math.random()*this.recoders.length);
+            var value=this.recoders[index];
+            this.recoders[index]=newvalue;
+            this.recoders.push(value);
         }
     };
     RandomInt.prototype.GetRecoderList = function () {
