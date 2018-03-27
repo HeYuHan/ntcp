@@ -69,6 +69,6 @@ int main(int argc,char **argv)
 		log_error("%s", "run as daemon error!");
 		return -1;
 	}
-
-	return 	gServer.Run();
+	int ret = gServer.Run();
+	return 	ret;
 }

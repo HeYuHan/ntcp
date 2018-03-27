@@ -84,9 +84,10 @@ var HuPaiInfo = (function () {
         return a.totle_socre - b.totle_socre;
     };
     HuPaiInfo.prototype.CaculateTotleScore = function (hu_pai) {
+        var qiong_xi = false;
         switch (this.xi_array.length) {
             case 0:
-                this.hu_pai_type |= HuPaiType.QIONG_XI;
+                qiong_xi = true;
                 this.xi_pai_score = 0;
                 break;
             case 1:
@@ -104,31 +105,38 @@ var HuPaiInfo = (function () {
                 this.xi_pai_score = 200;
                 break;
         }
-        this.totle_socre = this.di_hu_score + this.san_long_ju_hu_score + this.wen_qiang_score + this.xi_pai_score;
+        if (!hu_pai) {
+            this.totle_socre = this.di_hu_score + this.san_long_ju_hu_score + this.xi_pai_score;
+            this.totle_socre = Math.ceil(this.totle_socre / 10) * 10;
+            return;
+        }
         if (hu_pai) {
             var wen_qiang_count = 0;
+            var temp_hu_pai_type = HuPaiType.NONE;
+            if (hu_pai.pai.value == 1 || hu_pai.pai.value == 9) {
+                temp_hu_pai_type |= HuPaiType.BIAN_ZHANG;
+                Debug.Log("bian zhang..........");
+            }
+            else {
+                for (var i = 0; i < this.dui_zi_array.length; i++) {
+                    var d = this.dui_zi_array[i];
+                    if (d.pai.value == hu_pai.pai.value && d.pai.type == hu_pai.pai.type) {
+                        temp_hu_pai_type |= HuPaiType.DANG_DIAO;
+                        Debug.Log("dang diao......");
+                    }
+                }
+            }
             for (var i = 0; i < this.sun_zi_array.length; i++) {
                 var d = this.sun_zi_array[i];
                 if (d.pai.value == 1 && d.pai.type == PaiType.PAI_TONG) {
                     wen_qiang_count++;
                 }
-                if (!hu_pai)
-                    continue;
-                if ((d.pai.value == hu_pai.pai.value - 1) && d.pai.type == hu_pai.pai.type) {
-                    if (this.hu_pai_type == 0)
-                        this.hu_pai_type |= HuPaiType.YA_ZI;
-                }
-                else if ((d.pai.value == hu_pai.pai.value || (d.pai.value == hu_pai.pai.value - 2)) && d.pai.type == hu_pai.pai.type) {
-                    if (this.hu_pai_type == 0)
-                        this.hu_pai_type |= HuPaiType.BIAN_ZHANG;
+                if (temp_hu_pai_type == 0 && (d.pai.value == hu_pai.pai.value - 1) && d.pai.type == hu_pai.pai.type) {
+                    this.hu_pai_type |= HuPaiType.YA_ZI;
+                    Debug.Log("ya zi..........");
                 }
             }
-            for (var i = 0; i < this.dui_zi_array.length; i++) {
-                var d = this.dui_zi_array[i];
-                if (d.pai.value == hu_pai.pai.value && d.pai.type == hu_pai.pai.type) {
-                    this.hu_pai_type |= HuPaiType.DANG_DIAO;
-                }
-            }
+            this.hu_pai_type |= temp_hu_pai_type;
             if (wen_qiang_count > 0) {
                 this.hu_pai_type |= HuPaiType.WEN_QIAN;
                 switch (wen_qiang_count) {
@@ -146,6 +154,7 @@ var HuPaiInfo = (function () {
                         break;
                 }
             }
+            this.totle_socre = this.di_hu_score + this.san_long_ju_hu_score + this.wen_qiang_score + this.xi_pai_score;
             if (this.hu_pai_type & HuPaiType.DANG_DIAO) {
                 this.totle_socre += 10;
             }
@@ -158,28 +167,36 @@ var HuPaiInfo = (function () {
             if (this.hu_pai_type & HuPaiType.ZI_MO) {
                 this.totle_socre += 10;
             }
+            var socre_rate = 1;
             if (this.hu_pai_type & HuPaiType.TIANG_HU) {
-                this.totle_socre *= 4;
+                socre_rate = 4;
             }
             else if (this.hu_pai_type & HuPaiType.TIANG_TING) {
-                this.totle_socre *= 2;
+                socre_rate = 2;
             }
             else if (this.hu_pai_type & HuPaiType.QIONG_XI) {
-                this.totle_socre *= 2;
+                Debug.Log("qiong xi......." + this.totle_socre);
+                socre_rate = 2;
             }
             if (wen_qiang_count > 0 && (this.an_ke_array.length + this.ming_ke_array.length) > 0 && this.sun_zi_array.length == wen_qiang_count) {
                 this.hu_type = HuType.PIAO_HU;
                 this.totle_socre += 50;
-                this.totle_socre *= 2;
+                socre_rate *= 2;
             }
             else if (this.sun_zi_array.length == 7) {
                 this.hu_type = HuType.QING_HU;
                 this.totle_socre += 100;
             }
             else {
+                Debug.Log("tai zi hu......." + this.totle_socre);
                 this.hu_type = HuType.TAZI_HU;
                 this.totle_socre += 20;
             }
+            if (qiong_xi) {
+                socre_rate *= 2;
+                this.hu_pai_type |= HuPaiType.QIONG_XI;
+            }
+            this.totle_socre = Math.ceil(this.totle_socre / 10) * 10 * socre_rate;
         }
     };
     return HuPaiInfo;
@@ -250,10 +267,28 @@ var Pai = (function () {
         return (pai1.value == pai2.value && pai1.type == pai2.type);
     };
     Pai.IsLaoJiang = function (ret) {
-        if (ret.type == PaiType.PAI_HONG || ret.type == PaiType.PAI_QIAN || ret.type == PaiType.PAI_BAI || (ret.type == PaiType.PAI_WANG && ret.value == 9)) {
+        if (ret.type == PaiType.PAI_HONG || ret.type == PaiType.PAI_QIAN || ret.type == PaiType.PAI_BAI || (ret.type == PaiType.PAI_TIAO && ret.value == 9)) {
             return true;
         }
         return false;
+    };
+    Pai.ValueToNumber = function (type, value) {
+        var ret = 0;
+        if (type == PaiType.PAI_HONG)
+            return 10;
+        if (type == PaiType.PAI_WANG)
+            return value;
+        if (type == PaiType.PAI_BAI)
+            return 50;
+        if (type == PaiType.PAI_TIAO)
+            return value + 40;
+        if (type == PaiType.PAI_QIAN)
+            return 90;
+        if (type == PaiType.PAI_TONG)
+            return value + 80;
+        if (type == PaiType.PAI_XI)
+            return 121;
+        return ret;
     };
     Pai.CreatePai = function (value) {
         var ret = new Pai();
@@ -474,7 +509,7 @@ var PaiDui = (function () {
         else
             return p1.type - p2.type;
     };
-    PaiDui.prototype.CaculateDiHu = function (shou_pai, di_pai, an_gang, jiao_pai, only_gang_ke) {
+    PaiDui.prototype.CaculateDiHu = function (shou_pai, di_pai, an_gang, jiao_pai) {
         var ming_ke_array = [];
         var an_ke_array = [];
         var ming_gang_array = [];
@@ -492,14 +527,15 @@ var PaiDui = (function () {
             }
             temp_array.push(detail);
             if (temp_array.length > 1 && temp_array[0].pai.type != temp_array[1].pai.type) {
-                temp_array = [temp_array[1]];
+                temp_array.splice(0, 1);
                 continue;
             }
             if (temp_array.length < 2)
                 continue;
-            if (only_gang_ke) {
+            if (true) {
                 if (temp_array.length < 3)
                     continue;
+                Pai.PrintDetailArray(temp_array);
                 if (temp_array[2].pai.type != temp_array[0].pai.type) {
                     temp_array = [temp_array[1], temp_array[2]];
                     continue;
@@ -514,14 +550,25 @@ var PaiDui = (function () {
                     temp_array = [temp_array[1], temp_array[2]];
                     continue;
                 }
+            }
+        }
+        temp_array = [];
+        for (var i = 0; i < shou_pai.length; i++) {
+            var detail = this.GetPaiDetail(shou_pai[i]);
+            if (detail.pai.type == PaiType.PAI_XI) {
                 continue;
             }
+            temp_array.push(detail);
+            if (temp_array.length > 1 && temp_array[0].pai.type != temp_array[1].pai.type) {
+                temp_array = [temp_array[1]];
+                continue;
+            }
+            if (temp_array.length < 2)
+                continue;
             if (temp_array[0].pai.value == temp_array[1].pai.value) {
                 if (i < shou_pai.length - 1) {
                     var detail2 = this.GetPaiDetail(shou_pai[i + 1]);
                     if (PaiDetail.Equal(temp_array[0], detail2)) {
-                        if (jiao_pai.indexOf(temp_array[0].pai.num) < 0)
-                            an_ke_array.push(temp_array[0]);
                         temp_array = [];
                         i++;
                         continue;

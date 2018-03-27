@@ -195,7 +195,7 @@ class RoomPlayer{
         // }
         this.shou_pai.sort(Pai.SortNumber);
         this.di_pai.sort(Pai.SortNumber);
-        this.hu_pai_info = pais.CaculateDiHu(this.shou_pai,this.di_pai,this.an_gang_array,this.jiao_pai_array,true);
+        this.hu_pai_info = pais.CaculateDiHu(this.shou_pai,this.di_pai,this.an_gang_array,this.jiao_pai_array);
         this.hu_pai_info.CaculateTotleScore(null);
     }
     public Hu(pai:number,pais:PaiDui):boolean{
@@ -215,7 +215,7 @@ class RoomPlayer{
             this.di_pai.sort(PaiDui.SortPaiArray);
             for(var i=0;i<result_array.length;i++){
                 var shou=Pai.DetailToNumberArray(result_array[i]);
-                var info = pais.CaculateDiHu(shou,this.di_pai,this.an_gang_array,this.jiao_pai_array,false);
+                var info = pais.CaculateDiHu(shou,this.di_pai,this.an_gang_array,this.jiao_pai_array);
                 info.hu_pai_array=shou;
                 if(this.tian_ting){
                     info.hu_pai_type |= HuPaiType.TIANG_TING;
@@ -254,7 +254,7 @@ class RoomPlayer{
             var di_info_array:Array<HuPaiInfo>=[];
             for(var i=0;i<result_array.length;i++){
                 var shou=Pai.DetailToNumberArray(result_array[i]);
-                var info = pais.CaculateDiHu(shou,[],[],[],false);
+                var info = pais.CaculateDiHu(shou,[],[],[]);
                 info.hu_pai_array=shou;
                 info.hu_pai_type |= HuPaiType.ZI_MO;
                 //天胡

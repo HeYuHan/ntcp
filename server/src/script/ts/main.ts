@@ -134,6 +134,52 @@ var ret = server.Init({
     max_client:50
 });
 Debug.Log("init server ret:"+ret);
+
+// var pai_dui=new PaiDui(true);
+// pai_dui.jiang_pai[0]=Pai.ValueToNumber(PaiType.PAI_TONG,3);
+// pai_dui.jiang_pai[1]=Pai.ValueToNumber(PaiType.PAI_TONG,8);
+// pai_dui.CaculateJiangPaiType();
+// var shou=[];
+// var index=0;
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,1);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,2);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,3);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,7);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,8);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,9);
+
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,1);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,2);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,4);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,5);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,6);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,7);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,7);
+
+// var di=[];
+// index=0;
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,2);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,2);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,2);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
+
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_BAI,9);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_BAI,9);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_BAI,9);
+
+// var info=pai_dui.CaculateDiHu(shou,di,[],[]);
+// info.CaculateTotleScore(null);
+// info.Print();
+
+
+
+
+
+
+
+
 server.Start();
 
 // function start(){
