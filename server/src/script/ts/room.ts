@@ -29,7 +29,7 @@ class RoomPlayer{
     //叫牌
     public jiao_pai_array:Array<number>=[];
     //按杠的牌
-    public an_gang_array:Array<number>=[];
+    public an_gang_array:Array<Pai>=[];
     //胡牌信息
     public hu_pai_info:HuPaiInfo=null;
     //是否胡牌
@@ -116,24 +116,30 @@ class RoomPlayer{
         return false;
     }
     public AnGang(value:number):boolean{
-        var temp_shou=[];
-        var temp_di=[];
-        for(var i=0;i<this.shou_pai.length;i++)
+        this.shou_pai.sort(Pai.SortNumber);
+        var first_gan_index=-1;
+        for(var i=0;i<this.shou_pai.length-3;i++)
         {
-            var pai = this.shou_pai[i];
-            if(temp_di.length<4 && Pai.Equal(pai,value))
+            if(Pai.Equal(this.shou_pai[i],this.shou_pai[i+1])&&Pai.Equal(this.shou_pai[i+1],this.shou_pai[i+2])&&Pai.Equal(this.shou_pai[i+2],this.shou_pai[i+3]))
             {
-                temp_di.push(pai);
-            }
-            else
-            {
-                temp_shou.push(pai);
+                if(Pai.Equal(this.shou_pai[i],value)||Pai.Equal(this.shou_pai[i+1],value)||Pai.Equal(this.shou_pai[i+2],value)||Pai.Equal(this.shou_pai[i+3],value))
+                {
+                    this.AddDiPais([this.shou_pai[i],this.shou_pai[i+1],this.shou_pai[i+2],this.shou_pai[i+3]]);
+                    
+                    this.an_gang_array.push(Pai.GetPaiByNumber(this.shou_pai[i]));
+                    this.shou_pai.splice(i,4);
+                    return true;
+                }
+                else if(first_gan_index == -1){
+                    first_gan_index=i;
+                }
             }
         }
-        if(temp_di.length>3)
-        {
-            this.AddDiPais(temp_di);
-            this.shou_pai=temp_shou;
+        if(first_gan_index!=-1){
+            this.an_gang_array.push(Pai.GetPaiByNumber(this.shou_pai[first_gan_index]));
+            this.AddDiPais([this.shou_pai[first_gan_index],this.shou_pai[first_gan_index+1],this.shou_pai[first_gan_index+2],this.shou_pai[first_gan_index+3]]);
+            this.shou_pai.splice(first_gan_index,4);
+            
             return true;
         }
         return false;
@@ -159,6 +165,15 @@ class RoomPlayer{
             this.AddDiPais(temp_di);
             this.shou_pai=temp_shou;
             return true;
+        }
+        for(var i=0;i<this.di_pai.length;i++)
+        {
+            var pai = this.di_pai[i];
+            if(Pai.Equal(pai,value))
+            {
+                this.di_pai.push(value);
+                return true;
+            }
         }
         return false;
     }
@@ -254,7 +269,7 @@ class RoomPlayer{
             var di_info_array:Array<HuPaiInfo>=[];
             for(var i=0;i<result_array.length;i++){
                 var shou=Pai.DetailToNumberArray(result_array[i]);
-                var info = pais.CaculateDiHu(shou,[],[],[]);
+                var info = pais.CaculateDiHu(shou,this.di_pai,this.an_gang_array,this.jiao_pai_array);
                 info.hu_pai_array=shou;
                 info.hu_pai_type |= HuPaiType.ZI_MO;
                 //天胡
@@ -683,19 +698,19 @@ class Room{
             }
             //按杠
             else if(msg.type == PaiMessageResponse.RESULT_GANG){
-                if(client.player.AnGang(this.last_chu_pai))
+                var an_gan=client.player.AnGang(this.last_mo_pai);
+                if(an_gan || client.player.Gang(this.last_mo_pai))
                 {
-                    
                     this.next_mo_palyer=client.player.index;
                     var player_msg={
                         uid:client.uid,
-                        pai:this.last_chu_pai,
+                        pai:this.last_mo_pai,
                         shou:client.player.shou_pai,
                         di:client.player.di_pai
                     }
                     var other_msg={
                         uid:client.uid,
-                        pai:this.last_chu_pai,
+                        pai:this.last_mo_pai,
                         di:client.player.di_pai,
                         size1:client.player.GetShouPaiSize()
                     }
@@ -775,6 +790,7 @@ class Room{
             var ret_msg = p.result_msg;
             if(ret_msg.type == PaiMessageResponse.RESULT_HU){
                 var ret = p.Hu(this.last_chu_pai,this.pais);
+                
                 if(ret){
                     //把胡的牌摸到手上
                     p.MoPai(this.last_chu_pai);
@@ -784,7 +800,7 @@ class Room{
                     
                     var broad_msg={
                         uid:p.client.uid,
-                        target_uid:this.GetChuPaiPalyer().client.uid,
+                        uid2:this.GetChuPaiPalyer().client.uid,
                         pai:this.last_chu_pai
                     }
                     

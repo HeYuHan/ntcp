@@ -1,4 +1,4 @@
-var ROOM_MAX_PLAYER_COUNT = 2;
+var ROOM_MAX_PLAYER_COUNT = 1;
 var DEFINE_RANDOM_TEST = true;
 var INFO_SERVER_URL = "http://127.0.0.1:9800/private/";
 var ScriptLoader = (function () {

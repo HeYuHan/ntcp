@@ -178,7 +178,7 @@ var HuPaiInfo = (function () {
                 Debug.Log("qiong xi......." + this.totle_socre);
                 socre_rate = 2;
             }
-            if (wen_qiang_count > 0 && (this.an_ke_array.length + this.ming_ke_array.length) > 0 && this.sun_zi_array.length == wen_qiang_count) {
+            if (this.sun_zi_array.length == 0) {
                 this.hu_type = HuType.PIAO_HU;
                 this.totle_socre += 50;
                 socre_rate *= 2;
@@ -253,6 +253,13 @@ var Pai = (function () {
         var msg = "";
         for (var i = 0; i < details.length; i++) {
             msg += details[i].pai.ToString();
+        }
+        Debug.Log(msg);
+    };
+    Pai.PrintArray = function (pais) {
+        var msg = "";
+        for (var i = 0; i < pais.length; i++) {
+            msg += pais[i].ToString();
         }
         Debug.Log(msg);
     };
@@ -345,10 +352,10 @@ var PaiDui = (function () {
         this.includ_xipai = false;
         this.jiang_pai[0] = Math.floor(Math.random() * 120) + 1;
         this.jiang_pai[1] = Math.floor(Math.random() * 120) + 1;
-        this.pais = new RandomInt(1, this.includ_xipai ? 126 : 121, false);
+        this.pais = new RandomInt(1, include_xipai ? 126 : 121, false);
         this.pais.PopValue(this.jiang_pai[0]);
         this.pais.PopValue(this.jiang_pai[1]);
-        this.includ_xipai = this.includ_xipai;
+        this.includ_xipai = include_xipai;
         this.CaculateJiangPaiType();
     }
     PaiDui.prototype.GetMaxSize = function () {
@@ -391,12 +398,7 @@ var PaiDui = (function () {
         return this.pais.PopValue(num);
     };
     PaiDui.prototype.Get = function () {
-        try {
-            return this.pais.Get();
-        }
-        catch (error) {
-            return 0;
-        }
+        return this.pais.Get();
     };
     PaiDui.prototype.IsJiangPai = function (pai) {
         var ret = false;
@@ -519,11 +521,21 @@ var PaiDui = (function () {
         var dui_zi_array = [];
         var jiao_pai_array = [];
         var temp_array = [];
+        var san_hua = 0;
+        var have_san_hua = false;
         for (var i = 0; i < shou_pai.length; i++) {
             var detail = this.GetPaiDetail(shou_pai[i]);
             if (detail.pai.type == PaiType.PAI_XI) {
                 xi_pai_array.push(detail);
                 continue;
+            }
+            if (detail.is_laojiang) {
+                if (detail.pai.type == PaiType.PAI_HONG)
+                    san_hua |= 1 << 1;
+                else if (detail.pai.type == PaiType.PAI_BAI)
+                    san_hua |= 1 << 2;
+                else if (detail.pai.type == PaiType.PAI_QIAN)
+                    san_hua |= 1 << 3;
             }
             temp_array.push(detail);
             if (temp_array.length > 1 && temp_array[0].pai.type != temp_array[1].pai.type) {
@@ -535,7 +547,6 @@ var PaiDui = (function () {
             if (true) {
                 if (temp_array.length < 3)
                     continue;
-                Pai.PrintDetailArray(temp_array);
                 if (temp_array[2].pai.type != temp_array[0].pai.type) {
                     temp_array = [temp_array[1], temp_array[2]];
                     continue;
@@ -612,6 +623,14 @@ var PaiDui = (function () {
                 xi_pai_array.push(detail);
                 continue;
             }
+            if (detail.is_laojiang) {
+                if (detail.pai.type == PaiType.PAI_HONG)
+                    san_hua |= 1 << 1;
+                else if (detail.pai.type == PaiType.PAI_BAI)
+                    san_hua |= 1 << 2;
+                else if (detail.pai.type == PaiType.PAI_QIAN)
+                    san_hua |= 1 << 3;
+            }
             temp_array.push(detail);
             if (temp_array.length > 1 && temp_array[0].pai.type != temp_array[1].pai.type) {
                 temp_array = [temp_array[1]];
@@ -627,12 +646,16 @@ var PaiDui = (function () {
                 if (i < di_pai.length - 1) {
                     var detail2 = this.GetPaiDetail(di_pai[i + 1]);
                     if (temp_array[0].pai.value == detail2.pai.value) {
-                        if (an_gang.indexOf(detail2.pai.value) < 0) {
+                        var is_an_gang = false;
+                        for (var m = 0; m < an_gang.length; m++) {
+                            if (Pai.Equal2(an_gang[m], temp_array[0].pai)) {
+                                an_gang_array.push(temp_array[0]);
+                                is_an_gang = true;
+                                break;
+                            }
+                        }
+                        if (!is_an_gang)
                             ming_gang_array.push(temp_array[0]);
-                        }
-                        else {
-                            an_gang_array.push(temp_array[0]);
-                        }
                         temp_array = [];
                         i++;
                         continue;
@@ -659,6 +682,7 @@ var PaiDui = (function () {
         var ming_gang_hu = 0;
         var an_gang_hu = 0;
         var jiao_hu = 0;
+        have_san_hua = ((san_hua & (1 << 1)) > 0) && ((san_hua & (1 << 2)) > 0) && ((san_hua & (1 << 3)) > 0);
         for (var i = 0; i < sun_zi_array.length; i++) {
             var detail = sun_zi_array[i];
             for (var k = 0; k < 3; k++) {
@@ -672,24 +696,39 @@ var PaiDui = (function () {
         }
         for (var i = 0; i < ming_ke_array.length; i++) {
             var detail = ming_ke_array[i];
-            ming_ke_hu += PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.MING_KE);
+            var hu = PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.MING_KE);
+            ming_ke_hu += hu;
+            if (detail.is_laojiang && detail.pai.type != PaiType.PAI_TIAO && have_san_hua)
+                ming_ke_hu += hu;
         }
         for (var i = 0; i < an_ke_array.length; i++) {
             var detail = an_ke_array[i];
-            an_ke_hu += PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.AN_KE);
+            var hu = PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.AN_KE);
+            an_ke_hu += hu;
+            if (detail.is_laojiang && detail.pai.type != PaiType.PAI_TIAO && have_san_hua)
+                an_ke_hu += hu;
         }
         for (var i = 0; i < ming_gang_array.length; i++) {
             var detail = ming_gang_array[i];
-            ming_gang_hu += PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.MING_GANG);
+            var hu = PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.MING_GANG);
+            ming_gang_hu += hu;
+            if (detail.is_laojiang && detail.pai.type != PaiType.PAI_TIAO && have_san_hua)
+                ming_gang_hu += hu;
         }
         for (var i = 0; i < an_gang_array.length; i++) {
             var detail = an_gang_array[i];
-            an_gang_hu += PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.AN_GANG);
+            var hu = PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.AN_GANG);
+            an_gang_hu += hu;
+            if (detail.is_laojiang && detail.pai.type != PaiType.PAI_TIAO && have_san_hua)
+                an_gang_hu += hu;
         }
         for (var i = 0; i < jiao_pai.length; i++) {
             var detail = this.GetPaiDetail(jiao_pai[i]);
             jiao_pai_array.push(detail);
-            jiao_hu += PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.JIAO_PAI);
+            var hu = PaiDui.GetHuPaiRate(this.jiang_pai_type, detail, HuPaiRateType.JIAO_PAI);
+            jiao_hu += hu;
+            if (detail.is_laojiang && detail.pai.type != PaiType.PAI_TIAO && have_san_hua)
+                jiao_hu += hu;
         }
         Debug.Log("ming ke:" + ming_ke_hu + " an ke:" + an_ke_hu + " ming gang:" + ming_gang_hu + " an gang:" + an_gang_hu + " jiao hu:" + jiao_hu);
         var di_hu = ming_ke_hu + an_ke_hu + ming_gang_hu + an_gang_hu + jiao_hu;
@@ -702,6 +741,7 @@ var PaiDui = (function () {
         ret_info.dui_zi_array = dui_zi_array;
         ret_info.jiao_pai_array = jiao_pai_array;
         ret_info.di_hu_score = di_hu;
+        ret_info.xi_array = xi_pai_array;
         return ret_info;
     };
     return PaiDui;
@@ -762,6 +802,14 @@ var CheckPaiNode = (function () {
             return p1.type - p2.type;
     };
     CheckPaiNode.prototype.CheckWin = function () {
+        if (this.pai_list.length == 2) {
+            if (PaiDetail.Equal(this.pai_list[0].detail, this.pai_list[1].detail)) {
+                return [[this.pai_list[0].detail, this.pai_list[1].detail]];
+            }
+            else {
+                return [];
+            }
+        }
         this.win_node = [];
         this.pai_list.sort(this.Sort);
         var msg = "";
