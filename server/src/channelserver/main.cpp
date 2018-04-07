@@ -5,6 +5,7 @@
 #include "Server.h"
 #include <HttpConnection3.h>
 #include <Timer.h>
+#include <FileReader.h>
 enum
 {
 	script = 0x100,
@@ -25,15 +26,13 @@ struct option long_options[]=
 
 int main(int argc,char **argv)
 {
-//
-//#ifdef WIN32  
-//	WSAData wsaData;
-//	WSAStartup(MAKEWORD(2, 0), &wsaData);
-//#endif
-//	for (int i = 0; i < 10;i++)gHttpManager.Get("https://www.baidu.com");
-//	Timer::Loop();
-//	_CrtDumpMemoryLeaks();
-//	return 0;
+	//AsyncFileWriter writer;
+	//bool ok = writer.Create("./xxxx.txt");
+	//for (int i = 0; i < 30; i++) {
+	//	char msg[128] = { 0 };
+	//	sprintf(msg, "msg:%d\n", i);
+	//	writer.PushContent(msg);
+	//}
 	bool as_daemon = false;
 	while (1)
 	{

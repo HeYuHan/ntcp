@@ -27,23 +27,42 @@ class JClient{
         this.native.OnDisconected=()=>{self.OnDisconected()}
     }
     public Send(msg:string){
-        this.native.Send(msg);
+        var nstring=new NString();
+        nstring.Append(msg);
+        this.SendNString(nstring);
     }
     public SendNString(msg:NString){
         this.native.SendNString(msg);
+        msg.Append("\n");
+        if(this.room && this.room.recoder_stream)this.room.recoder_stream.WriteNString(msg);
     }
     private OnMessage(msg:string){
         var json=JSON.parse(msg);
-        Debug.Log(CLIENT_MSG[json[0]]+":"+JSON.stringify(json[1]));
-        this.DispatchMessage(json);
+        LogInfo(CLIENT_MSG[json[0]]+":"+JSON.stringify(json[1]));
+        try
+        {
+            this.DispatchMessage(json);
+        }
+        catch(e){
+            PrintError("parse message error:",e);
+            this.native.Disconnect();
+        }
     }
     private OnConnected(){
-        Debug.Log("OnConnected:"+this.uid);
+        LogInfo("OnConnected:"+this.uid);
         this.state=State.IN_LOGIN;
         this.RegisterAllMessage();
     }
     private OnDisconected(){
-        Debug.Log("OnDisconected:"+this.uid);
+        LogInfo("OnDisconected:"+this.uid);
+        try
+        {
+            this.LeaveRoom(null);
+        }
+        catch(e){
+            PrintError("leave room error:",e);
+        }
+        
         this.uid=0;
         this.info=null;
         this.state=State.IN_NONE;
@@ -64,41 +83,62 @@ class JClient{
         if(hander)hander.call(this,msg[1]);
         else
         {
-            Debug.Log("msg hander is null id : "+msg.id);
+            LogError("msg hander is null id : "+msg.id);
+            this.native.Disconnect();
         }
     }
     public EnterRoom(msg){
-        Debug.Log("EnterRoom:"+this.uid+" room_id:"+msg.room_uid);
+        LogInfo("EnterRoom:"+this.uid+" room_id:"+msg.room_uid);
         var room_uid=msg.room_uid;
-        var room=Room.Get(room_uid);
-        if(room){
-            this.state=State.IN_ROOM;
-            this.room=room;
-            room.ClientJoin(this);
-            
+        var open_id=msg.openid;
+        if(!open_id){
+            this.native.Disconnect();
+            return;
         }
-        else
-        {
-            var http = new Http();
-            var client=this;
-            http.OnResponse=function(state,msg){
-                Debug.Log("check room ret:"+msg);
-                var json = JSON.parse(msg);
-                if(state == 200 && !json.error){
-                    var room = Room.Create(json);
+        var client=this;
+        var chekc_id = new Http();
+        chekc_id.OnResponse=function(state,msg){
+            LogInfo("check user:"+msg);
+            var json = JSON.parse(msg);
+            if(state == 200 && !json.error){
+                client.info=json;
+                var room=Room.Get(room_uid);
+                if(room){
                     client.state=State.IN_ROOM;
                     client.room=room;
                     room.ClientJoin(client);
                 }
-                else{
-                    this.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM,{
-                        error:"room not found:"+room_uid
-                    }));
+                else
+                {
+                    var http = new Http();
+                    http.OnResponse=function(state,msg){
+                        LogInfo("check room ret:"+msg);
+                        var json = JSON.parse(msg);
+                        if(state == 200 && !json.error){
+                            var room = Room.Create(json);
+                            client.state=State.IN_ROOM;
+                            client.room=room;
+                            room.ClientJoin(client);
+                        }
+                        else{
+                            client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM,{
+                                error:"room not found:"+room_uid
+                            }));
+                            //client.native.Disconnect();
+                        }
+                    }
+                    http.Get(INFO_SERVER_URL + "checkRoom?data="+EncodeUriMsg({roomid:room_uid}));
                 }
             }
-            http.Get(INFO_SERVER_URL + "checkRoom?data="+EncodeUriMsg({roomid:room_uid}));
-            
+            else{
+                client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM,{
+                    error:"check usr failed"
+                }));
+                //client.native.Disconnect();
+            }
         }
+        chekc_id.Get(INFO_SERVER_URL + "getUserInfo?data="+EncodeUriMsg({openid:open_id}));
+
     }
     public LeaveRoom(msg){
         if(this.room)this.room.ClientLeave(this);
@@ -112,7 +152,7 @@ class JClient{
         return (this.state == State.IN_READY);
     }
     public ChuPai(msg){
-        this.room.ClientChuPai(this,msg);
+        this.room.ClientChuPai(this.player,msg);
     }
     public ResponseChuPai(msg){
         this.room.ClientResponseChuPai(this,msg);

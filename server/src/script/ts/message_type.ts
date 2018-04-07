@@ -19,7 +19,8 @@ enum SERVER_MSG{
     SM_PENG_PAI,//碰牌
     SM_GANG_PAI,//杠牌
     SM_HU_PAI,//胡牌
-    SM_GAME_BALANCE,//进入结算
+    SM_GAME_BALANCE,//进入结算,
+    SM_SYNC_ROOM_STATE,//断线重新连接
 }
 function CreateMsg(id:number,msg:any):string{
     return JSON.stringify([id,msg]);

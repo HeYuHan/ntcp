@@ -9,4 +9,5 @@ void js_register_File(JSContext *cx, JS::HandleObject global);
 void js_register_Timer(JSContext *cx, JS::HandleObject global);
 void js_register_Http(JSContext *cx, JS::HandleObject global);
 void js_register_String(JSContext *cx, JS::HandleObject global);
+void js_register_AsyncFile(JSContext *cx, JS::HandleObject global);
 #endif // !__JSB_H__

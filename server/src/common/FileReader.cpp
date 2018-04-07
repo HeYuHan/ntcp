@@ -45,3 +45,105 @@ bool ReadJson(Json::Value &root, const char* path)
 	file_in.close();
 	return ret;
 }
+AsyncFileWriter::AsyncFileWriter():
+	mutex(),
+	m_ContentFull(mutex),
+	m_HaveContent(mutex),
+	m_CreateStream(false),
+	m_CreateThread(false),
+	m_WritePosition(0)
+{
+}
+
+AsyncFileWriter::~AsyncFileWriter()
+{
+	Close();
+}
+
+bool AsyncFileWriter::Create(const std::string & path)
+{
+	m_File.clear();
+	//m_File.open(path.c_str(), ios::out| ios::app);
+	m_File.open(path.c_str(), ios::out);
+	if (m_File.good())
+	{
+		m_CreateStream = true;
+		if (!m_CreateThread) {
+			m_CreateThread = true;
+			pthread_create(&m_ThreadID, NULL, WriteThread, this);
+		}
+	}
+	else {
+		m_File.close();
+	}
+
+	return m_CreateStream;
+}
+
+int AsyncFileWriter::PushContent(const char* content)
+{
+	
+	EasyMutexLock lock(mutex);
+	int len = strlen(content);
+	len = MIN(len, ASYNC_FILE_BUFF_LEN);
+	while ((ASYNC_FILE_BUFF_LEN - m_WritePosition)<len)
+	{
+		m_ContentFull.Wait();
+	}
+	strcpy(&m_ContentQueue[m_WritePosition], content);
+	m_WritePosition += len;
+	m_ContentQueue[m_WritePosition] = 0;
+	m_HaveContent.Notify();
+	return len;
+}
+
+
+void AsyncFileWriter::Write()
+{
+	while (m_CreateThread)
+	{
+		EasyMutexLock lock(mutex);
+		while (m_WritePosition == 0)
+		{
+			m_HaveContent.Wait();
+		}
+		m_ContentFull.Notify();
+
+		if (m_WritePosition>0)
+		{
+			m_File << m_ContentQueue;
+			m_File.flush();
+		}
+		m_WritePosition = 0;
+	}
+}
+
+void AsyncFileWriter::Close()
+{
+	if (m_CreateThread)
+	{
+		pthread_detach(m_ThreadID);
+		m_CreateThread = false;
+	}
+	if (m_CreateStream)
+	{
+		if (m_WritePosition > 0)
+		{
+			m_File << m_ContentQueue;
+			m_File.flush();
+			
+		}
+		m_File.close();
+		m_File.clear();
+		m_CreateStream = false;
+		m_WritePosition = 0;
+	}
+
+}
+
+void* AsyncFileWriter::WriteThread(void * arg)
+{
+	AsyncFileWriter *t = static_cast<AsyncFileWriter*>(arg);
+	if (NULL != t)t->Write();
+	return NULL;
+}

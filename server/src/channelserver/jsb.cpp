@@ -75,7 +75,9 @@ bool js_Server_Init(JSContext *cx, uint32_t argc, jsval *vp)
 			{
 				max_client = root["max_client"].asInt();
 			}
-			ret = gServer.m_OnLineClients.Initialize(max_client);
+			int writer_count = (max_client / 3) + 1;
+			ret = gServer.m_FileWriters.Initialize(writer_count);
+			ret = ret && gServer.m_OnLineClients.Initialize(max_client);
 			ret = ret && gServer.CreateTcpServer(addr.c_str(), max_client);
 			log_debug("create server in %s max_client %d", addr.c_str(),max_client);
 		} while (0);
@@ -163,19 +165,23 @@ void js_register_Server(JSContext *cx, JS::HandleObject global)
 	jsb_register_class<Server>(cx, jsb_Server_class, proto, JS::NullPtr());
 	
 }
-bool js_Log_Debug(JSContext *cx, uint32_t argc, jsval *vp)
+bool js_Log(JSContext *cx, uint32_t argc, jsval *vp)
 {
 	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
 	bool ok = true;
 	JS::RootedObject obj(cx, args.thisv().toObjectOrNull());
-	if (argc == 1) {
+	if(argc == 2)
+	{
+		int id = args.get(0).toInt32();
+
 		std::string data;
-		GetJSString(cx, args.get(0), data);
-		log_debug("%s", data.c_str());
+		GetJSString(cx, args.get(1), data);
+		if (id == 1)log_debug("%s", data.c_str());
+		if (id == 2)log_warn("%s", data.c_str());
+		if (id == 3)log_error("%s", data.c_str());
 		args.rval().setUndefined();
 		return true;
 	}
-
 	JS_ReportError(cx, "js_Log_Debug : wrong number of arguments: %d, was expecting %d", argc, 1);
 	return false;
 }
@@ -207,7 +213,7 @@ void js_register_Log(JSContext *cx, JS::HandleObject global)
 		JS_FS_END
 	};
 	static JSFunctionSpec st_funcs[] = {
-		JS_FN("Log", js_Log_Debug, 1, JSPROP_PERMANENT | JSPROP_ENUMERATE),
+		JS_FN("Log", js_Log, 2, JSPROP_PERMANENT | JSPROP_ENUMERATE),
 		JS_FS_END
 	};
 
@@ -492,6 +498,166 @@ void js_register_File(JSContext *cx, JS::HandleObject global)
 	//JS_SetProperty(cx, proto, "__is_ref", JS::TrueHandleValue);
 	// add the proto and JSClass to the type->js info hash table
 	jsb_register_class<JSFile>(cx, jsb_File_class, proto, JS::NullPtr());
+}
+bool js_AsyncFile_Constructor(JSContext *cx, uint32_t argc, jsval *vp)
+{
+	return false;
+}
+bool js_AsyncFile_Get(JSContext *cx, uint32_t argc, jsval *vp)
+{
+	CallArgs args = CallArgsFromVp(argc, vp);
+	if (argc == 1) {
+		std::string path;
+		GetJSString(cx, args.get(0), path);
+		AsyncFileWriter* w = gServer.m_FileWriters.Allocate();
+		if (w)
+		{
+			if (w->Create(path))
+			{
+				args.rval().set(UINT_TO_JSVAL(w->uid));
+			}
+			else
+			{
+				log_error("crate file handle error:%s", path.c_str());
+				args.rval().set(UINT_TO_JSVAL(0));
+			}
+		}
+		else
+		{
+			log_error("%s", "get file writer error");
+			args.rval().setUndefined();
+		}
+		return true;
+	}
+	JS_ReportError(cx, "js_AsyncFile_Get : wrong number of arguments");
+	return false;
+}
+
+bool js_AsyncFile_Write(JSContext *cx, uint32_t argc, jsval *vp)
+{
+	CallArgs args = CallArgsFromVp(argc, vp);
+	if (argc == 2) {
+		uint id = (uint)args.get(0).toInt32();
+		AsyncFileWriter* w = gServer.m_FileWriters.Get(id);
+
+		std::string content;
+		GetJSString(cx, args.get(1), content);
+		if (w)
+		{
+			w->PushContent(content.c_str());
+			args.rval().setBoolean(true);
+		}
+		else
+		{
+			log_error("%s", "get file writer error");
+			args.rval().setBoolean(false);
+		}
+		return true;
+	}
+	JS_ReportError(cx, "js_AsyncFile_Write : wrong number of arguments");
+	return false;
+}
+bool js_AsyncFile_WriteNString(JSContext *cx, uint32_t argc, jsval *vp)
+{
+	CallArgs args = CallArgsFromVp(argc, vp);
+	if (argc == 2) {
+		uint id = (uint)args.get(0).toInt32();
+		AsyncFileWriter* w = gServer.m_FileWriters.Get(id);
+
+		js_proxy_t *jsProxy;
+		JS::RootedObject tmpObj(cx, args.get(1).toObjectOrNull());
+		jsProxy = jsb_get_js_proxy(tmpObj);
+		NativeString *content = (NativeString*)(jsProxy ? jsProxy->ptr : NULL);
+		if (w && content)
+		{
+			w->PushContent(content->Get());
+			args.rval().setBoolean(true);
+		}
+		else
+		{
+			log_error("%s", "get file writer error");
+			args.rval().setBoolean(false);
+		}
+		return true;
+	}
+	JS_ReportError(cx, "js_AsyncFile_Write : wrong number of arguments");
+	return false;
+}
+
+bool js_AsyncFile_Free(JSContext *cx, uint32_t argc, jsval *vp)
+{
+	CallArgs args = CallArgsFromVp(argc, vp);
+	if (argc == 1) {
+		uint id = (uint)args.get(0).toInt32();
+		AsyncFileWriter* w = gServer.m_FileWriters.Get(id);
+		if (w)
+		{
+			w->Close();
+			gServer.m_FileWriters.Free(id);
+			args.rval().setBoolean(true);
+		}
+		else
+		{
+			log_error("%s", "get file writer error");
+			args.rval().setBoolean(false);
+		}
+		return true;
+	}
+	JS_ReportError(cx, "js_AsyncFile_Free : wrong number of arguments");
+	return false;
+}
+class JSAsyncFile {};
+JSClass *jsb_AsyncFile_class;
+JSObject *jsb_AsyncFile_prototype;
+void js_register_AsyncFile(JSContext *cx, JS::HandleObject global)
+{
+	jsb_AsyncFile_class = (JSClass *)calloc(1, sizeof(JSClass));
+	jsb_AsyncFile_class->name = "AsyncWriter";
+	jsb_AsyncFile_class->addProperty = JS_PropertyStub;
+	jsb_AsyncFile_class->delProperty = JS_DeletePropertyStub;
+	jsb_AsyncFile_class->getProperty = JS_PropertyStub;
+	jsb_AsyncFile_class->setProperty = JS_StrictPropertyStub;
+	jsb_AsyncFile_class->enumerate = JS_EnumerateStub;
+	jsb_AsyncFile_class->resolve = JS_ResolveStub;
+	jsb_AsyncFile_class->convert = JS_ConvertStub;
+	//Îö¹¹
+	//jsb_Server_class->finalize
+	jsb_AsyncFile_class->flags = JSCLASS_HAS_RESERVED_SLOTS(2);
+
+	static JSPropertySpec properties[] = {
+		JS_PS_END
+	};
+	static JSFunctionSpec funcs[] = {
+		
+		JS_FS_END
+	};
+	static JSFunctionSpec st_funcs[] = {
+		JS_FN("Get", js_AsyncFile_Get, 1, JSPROP_PERMANENT | JSPROP_ENUMERATE),
+		JS_FN("Write", js_AsyncFile_Write, 2, JSPROP_PERMANENT | JSPROP_ENUMERATE),
+		JS_FN("WriteNString", js_AsyncFile_WriteNString, 2, JSPROP_PERMANENT | JSPROP_ENUMERATE),
+		JS_FN("Free", js_AsyncFile_Free, 1, JSPROP_PERMANENT | JSPROP_ENUMERATE),
+		JS_FS_END
+	};
+
+	//JS::RootedObject parent_proto(cx, jsb_cocos2d_Layer_prototype);
+	jsb_AsyncFile_prototype = JS_InitClass(
+		cx, global,
+		//parent_proto,
+		JS::NullPtr(),
+		jsb_AsyncFile_class,
+		js_AsyncFile_Constructor, 0, // constructor
+		properties,
+		funcs,
+		NULL, // no static properties
+		st_funcs);
+
+	JS::RootedObject proto(cx, jsb_File_prototype);
+	/*JS::RootedValue className(cx, std_string_to_jsval(cx, "Server"));
+	JS_SetProperty(cx, proto, "_className", className);*/
+	//JS_SetProperty(cx, proto, "__nativeObj", JS::TrueHandleValue);
+	//JS_SetProperty(cx, proto, "__is_ref", JS::TrueHandleValue);
+	// add the proto and JSClass to the type->js info hash table
+	jsb_register_class<JSAsyncFile>(cx, jsb_AsyncFile_class, proto, JS::NullPtr());
 }
 
 struct JSTimer {

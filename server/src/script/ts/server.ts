@@ -5,7 +5,7 @@ class JServer{
         this.native.OnAccept=this.OnAccept;
     }
     public OnAccept(uid:number){
-        Debug.Log("accept new client uid:"+uid);
+        LogInfo("accept new client uid:"+uid);
         var client=new JClient(uid);
     }
     public Init(config):boolean{

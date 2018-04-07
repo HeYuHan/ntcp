@@ -41,6 +41,7 @@ void RegisterJS()
 	engine->RegisterJSClass(js_register_File);
 	engine->RegisterJSClass(js_register_Timer);
 	engine->RegisterJSClass(js_register_Http);
+	engine->RegisterJSClass(js_register_AsyncFile);
 	
 
 	engine->Start();

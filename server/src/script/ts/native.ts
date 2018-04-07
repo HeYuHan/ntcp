@@ -35,6 +35,12 @@ declare class NString{
     public Get():string;
 }
 declare class Debug{
-    public static Log(msg:any);
+    public static Log(type:number,msg:any);
+}
+declare class AsyncWriter{
+    public static Get(path:string):number;
+    public static Free(uid:number):boolean;
+    public static Write(uid,content:string):boolean;
+    public static WriteNString(uid,content:NString):boolean;
 }
 

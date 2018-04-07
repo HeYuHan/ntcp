@@ -149,7 +149,7 @@
     <ClInclude Include="..\src\common\sha1.h" />
     <ClInclude Include="..\src\common\TcpConnection.h" />
     <ClInclude Include="..\src\common\TcpListener.h" />
-    <ClInclude Include="..\src\common\ThreadPool.h" />
+    <ClInclude Include="..\src\common\ThreadPool2.h" />
     <ClInclude Include="..\src\common\Timer.h" />
     <ClInclude Include="..\src\common\tools.h" />
     <ClInclude Include="..\src\common\UdpConnection.h" />
@@ -177,7 +177,7 @@
     <ClCompile Include="..\src\common\sha1.cpp" />
     <ClCompile Include="..\src\common\TcpConnection.cpp" />
     <ClCompile Include="..\src\common\TcpListener.cpp" />
-    <ClCompile Include="..\src\common\ThreadPool.cpp" />
+    <ClCompile Include="..\src\common\ThreadPool2.cpp" />
     <ClCompile Include="..\src\common\Timer.cpp" />
     <ClCompile Include="..\src\common\tools.cpp" />
     <ClCompile Include="..\src\common\UdpConnection.cpp" />

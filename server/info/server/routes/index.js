@@ -157,35 +157,51 @@ router.get('/private/checkRoom',function(req,res,next){
     res.send({error:ERROR_ROOM_NOT_FOUND});
   }
 });
-//request in channel only
-router.get('/private/releaseRoom',function(req,res,next){
-  var roomid = req.query.roomid;
-  var hashcode = req.query.hashcode;
-  var room = GetRoom(roomid);
-  if(room && room.hashcode == hashcode){
-    ReleaseRoom(roomid);
-    res.send({error:ERROR_NONE});
-  }
-  else{
-    res.send({error:ERROR_ROOM_NOT_FOUND});
-  }
-});
+// //request in channel only
+// router.get('/private/releaseRoom',function(req,res,next){
+//   var roomid = req.query.roomid;
+//   var hashcode = req.query.hashcode;
+//   var room = GetRoom(roomid);
+//   if(room && room.hashcode == hashcode){
+//     ReleaseRoom(roomid);
+//     res.send({error:ERROR_NONE});
+//   }
+//   else{
+//     res.send({error:ERROR_ROOM_NOT_FOUND});
+//   }
+// });
 //request in channel only
 router.get('/private/playEnd',function(req,res,next){
   console.log("playEnd:"+req.query.data);
   var data = ParseGetArg(req,res,"data");
   if(!data) return;
-  var roomid = data.roomid;
-  var hashcode = data.hashcode;
+  var roomid = data.info.roomid;
+  var hashcode = data.info.hashcode;
   var room = GetRoom(roomid);
   if(room && room.hashcode == hashcode){
     room.playcount++;
     res.send(room);
-    
+    //ReleaseRoom(roomid);
   }
   else{
     res.send({error:ERROR_ROOM_NOT_FOUND});
   }
 });
-
+//check enter room
+router.get('/private/getUserInfo',function(req,res,next){
+  var arg = ParseGetArg(req,res,"data");
+  if(!arg)return;
+  if(!arg.openid){
+    res.send({
+      error:ERROR_USER_NOT_FOUND
+    })
+    return;
+  }
+  DBHelper.GetUserInfo(arg.openid,false).then((data,error)=>{
+    if(data.length>0){
+      res.send(data[0]);
+    }
+    else res.send({error:ERROR_USER_NOT_FOUND});
+  });
+});
 module.exports = router;

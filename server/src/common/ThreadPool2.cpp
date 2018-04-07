@@ -1,4 +1,4 @@
-#include "ThreadPool.h"
+#include "ThreadPool2.h"
 Thread::Thread(ThreadPool& pool):
 	m_Pool(pool)
 {

@@ -1,6 +1,46 @@
-var ROOM_MAX_PLAYER_COUNT = 1;
+var ROOM_MAX_PLAYER_COUNT = 2;
 var DEFINE_RANDOM_TEST = true;
 var INFO_SERVER_URL = "http://127.0.0.1:9800/private/";
+var WRITE_ROOM_RECODER = true;
+var AUTO_CHU_PAI_TIME = 5;
+function LogInfo(msg) {
+    Debug.Log(1, msg);
+}
+function LogWarn(msg) {
+    Debug.Log(2, msg);
+}
+function LogError(msg) {
+    Debug.Log(3, msg);
+}
+var AsyncFileWriter = (function () {
+    function AsyncFileWriter(path) {
+        this.native = 0;
+        LogInfo("create write stream:" + path);
+        this.native = AsyncWriter.Get(path);
+    }
+    AsyncFileWriter.prototype.Write = function (content) {
+        if (this.native == 0)
+            return false;
+        return AsyncWriter.Write(this.native, content);
+    };
+    AsyncFileWriter.prototype.WriteNString = function (content) {
+        if (this.native == 0)
+            return false;
+        return AsyncWriter.WriteNString(this.native, content);
+    };
+    AsyncFileWriter.prototype.Free = function () {
+        var ret = false;
+        if (this.native > 0) {
+            ret = AsyncWriter.Free(this.native);
+            this.native = 0;
+        }
+        return ret;
+    };
+    return AsyncFileWriter;
+}());
+function PrintError(msg, e) {
+    LogError(msg + e.message + "\nname:" + e.name + "\nstack:" + e.stack);
+}
 var ScriptLoader = (function () {
     function ScriptLoader() {
         this.scripts = {};
@@ -13,7 +53,7 @@ var ScriptLoader = (function () {
             var ok = FileHelper.LoadScript(ScriptLoader.ROOT_PATH + path);
             state.loading = false;
             this.scripts[path].ok = ok;
-            Debug.Log("load script " + ok + " from :" + path);
+            LogInfo("load script " + ok + " from :" + path);
         }
     };
     ScriptLoader.GetInstance = function () {
@@ -68,7 +108,7 @@ var RandomInt = (function () {
         }
         else {
             if (this.recoders.length == 0) {
-                Debug.Log("random recoder is empty");
+                LogInfo("random recoder is empty");
                 throw "random recoder is empty";
             }
             return this.recoders.pop();
@@ -116,5 +156,38 @@ var server = new JServer();
 var ret = server.Init({
     max_client: 50
 });
-Debug.Log("init server ret:" + ret);
+LogInfo("init server ret:" + ret);
+var pai_dui = new PaiDui(true);
+pai_dui.jiang_pai[0] = Pai.ValueToNumber(PaiType.PAI_TIAO, 9);
+pai_dui.jiang_pai[1] = Pai.ValueToNumber(PaiType.PAI_TONG, 2);
+pai_dui.CaculateJiangPaiType();
+var shou = [];
+var index = 0;
+shou[index++] = Pai.ValueToNumber(PaiType.PAI_TIAO, 6);
+shou[index++] = Pai.ValueToNumber(PaiType.PAI_TIAO, 6);
+shou[index++] = Pai.ValueToNumber(PaiType.PAI_HONG, 6);
+shou[index++] = Pai.ValueToNumber(PaiType.PAI_HONG, 6);
+shou[index++] = Pai.ValueToNumber(PaiType.PAI_HONG, 6);
+var di = [];
+index = 0;
+di[index++] = Pai.ValueToNumber(PaiType.PAI_WANG, 7);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_WANG, 7);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_WANG, 7);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_TIAO, 3);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_TIAO, 3);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_TIAO, 3);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_TIAO, 7);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_TIAO, 7);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_TIAO, 7);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_TONG, 8);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_TONG, 8);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_TONG, 8);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_TONG, 8);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_BAI, 121);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_BAI, 121);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_BAI, 121);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_QIAN, 121);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_QIAN, 121);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_QIAN, 121);
+di[index++] = Pai.ValueToNumber(PaiType.PAI_XI, 121);
 server.Start();

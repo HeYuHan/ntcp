@@ -1,10 +1,52 @@
 //人数限制
-let ROOM_MAX_PLAYER_COUNT=1;
+let ROOM_MAX_PLAYER_COUNT = 2;
 //关闭随机
-let DEFINE_RANDOM_TEST=true;
+let DEFINE_RANDOM_TEST = true;
 
-let INFO_SERVER_URL="http://127.0.0.1:9800/private/";
+let INFO_SERVER_URL = "http://127.0.0.1:9800/private/";
 
+let WRITE_ROOM_RECODER = true;
+
+let AUTO_CHU_PAI_TIME = 5;
+
+function LogInfo(msg){
+    Debug.Log(1,msg);
+}
+function LogWarn(msg){
+    Debug.Log(2,msg);
+}
+function LogError(msg){
+    Debug.Log(3,msg);
+}
+
+class AsyncFileWriter{
+    private native:number=0;
+    constructor(path){
+        LogInfo("create write stream:"+path);
+        this.native=AsyncWriter.Get(path);
+    }
+    public Write(content):boolean{
+        if(this.native == 0)return false;
+        return AsyncWriter.Write(this.native,content);
+    }
+    public WriteNString(content:NString):boolean{
+        if(this.native == 0)return false;
+        return AsyncWriter.WriteNString(this.native,content);
+    }
+    public Free():boolean{
+        var ret=false;
+        if(this.native>0){
+            
+            ret = AsyncWriter.Free(this.native);
+            this.native=0;
+        }
+        
+        return ret;
+    }
+}
+function PrintError(msg,e){
+    LogError(msg+e.message+"\nname:"+e.name+"\nstack:"+e.stack);
+}
 class ScriptLoader{
     public static ROOT_PATH:string;
     private scripts={};
@@ -17,7 +59,7 @@ class ScriptLoader{
             var ok=FileHelper.LoadScript(ScriptLoader.ROOT_PATH + path);
             state.loading=false;
             this.scripts[path].ok=ok;
-            Debug.Log("load script "+ok+" from :"+path);
+            LogInfo("load script "+ok+" from :"+path);
         }
     }
     private static m_Instance=null;
@@ -80,7 +122,7 @@ class RandomInt{
         else
         {
             if(this.recoders.length == 0){
-                Debug.Log("random recoder is empty");
+                LogInfo("random recoder is empty");
                 throw "random recoder is empty";
             }
             return this.recoders.pop();
@@ -133,44 +175,85 @@ var server = new JServer();
 var ret = server.Init({
     max_client:50
 });
-Debug.Log("init server ret:"+ret);
-
-// var pai_dui=new PaiDui(true);
-// pai_dui.jiang_pai[0]=Pai.ValueToNumber(PaiType.PAI_TONG,3);
-// pai_dui.jiang_pai[1]=Pai.ValueToNumber(PaiType.PAI_TONG,8);
-// pai_dui.CaculateJiangPaiType();
-// var shou=[];
-// var index=0;
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,1);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,2);
+LogInfo("init server ret:"+ret);
+var pai_dui=new PaiDui(true);
+pai_dui.jiang_pai[0]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
+pai_dui.jiang_pai[1]=Pai.ValueToNumber(PaiType.PAI_TONG,2);
+pai_dui.CaculateJiangPaiType();
+var shou=[];
+var index=0;
 // shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,3);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,3);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,3);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,4);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,5);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,6);
 // shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,7);
 // shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,8);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,9);
+
+shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,6);
+shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,6);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,4);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,7);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,8);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
 
 // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,1);
 // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,2);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,3);
 // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,4);
 // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,5);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,5);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,6);
 // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,6);
 // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,7);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,7);
 
-// var di=[];
-// index=0;
-// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,2);
-// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,2);
-// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,2);
-// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
-// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
-// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
+shou[index++]=Pai.ValueToNumber(PaiType.PAI_HONG,6);
+shou[index++]=Pai.ValueToNumber(PaiType.PAI_HONG,6);
+shou[index++]=Pai.ValueToNumber(PaiType.PAI_HONG,6);
 
-// di[index++]=Pai.ValueToNumber(PaiType.PAI_BAI,9);
-// di[index++]=Pai.ValueToNumber(PaiType.PAI_BAI,9);
-// di[index++]=Pai.ValueToNumber(PaiType.PAI_BAI,9);
+var di=[];
+index=0;
+di[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,7);
+di[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,7);
+di[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,7);
 
+di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,3);
+di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,3);
+di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,3);
+di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,7);
+di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,7);
+di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,7);
+
+di[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,8);
+di[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,8);
+di[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,8);
+di[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,8);
+
+di[index++]=Pai.ValueToNumber(PaiType.PAI_BAI,121);
+di[index++]=Pai.ValueToNumber(PaiType.PAI_BAI,121);
+di[index++]=Pai.ValueToNumber(PaiType.PAI_BAI,121);
+
+di[index++]=Pai.ValueToNumber(PaiType.PAI_QIAN,121);
+di[index++]=Pai.ValueToNumber(PaiType.PAI_QIAN,121);
+di[index++]=Pai.ValueToNumber(PaiType.PAI_QIAN,121);
+
+di[index++]=Pai.ValueToNumber(PaiType.PAI_XI,121);
+
+// var caulater= new CheckPaiNode();
+// for(var i=0;i<shou.length;i++){
+//     caulater.AddOriginPai(pai_dui.GetPaiDetail(shou[i]));
+// }
+// var result_array = caulater.CheckWin();
+// LogInfo("result array len:"+result_array.length);
+// for(var i=0;i<result_array.length;i++){
+//     Pai.PrintDetailArray(result_array[i]);
+// }
+// if(result_array.length>0)shou=Pai.DetailToNumberArray(result_array[0]);
 // var info=pai_dui.CaculateDiHu(shou,di,[],[]);
-// info.CaculateTotleScore(null);
+// info.CaculateTotleScore(pai_dui.GetPaiDetail(Pai.ValueToNumber(PaiType.PAI_TIAO,6)));
 // info.Print();
 
 

@@ -19,12 +19,12 @@ void Logger::Init()
 {
 	if (strlen(logName) == 0)
 	{
-		strcpy(logName, "Log");
+		strcpy(logName, "NTCP");
 		
 	}
 	if (strlen(filePath) == 0)
 	{
-		strcpy(filePath, "./log/log_file.log");
+		strcpy(filePath, "./log/ntcp.log");
 	}
 	PatternLayout *layout = new PatternLayout();
 	layout->setConversionPattern("%d:%c|%p:%m%n");

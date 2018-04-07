@@ -58,29 +58,29 @@ class HuPaiInfo{
     public xi_pai_score:number=0;
     public san_long_ju_hu_score:number=0;
     public Print(){
-        Debug.Log("------------ming ke---------------");
+        LogInfo("------------ming ke---------------");
         Pai.PrintDetailArray(this.ming_ke_array);
-        Debug.Log("------------an ke---------------");
+        LogInfo("------------an ke---------------");
         Pai.PrintDetailArray(this.an_ke_array);
-        Debug.Log("------------ming gang---------------");
+        LogInfo("------------ming gang---------------");
         Pai.PrintDetailArray(this.ming_gang_array);
-        Debug.Log("------------an gang---------------");
+        LogInfo("------------an gang---------------");
         Pai.PrintDetailArray(this.an_gang_array);
-        Debug.Log("------------sun zi---------------");
+        LogInfo("------------sun zi---------------");
         Pai.PrintDetailArray(this.sun_zi_array);
-        Debug.Log("------------dui zi---------------");
+        LogInfo("------------dui zi---------------");
         Pai.PrintDetailArray(this.dui_zi_array);
-        Debug.Log("------------jiao pai---------------");
+        LogInfo("------------jiao pai---------------");
         Pai.PrintDetailArray(this.jiao_pai_array);
-        Debug.Log("------------xi---------------");
+        LogInfo("------------xi---------------");
         Pai.PrintDetailArray(this.xi_array);
-        Debug.Log("HuType:"+HuType[this.hu_type]);
-        Debug.Log("HuPaiType:"+this.hu_pai_type);
-        Debug.Log("dihu:"+this.di_hu_score);
-        Debug.Log("xi:"+this.xi_pai_score);
-        Debug.Log("wenqiang:"+this.wen_qiang_score);
-        Debug.Log("totle:"+this.totle_socre);
-        Debug.Log("-------------end--------------\n\n");
+        LogInfo("HuType:"+HuType[this.hu_type]);
+        LogInfo("HuPaiType:"+this.hu_pai_type);
+        LogInfo("dihu:"+this.di_hu_score);
+        LogInfo("xi:"+this.xi_pai_score);
+        LogInfo("wenqiang:"+this.wen_qiang_score);
+        LogInfo("totle:"+this.totle_socre);
+        LogInfo("-------------end--------------\n\n");
     }
     public static SortInfo(a:HuPaiInfo,b:HuPaiInfo){
         return a.totle_socre-b.totle_socre;
@@ -88,6 +88,7 @@ class HuPaiInfo{
     public CaculateTotleScore(hu_pai:PaiDetail){
         //喜牌分数
         var qiong_xi=false;
+        
         switch(this.xi_array.length){
             case 0:
             qiong_xi=true;
@@ -95,6 +96,7 @@ class HuPaiInfo{
             break;
             case 1:
             this.xi_pai_score=10;
+            break;
             case 2:
             this.xi_pai_score=30;
             break;
@@ -108,6 +110,7 @@ class HuPaiInfo{
             this.xi_pai_score=200;
             break;
         }
+        //LogInfo("xi pai score:"+this.xi_pai_score);
         if(!hu_pai){
             this.totle_socre=this.di_hu_score + this.san_long_ju_hu_score + this.xi_pai_score;
             this.totle_socre=Math.ceil(this.totle_socre/10)*10;
@@ -117,19 +120,12 @@ class HuPaiInfo{
         {
             var wen_qiang_count=0;
             var temp_hu_pai_type=HuPaiType.NONE;
-            if(hu_pai.pai.value == 1||hu_pai.pai.value == 9){
-                temp_hu_pai_type |= HuPaiType.BIAN_ZHANG;
-                Debug.Log("bian zhang..........");
-            }
-            else
-            {
-                //单吊
-                for(var i=0;i<this.dui_zi_array.length;i++){
-                    var d=this.dui_zi_array[i];
-                    if(d.pai.value == hu_pai.pai.value && d.pai.type == hu_pai.pai.type){
-                        temp_hu_pai_type |= HuPaiType.DANG_DIAO;
-                        Debug.Log("dang diao......");
-                    }
+            //单吊
+            for(var i=0;i<this.dui_zi_array.length;i++){
+                var d=this.dui_zi_array[i];
+                if(d.pai.value == hu_pai.pai.value && d.pai.type == hu_pai.pai.type){
+                    temp_hu_pai_type |= HuPaiType.DANG_DIAO;
+                    LogInfo("dang diao......");
                 }
             }
             for(var i=0;i<this.sun_zi_array.length;i++){
@@ -141,9 +137,13 @@ class HuPaiInfo{
                 if(temp_hu_pai_type == 0&&(d.pai.value == hu_pai.pai.value - 1) && d.pai.type == hu_pai.pai.type){
     
                     this.hu_pai_type |= HuPaiType.YA_ZI;
-                    Debug.Log("ya zi..........");
+                    LogInfo("ya zi..........");
                     
                 }
+            }
+            if(temp_hu_pai_type == 0&&(hu_pai.pai.value == 3||hu_pai.pai.value == 7)){
+                temp_hu_pai_type |= HuPaiType.BIAN_ZHANG;
+                LogInfo("bian zhang..........");
             }
             this.hu_pai_type |=temp_hu_pai_type;
             
@@ -191,7 +191,7 @@ class HuPaiInfo{
                 socre_rate = 2;
             }
             else if(this.hu_pai_type & HuPaiType.QIONG_XI){
-                Debug.Log("qiong xi......."+this.totle_socre);
+                LogInfo("qiong xi......."+this.totle_socre);
                 socre_rate = 2;
             }
             //没有顺子
@@ -207,7 +207,7 @@ class HuPaiInfo{
             }
             //塔子湖
             else {
-                Debug.Log("tai zi hu......."+this.totle_socre);
+                LogInfo("tai zi hu......."+this.totle_socre);
                 this.hu_type=HuType.TAZI_HU;
                 this.totle_socre +=20;
             }
@@ -225,7 +225,7 @@ class Pai{
     public type:PaiType=PaiType.PAI_NONE;
     public num:number=0;
     public Print(){
-        Debug.Log(this.ToString());
+        LogInfo(this.ToString());
     }
     public ToString():string{
         return "{"+PaiType[this.type]+" "+this.value+"}";
@@ -267,21 +267,22 @@ class Pai{
         for(var i=0;i<nums.length;i++){
             msg += Pai.GetPaiByNumber(nums[i]).ToString();
         }
-        Debug.Log(msg);
+        LogInfo(msg);
     }
     public static PrintDetailArray(details:Array<PaiDetail>){
         var msg="";
         for(var i=0;i<details.length;i++){
             msg += details[i].pai.ToString();
+            //LogInfo(details[i].pai.ToString());
         }
-        Debug.Log(msg);
+        LogInfo(msg);
     }
     public static PrintArray(pais:Array<Pai>){
         var msg="";
         for(var i=0;i<pais.length;i++){
             msg += pais[i].ToString();
         }
-        Debug.Log(msg);
+        LogInfo(msg);
     }
     public static Equal(n1:number,n2:number){
         if(n1 == n2)return true;
@@ -342,7 +343,7 @@ class PaiDetail{
     public pai:Pai=null;
     public is_jiang:boolean=false;
     public is_laojiang:boolean=false;
-    public equal_jiang_value:boolean =false;
+    public equal_jiang_value:number =0;
     public static Equal(p1:PaiDetail,p2:PaiDetail)
     {
         return Pai.Equal2(p1.pai,p2.pai);
@@ -387,7 +388,8 @@ class PaiDui{
             ret.is_laojiang=Pai.IsLaoJiang(ret.pai);
             var j1=Pai.GetPaiByNumber(this.jiang_pai[0]);
             var j2=Pai.GetPaiByNumber(this.jiang_pai[1]);
-            ret.equal_jiang_value=(j1.value==ret.pai.value || j2.value == ret.pai.value);
+            if(j1.value==ret.pai.value)ret.equal_jiang_value+=1;
+            if(j2.value==ret.pai.value)ret.equal_jiang_value+=1;
             this.pai_detail_array[num]=ret;
         }
         return ret;
@@ -490,9 +492,9 @@ class PaiDui{
                 }
             }
         }
-        else if(pai_detail.equal_jiang_value)
+        else if(pai_detail.equal_jiang_value>0)
         {
-            rate=2;
+            rate=2*pai_detail.equal_jiang_value;
         }
         hu = hu *rate;
         if(pai_detail.is_jiang){
@@ -549,10 +551,12 @@ class PaiDui{
         //判断三花聚会
         var san_hua=0;
         var have_san_hua=false;
-        //手牌
-        for(var i=0;i<shou_pai.length;i++){
+        //手牌(计算暗刻,重新排序)
+        var shou_pai2=shou_pai.slice(0);
+        shou_pai2.sort(Pai.SortNumber);
+        for(var i=0;i<shou_pai2.length;i++){
             
-            var detail=this.GetPaiDetail(shou_pai[i]);
+            var detail=this.GetPaiDetail(shou_pai2[i]);
             if(detail.pai.type == PaiType.PAI_XI){
                 xi_pai_array.push(detail);
                 continue;
@@ -609,7 +613,7 @@ class PaiDui{
             }
             
         }
-        
+        //计算顺子,和对子
         temp_array=[];
         for(var i=0;i<shou_pai.length;i++)
         {
@@ -709,7 +713,7 @@ class PaiDui{
                 if(i<di_pai.length-1)
                 {
                     var detail2 = this.GetPaiDetail(di_pai[i+1]);
-                    if(temp_array[0].pai.value == detail2.pai.value){
+                    if( PaiDetail.Equal(temp_array[0],detail2)){
                         var is_an_gang=false;
                         for(var m=0;m<an_gang.length;m++)
                         {
@@ -751,6 +755,7 @@ class PaiDui{
         var jiao_hu=0;
 
         have_san_hua = ((san_hua&(1<<1))>0)&&((san_hua&(1<<2))>0)&&((san_hua&(1<<3))>0);
+        LogInfo("have san hua:"+have_san_hua);
         //将手牌上含有明刻的放到明杠
         for(var i=0;i<sun_zi_array.length;i++){
             var detail = sun_zi_array[i];
@@ -800,7 +805,7 @@ class PaiDui{
             jiao_hu += hu;
             if(detail.is_laojiang && detail.pai.type !=PaiType.PAI_TIAO && have_san_hua)jiao_hu+=hu;
         }
-        Debug.Log("ming ke:"+ming_ke_hu+" an ke:"+an_ke_hu+" ming gang:"+ming_gang_hu+" an gang:"+an_gang_hu+" jiao hu:"+jiao_hu);
+        LogInfo("ming ke:"+ming_ke_hu+" an ke:"+an_ke_hu+" ming gang:"+ming_gang_hu+" an gang:"+an_gang_hu+" jiao hu:"+jiao_hu);
         var di_hu = ming_ke_hu+an_ke_hu+ming_gang_hu+an_gang_hu+jiao_hu;
         var ret_info = new HuPaiInfo();
         ret_info.ming_ke_array=ming_ke_array;
@@ -1007,6 +1012,7 @@ class CheckPaiNode{
             }
         }
         this.GetResult(true);
+        if(!this.last_node)return;
         this.last_node.check = this.last_node.check << 1;
         this.Check(this.last_node);
     }
@@ -1133,7 +1139,7 @@ class CheckPaiNode{
 
                             }
                     }
-                    //Debug.Log(text);
+                    //LogInfo(text);
                     win_info.push(temp);
                 }
                 

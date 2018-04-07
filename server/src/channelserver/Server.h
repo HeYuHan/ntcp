@@ -5,6 +5,7 @@
 #include <BaseServer.h>
 #include <objectpool.h>
 #include "Client.h"
+#include <FileReader.h>
 class Server:public BaseServer,public TcpListener
 {
 public:
@@ -23,6 +24,7 @@ public:
 	JSObject* m_JSObject;
 public:
 	ObjectPool<Client> m_OnLineClients;
+	ObjectPool<AsyncFileWriter> m_FileWriters;
 };
 extern Server gServer;
 

@@ -4,7 +4,7 @@ var JServer = (function () {
         this.native.OnAccept = this.OnAccept;
     }
     JServer.prototype.OnAccept = function (uid) {
-        Debug.Log("accept new client uid:" + uid);
+        LogInfo("accept new client uid:" + uid);
         var client = new JClient(uid);
     };
     JServer.prototype.Init = function (config) {

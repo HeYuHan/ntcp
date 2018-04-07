@@ -22,6 +22,7 @@ var SERVER_MSG;
     SERVER_MSG[SERVER_MSG["SM_GANG_PAI"] = 8] = "SM_GANG_PAI";
     SERVER_MSG[SERVER_MSG["SM_HU_PAI"] = 9] = "SM_HU_PAI";
     SERVER_MSG[SERVER_MSG["SM_GAME_BALANCE"] = 10] = "SM_GAME_BALANCE";
+    SERVER_MSG[SERVER_MSG["SM_SYNC_ROOM_STATE"] = 11] = "SM_SYNC_ROOM_STATE";
 })(SERVER_MSG || (SERVER_MSG = {}));
 function CreateMsg(id, msg) {
     return JSON.stringify([id, msg]);
