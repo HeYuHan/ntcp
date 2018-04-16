@@ -5,12 +5,65 @@ var crypto = require('crypto');
 var RoomIDCreater = new Common.RandomInt(100000,999999);
 var router = express.Router();
 
-
-
-
 function MD5(str){
   return crypto.createHash("md5").update(str).digest('hex');
 }
+let ROOM_PAY_HOST=1;
+let ROOM_PAY_WIN=2;
+let ROOM_PAY_AA=3;
+function RoomCard(){
+  //谁开的
+  this.host="";
+  //可使用次数
+  this.maxusecount=0;
+  //倍率
+  this.rate=1;
+  //带喜牌
+  this.includexi=true;
+  //支付方式
+  this.paytype=1;
+  this.cardid=0;
+
+  //已使用次数
+  this.usedcount=0;
+
+  this.timestamp=0;
+
+}
+
+let ROOM_PLAY_COUNT6=[6,3];
+let ROOM_PLAY_COUNT12=[12,6];
+
+async function CreateRoomCard(openid,usecount,includexi,paytype){
+  if(!paytype)paytype=ROOM_PAY_HOST;
+  var users = await DBHelper.GetUserInfo(openid,false);
+  if(users.length == 0)return {error:ERROR_USER_NOT_FOUND};
+  var user = users[0];
+  if(usecount == ROOM_PLAY_COUNT6[0]){
+    if(user.diamond<ROOM_PLAY_COUNT6[1])return{error:ERROR_DIAMOND_TOO_LESS};
+  }
+  else if(usecount == ROOM_PLAY_COUNT12[0]){
+    if(user.diamond<ROOM_PLAY_COUNT12[1])return{error:ERROR_DIAMOND_TOO_LESS};
+  }
+  else {
+    return{error:ERROR_ROOM_PLAY_COUNT_ERROR};
+  }
+  var room_card = new RoomCard();
+  room_card.host=openid;
+  room_card.timestamp=Date.now();
+  room_card.cardid=MD5(openid+room_card.timestamp.toString());
+  room_card.maxusecount=usecount;
+  room_card.usedcount=0;
+  room_card.includexi=includexi?false:true;
+  room_card.paytype=paytype;
+  var  ret = await DBHelper.UpdateOrInsertRoomCard(room_card);
+  console.log(ret);
+  return ret;
+}
+DBHelper.addDBConnectedCallback(this,()=>{
+  CreateRoomCard("18516606748",6,true,1);
+});
+
 
 function Room(){
   this.roomid=0;
@@ -71,6 +124,8 @@ var ERROR_ROOM_IS_FULL = 10002;
 var ERROR_ROOM_NOT_FOUND = 10003;
 var ERROR_PARSE_ARG = 10004;
 var ERROR_UPDATE_ROOM_INFO = 10005;
+var ERROR_DIAMOND_TOO_LESS = 10006;
+var ERROR_ROOM_PLAY_COUNT_ERROR = 10007;
 function ParseGetArg(req,res,query){
   try {
     var json=JSON.parse(decodeURIComponent(req.query[query]));

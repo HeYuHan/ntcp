@@ -27,11 +27,6 @@ var server = http.createServer(app);
 //connect DB
 DBHelper.Connect(DB_URL,"ntcp").then((DBHelper)=>{
   console.log("connected db :" + DB_URL);
-  DBHelper.InsertRoom({
-    hashcode:"sadfasdfasdf",
-    openid:"12345",
-    info:"hlx"
-  });
   /**
  * Listen on provided port, on all network interfaces.
  */

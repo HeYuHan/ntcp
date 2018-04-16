@@ -53,7 +53,6 @@ var ScriptLoader = (function () {
             var ok = FileHelper.LoadScript(ScriptLoader.ROOT_PATH + path);
             state.loading = false;
             this.scripts[path].ok = ok;
-            LogInfo("load script " + ok + " from :" + path);
         }
     };
     ScriptLoader.GetInstance = function () {
@@ -157,37 +156,4 @@ var ret = server.Init({
     max_client: 50
 });
 LogInfo("init server ret:" + ret);
-var pai_dui = new PaiDui(true);
-pai_dui.jiang_pai[0] = Pai.ValueToNumber(PaiType.PAI_TIAO, 9);
-pai_dui.jiang_pai[1] = Pai.ValueToNumber(PaiType.PAI_TONG, 2);
-pai_dui.CaculateJiangPaiType();
-var shou = [];
-var index = 0;
-shou[index++] = Pai.ValueToNumber(PaiType.PAI_TIAO, 6);
-shou[index++] = Pai.ValueToNumber(PaiType.PAI_TIAO, 6);
-shou[index++] = Pai.ValueToNumber(PaiType.PAI_HONG, 6);
-shou[index++] = Pai.ValueToNumber(PaiType.PAI_HONG, 6);
-shou[index++] = Pai.ValueToNumber(PaiType.PAI_HONG, 6);
-var di = [];
-index = 0;
-di[index++] = Pai.ValueToNumber(PaiType.PAI_WANG, 7);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_WANG, 7);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_WANG, 7);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_TIAO, 3);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_TIAO, 3);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_TIAO, 3);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_TIAO, 7);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_TIAO, 7);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_TIAO, 7);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_TONG, 8);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_TONG, 8);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_TONG, 8);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_TONG, 8);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_BAI, 121);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_BAI, 121);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_BAI, 121);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_QIAN, 121);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_QIAN, 121);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_QIAN, 121);
-di[index++] = Pai.ValueToNumber(PaiType.PAI_XI, 121);
 server.Start();

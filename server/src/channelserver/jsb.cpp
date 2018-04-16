@@ -439,6 +439,7 @@ bool js_File_LoadScript(JSContext *cx, uint32_t argc, jsval *vp)
 		JS::RootedValue jsret(cx);
 		jsret = BOOLEAN_TO_JSVAL(ok);
 		args.rval().set(jsret);
+		log_debug("load script %s ret:%d", path.c_str(), ok);
 		return true;
 	}
 	JS_ReportError(cx, "js_File_LoadScript : wrong number of arguments");

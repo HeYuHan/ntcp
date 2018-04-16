@@ -126,12 +126,12 @@ var HuPaiInfo = (function () {
                 if (d.pai.value == 1 && d.pai.type == PaiType.PAI_TONG) {
                     wen_qiang_count++;
                 }
-                if (temp_hu_pai_type == 0 && (d.pai.value == hu_pai.pai.value - 1) && d.pai.type == hu_pai.pai.type) {
-                    this.hu_pai_type |= HuPaiType.YA_ZI;
+                if (temp_hu_pai_type == HuPaiType.NONE && (d.pai.value == hu_pai.pai.value - 1) && d.pai.type == hu_pai.pai.type) {
+                    temp_hu_pai_type |= HuPaiType.YA_ZI;
                     LogInfo("ya zi..........");
                 }
             }
-            if (temp_hu_pai_type == 0 && (hu_pai.pai.value == 3 || hu_pai.pai.value == 7)) {
+            if (temp_hu_pai_type == HuPaiType.NONE && (hu_pai.pai.value == 3 || hu_pai.pai.value == 7)) {
                 temp_hu_pai_type |= HuPaiType.BIAN_ZHANG;
                 LogInfo("bian zhang..........");
             }
@@ -177,7 +177,7 @@ var HuPaiInfo = (function () {
                 LogInfo("qiong xi......." + this.totle_socre);
                 socre_rate = 2;
             }
-            if (this.sun_zi_array.length == 0) {
+            if (this.sun_zi_array.length == 0 || (wen_qiang_count == this.sun_zi_array.length)) {
                 this.hu_type = HuType.PIAO_HU;
                 this.totle_socre += 50;
                 socre_rate *= 2;

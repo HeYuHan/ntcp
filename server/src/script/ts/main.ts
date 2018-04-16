@@ -59,7 +59,6 @@ class ScriptLoader{
             var ok=FileHelper.LoadScript(ScriptLoader.ROOT_PATH + path);
             state.loading=false;
             this.scripts[path].ok=ok;
-            LogInfo("load script "+ok+" from :"+path);
         }
     }
     private static m_Instance=null;
@@ -176,85 +175,85 @@ var ret = server.Init({
     max_client:50
 });
 LogInfo("init server ret:"+ret);
-var pai_dui=new PaiDui(true);
-pai_dui.jiang_pai[0]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
-pai_dui.jiang_pai[1]=Pai.ValueToNumber(PaiType.PAI_TONG,2);
-pai_dui.CaculateJiangPaiType();
-var shou=[];
-var index=0;
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,3);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,3);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,3);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,4);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,5);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,6);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,7);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,8);
+// var pai_dui=new PaiDui(true);
+// pai_dui.jiang_pai[0]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
+// pai_dui.jiang_pai[1]=Pai.ValueToNumber(PaiType.PAI_TONG,2);
+// pai_dui.CaculateJiangPaiType();
+// var shou=[];
+// var index=0;
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,3);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,3);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,3);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,4);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,5);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,6);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,7);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,8);
 
-shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,6);
-shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,6);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,4);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,7);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,8);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,6);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,6);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,4);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,7);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,8);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
 
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,1);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,2);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,3);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,4);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,5);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,5);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,6);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,6);
-// shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,7);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,1);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,2);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,3);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,4);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,5);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,5);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,6);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,6);
+// // shou[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,7);
 
-shou[index++]=Pai.ValueToNumber(PaiType.PAI_HONG,6);
-shou[index++]=Pai.ValueToNumber(PaiType.PAI_HONG,6);
-shou[index++]=Pai.ValueToNumber(PaiType.PAI_HONG,6);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_HONG,6);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_HONG,6);
+// shou[index++]=Pai.ValueToNumber(PaiType.PAI_HONG,6);
 
-var di=[];
-index=0;
-di[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,7);
-di[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,7);
-di[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,7);
+// var di=[];
+// index=0;
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,7);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,7);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_WANG,7);
 
-di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,3);
-di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,3);
-di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,3);
-di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,7);
-di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,7);
-di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,7);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,3);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,3);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,3);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,7);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,7);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_TIAO,7);
 
-di[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,8);
-di[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,8);
-di[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,8);
-di[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,8);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,8);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,8);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,8);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_TONG,8);
 
-di[index++]=Pai.ValueToNumber(PaiType.PAI_BAI,121);
-di[index++]=Pai.ValueToNumber(PaiType.PAI_BAI,121);
-di[index++]=Pai.ValueToNumber(PaiType.PAI_BAI,121);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_BAI,121);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_BAI,121);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_BAI,121);
 
-di[index++]=Pai.ValueToNumber(PaiType.PAI_QIAN,121);
-di[index++]=Pai.ValueToNumber(PaiType.PAI_QIAN,121);
-di[index++]=Pai.ValueToNumber(PaiType.PAI_QIAN,121);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_QIAN,121);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_QIAN,121);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_QIAN,121);
 
-di[index++]=Pai.ValueToNumber(PaiType.PAI_XI,121);
+// di[index++]=Pai.ValueToNumber(PaiType.PAI_XI,121);
 
-// var caulater= new CheckPaiNode();
-// for(var i=0;i<shou.length;i++){
-//     caulater.AddOriginPai(pai_dui.GetPaiDetail(shou[i]));
-// }
-// var result_array = caulater.CheckWin();
-// LogInfo("result array len:"+result_array.length);
-// for(var i=0;i<result_array.length;i++){
-//     Pai.PrintDetailArray(result_array[i]);
-// }
-// if(result_array.length>0)shou=Pai.DetailToNumberArray(result_array[0]);
-// var info=pai_dui.CaculateDiHu(shou,di,[],[]);
-// info.CaculateTotleScore(pai_dui.GetPaiDetail(Pai.ValueToNumber(PaiType.PAI_TIAO,6)));
-// info.Print();
+// // var caulater= new CheckPaiNode();
+// // for(var i=0;i<shou.length;i++){
+// //     caulater.AddOriginPai(pai_dui.GetPaiDetail(shou[i]));
+// // }
+// // var result_array = caulater.CheckWin();
+// // LogInfo("result array len:"+result_array.length);
+// // for(var i=0;i<result_array.length;i++){
+// //     Pai.PrintDetailArray(result_array[i]);
+// // }
+// // if(result_array.length>0)shou=Pai.DetailToNumberArray(result_array[0]);
+// // var info=pai_dui.CaculateDiHu(shou,di,[],[]);
+// // info.CaculateTotleScore(pai_dui.GetPaiDetail(Pai.ValueToNumber(PaiType.PAI_TIAO,6)));
+// // info.Print();
 
 
 
@@ -265,24 +264,24 @@ di[index++]=Pai.ValueToNumber(PaiType.PAI_XI,121);
 
 server.Start();
 
-// function start(){
-//     this.pai_list=[];
-//     this.pai_list[0] = new PaiNode(1,1);
-//     this.pai_list[1] = new PaiNode(1,1);
-//     this.pai_list[2] = new PaiNode(1,1);
-//     this.pai_list[3] = new PaiNode(1,1);
-//     this.pai_list[4] = new PaiNode(1,2);
-//     this.pai_list[5] = new PaiNode(1,3);
-//     this.pai_list[6] = new PaiNode(1,3);
-//     this.pai_list[7] = new PaiNode(1,3);
-//     this.pai_list[8] = new PaiNode(1,3);
-//     this.pai_list[9] = new PaiNode(1,4);
-//     this.pai_list[10] = new PaiNode(1,4);
-//     this.pai_list[11] = new PaiNode(1,4);
-//     this.pai_list[12] = new PaiNode(2,5);
-//     this.pai_list[13] = new PaiNode(2,5);
-//     var check=new CheckPaiNode();
-//     check.SetPais(this.pai_list);
-//     check.CheckWin();
-// }
-// start();
+// // function start(){
+// //     this.pai_list=[];
+// //     this.pai_list[0] = new PaiNode(1,1);
+// //     this.pai_list[1] = new PaiNode(1,1);
+// //     this.pai_list[2] = new PaiNode(1,1);
+// //     this.pai_list[3] = new PaiNode(1,1);
+// //     this.pai_list[4] = new PaiNode(1,2);
+// //     this.pai_list[5] = new PaiNode(1,3);
+// //     this.pai_list[6] = new PaiNode(1,3);
+// //     this.pai_list[7] = new PaiNode(1,3);
+// //     this.pai_list[8] = new PaiNode(1,3);
+// //     this.pai_list[9] = new PaiNode(1,4);
+// //     this.pai_list[10] = new PaiNode(1,4);
+// //     this.pai_list[11] = new PaiNode(1,4);
+// //     this.pai_list[12] = new PaiNode(2,5);
+// //     this.pai_list[13] = new PaiNode(2,5);
+// //     var check=new CheckPaiNode();
+// //     check.SetPais(this.pai_list);
+// //     check.CheckWin();
+// // }
+// // start();

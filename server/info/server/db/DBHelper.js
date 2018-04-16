@@ -1,13 +1,31 @@
 
 var MongoClient = require('mongodb');
+
+
 var DBHelper=(function(){
     function DBHelper(){
     }
     DBHelper.Instance = new DBHelper();
+
+    var db_con_call_back=[];
+    DBHelper.prototype.addDBConnectedCallback=function(sender,call){
+        db_con_call_back.push({
+            sender:sender,
+            call:call
+        });
+    }
+    function OnDBConnected(){
+        for(var i=0;i<db_con_call_back.length;i++){
+            var c = db_con_call_back[i];
+            if(c.sender && c.call)c.call.call(c.sender);
+        }
+        db_con_call_back=[];
+    }
     DBHelper.Connect= async function (url,data_base){
         var db = await MongoClient.connect(url);
         DBHelper.Instance.db=db;
         DBHelper.Instance.db_base=db.db(data_base);
+        OnDBConnected();
         return DBHelper.Instance;
     }
     DBHelper.prototype.GetUserInfo= async function(openid,auto_create){
@@ -40,6 +58,11 @@ var DBHelper=(function(){
         let collection = await this.db_base.collection('user');
         return await collection.update({openid:openid},{$set:value},{multi:false}).result;
     }
+    DBHelper.prototype.UpdateOrInsertRoomCard = async function(card){
+        let collection = await this.db_base.collection("room_card");
+        return await collection.update({cardid:card.cardid},{$set:card},{multi:false,upsert:true});
+    }
+
     DBHelper.prototype.GetUserRoom= async function(openid){
         let collection = await this.db_base.collection('room');
         let ret = await collection.find({openid:openid});

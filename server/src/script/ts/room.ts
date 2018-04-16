@@ -793,6 +793,7 @@ class Room{
                 var an_gan=client.player.AnGang(this.last_mo_pai);
                 if(an_gan || client.player.Gang(this.last_mo_pai))
                 {
+                    this.auto_chu_pai_timer=0;
                     this.next_mo_palyer=client.player.index;
                     var player_msg={
                         uid:client.uid,
@@ -822,6 +823,7 @@ class Room{
         {
             if(client.player.Peng(this.last_chu_pai))
             {
+                this.auto_chu_pai_timer=0;
                 this.next_mo_palyer=client.player.index;
                 this.AutoUpdateNextPlayer();
                 var player_msg={
@@ -845,7 +847,7 @@ class Room{
         {
             if(client.player.Gang(this.last_chu_pai))
             {
-                
+                this.auto_chu_pai_timer=0;
                 this.next_mo_palyer=client.player.index;
                 var player_msg={
                     uid:client.uid,
@@ -912,6 +914,7 @@ class Room{
         
         if((this.players_result_msg_count == this.wait_result_players.length)||time_out)
         {
+            this.auto_chu_pai_timer=0;
             if(this.last_chu_pai_player)this.last_chu_pai_player.AddQiPais(this.last_chu_pai);
             this.wait_result=false;
             this.MoPai();

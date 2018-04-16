@@ -123,13 +123,13 @@ JSObject* jsb_ref_create_jsobject(JSContext *cx, void *ref, js_type_class_t *typ
 {
 	JS::RootedObject proto(cx, typeClass->proto.ref());
 	JS::RootedObject parent(cx, typeClass->parentProto.ref());
-	JS::RootedObject jsObj(cx, JS_NewObject(cx, typeClass->jsclass, proto, parent));
-	JS::Heap<JSObject*> h(jsObj.get());
+	JSObject *obj = JS_NewObject(cx, typeClass->jsclass, proto, parent);
+	JS::RootedObject jsObj(cx, obj);
+	
 	if (create_proxy)
 	{
 		js_proxy_t* newproxy = jsb_new_proxy(ref, jsObj);
 	}
-	JS::AddNamedObjectRoot(cx, &h, debug);
 	return jsObj;
 }
 js_proxy_t* jsb_new_proxy(void* nativeObj, JS::HandleObject jsHandle)
@@ -244,7 +244,7 @@ ScriptingCore * ScriptingCore::GetInstance()
 	return m_SharedInstance;
 }
 void report_error(JSContext *cx, const char *message, JSErrorReport *report) {
-	log_debug("%s:%u:%s\n",
+	log_error("%s:%u:%s\n",
 		report->filename ? report->filename : "<no filename=\"filename\">",
 		(unsigned int)report->lineno,
 		message);
@@ -293,10 +293,12 @@ JSObject* NewGlobalObject(JSContext* cx, bool debug)
 bool ScriptingCore::Start()
 {
 	if (!JS_Init())return false;
-	_rt = JS_NewRuntime(32L * 1024L * 1024L);
+	const int RUN_TIME_BUFF_LEN = 32L * 1024L * 1024L;
+	const int CONTEXT_STACK_SIZE = 32 * 1024;
+	_rt = JS_NewRuntime(RUN_TIME_BUFF_LEN);
 	JS_SetGCParameter(_rt, JSGCParamKey::JSGC_MAX_BYTES, 0xffffffff);
 	JS_SetGCParameter(_rt, JSGCParamKey::JSGC_MODE, JSGC_MODE_COMPARTMENT);
-	_cx = JS_NewContext(_rt, 32 * 1024);
+	_cx = JS_NewContext(_rt, CONTEXT_STACK_SIZE);
 	JS_SetErrorReporter(_cx, report_error);
 	JS::RuntimeOptionsRef(_rt).setIon(true);
 	JS::RuntimeOptionsRef(_rt).setBaseline(true);
@@ -331,8 +333,9 @@ bool ScriptingCore::RunScript(const char * path)
 	if (ok)
 	{
 		JS::RootedValue rval(_cx);
-		//JSAutoCompartment ac3(_cx, global2);
-		return JS_ExecuteScript(_cx, global, *script, &rval);
+		JS::RootedObject global2(_cx, _global->get());
+		JSAutoCompartment ac2(_cx, global2);
+		return JS_ExecuteScript(_cx, global2, *script, &rval);
 	}
 	return false;
 	

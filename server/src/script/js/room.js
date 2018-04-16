@@ -684,6 +684,7 @@ var Room = (function () {
             else if (msg.type == PaiMessageResponse.RESULT_GANG) {
                 var an_gan = client.player.AnGang(this.last_mo_pai);
                 if (an_gan || client.player.Gang(this.last_mo_pai)) {
+                    this.auto_chu_pai_timer = 0;
                     this.next_mo_palyer = client.player.index;
                     var player_msg = {
                         uid: client.uid,
@@ -708,6 +709,7 @@ var Room = (function () {
             return;
         if (msg.type == PaiMessageResponse.RESULT_PENG) {
             if (client.player.Peng(this.last_chu_pai)) {
+                this.auto_chu_pai_timer = 0;
                 this.next_mo_palyer = client.player.index;
                 this.AutoUpdateNextPlayer();
                 var player_msg = {
@@ -729,6 +731,7 @@ var Room = (function () {
         }
         else if (msg.type == PaiMessageResponse.RESULT_GANG) {
             if (client.player.Gang(this.last_chu_pai)) {
+                this.auto_chu_pai_timer = 0;
                 this.next_mo_palyer = client.player.index;
                 var player_msg = {
                     uid: client.uid,
@@ -784,6 +787,7 @@ var Room = (function () {
             }
         }
         if ((this.players_result_msg_count == this.wait_result_players.length) || time_out) {
+            this.auto_chu_pai_timer = 0;
             if (this.last_chu_pai_player)
                 this.last_chu_pai_player.AddQiPais(this.last_chu_pai);
             this.wait_result = false;

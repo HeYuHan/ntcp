@@ -89,15 +89,14 @@ bool Server::Init()
 
 int Server::Run()
 {
-	
-	Init();
-	
 	return Init() ? 0 : -1;
 }
 
 int Server::Loop()
 {
-	 return BaseServer::Run();
+	int ret = BaseServer::Run();
+	ScriptingCore::GetInstance()->Stop();
+	 return ret;
 }
 
 Client * Server::GetClient(uint uid)

@@ -3,7 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include<json/reader.h>
-
+#include <string.h>
 using namespace std;
 bool ReadText(std::string &ret, const std::string path)
 {
