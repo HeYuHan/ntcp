@@ -1,2 +1,0 @@
-2018-03-12T19:59:47.095-0700 I CONTROL  [main] Trying to install Windows service 'MongoDB'
-2018-03-12T19:59:47.095-0700 I CONTROL  [main] Error connecting to the Service Control Manager: 拒绝访问。 (5)
