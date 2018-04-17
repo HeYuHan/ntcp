@@ -6,6 +6,14 @@
 #include "Timer.h"
 #include "log.h"
 HttpManager gHttpManager;
+struct RequestPack 
+{
+
+};
+void http_request(struct evhttp_request *req, void *arg)
+{
+
+}
 void http_request_done(struct evhttp_request *req, void *arg)
 {
 	/*fprintf(stderr, "< HTTP/1.1 %d\n", evhttp_request_get_response_code(req));
@@ -43,6 +51,20 @@ void http_request_done(struct evhttp_request *req, void *arg)
 	}
 	else
 	{
+#ifdef WIN32
+		//int state = evhttp_request_get_response_code(req);
+		//if (state == 200)
+		//{
+		//	size_t len = evbuffer_get_length(req->input_buffer);
+		//	unsigned char * str = evbuffer_pullup(req->input_buffer, len);
+		//	log_info("response => %s", str);
+		//}
+
+#endif // WIN32
+
+
+
+
 		connection = static_cast<evhttp_connection*>(arg);
 		if (NULL != connection)
 		{

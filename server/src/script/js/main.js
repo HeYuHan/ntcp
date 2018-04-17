@@ -1,8 +1,8 @@
-var ROOM_MAX_PLAYER_COUNT = 2;
+var ROOM_MAX_PLAYER_COUNT = 3;
 var DEFINE_RANDOM_TEST = true;
 var INFO_SERVER_URL = "http://127.0.0.1:9800/private/";
-var WRITE_ROOM_RECODER = true;
-var AUTO_CHU_PAI_TIME = 5;
+var WRITE_ROOM_RECODER = false;
+var AUTO_CHU_PAI_TIME = 18;
 function LogInfo(msg) {
     Debug.Log(1, msg);
 }
@@ -156,4 +156,9 @@ var ret = server.Init({
     max_client: 50
 });
 LogInfo("init server ret:" + ret);
+var http = new Http();
+http.OnResponse = function (state, content) {
+    LogInfo("state:" + state + " content:" + content);
+};
+http.Post("http://127.0.0.1:8080/public/getUserInfo", JSON.stringify({ openid: "1234455" }));
 server.Start();

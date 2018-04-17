@@ -173,9 +173,6 @@
     <ClCompile Include="..\src\common\HttpConnection4.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\WebSocket.cpp">
-      <Filter>头文件</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\common\base64.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -192,6 +189,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\src\common\ThreadPool2.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\WebSocket.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

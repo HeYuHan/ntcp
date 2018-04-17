@@ -78,6 +78,7 @@ void NetworkStream::OnRevcMessage()
 				}
 				else if (ret == WS_PARSE_RESULT_WAIT_NEXT_DATA)
 				{
+					log_info("WS_PARSE_RESULT_WAIT_NEXT_DATA=>next size : %d", size);
 					web_frame = NULL;
 					return;
 				}
@@ -98,9 +99,11 @@ void NetworkStream::OnRevcMessage()
 					read_offset = web_frame + size;
 					read_end = web_frame + outSize;
 					OnMessage();
-					web_frame = NULL;
 					read_position = read_end;
 					size = read_offset - read_position;
+					web_frame = read_position;
+					if (size > 0)log_info("WS_PARSE_RESULT_OK=>next size : %d", size);
+					else web_frame = NULL;
 				}
 			}
 		}

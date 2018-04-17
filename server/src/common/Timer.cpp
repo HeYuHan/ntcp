@@ -86,6 +86,10 @@ event_base * Timer::GetEventBase()
 {
 	if (NULL == gEventBase)
 	{
+#ifdef WIN32  
+		WSAData wsaData;
+		WSAStartup(MAKEWORD(2, 2), &wsaData);
+#endif
 		gEventBase= event_base_new();
 	}
 	return gEventBase;

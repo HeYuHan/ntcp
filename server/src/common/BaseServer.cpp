@@ -13,10 +13,7 @@ BaseServer::~BaseServer()
 
 bool BaseServer::Init()
 {
-#ifdef WIN32  
-	WSAData wsaData;
-	WSAStartup(MAKEWORD(2, 2), &wsaData);
-#endif
+
 	return true;
 }
 

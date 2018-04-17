@@ -1,13 +1,13 @@
 //人数限制
-let ROOM_MAX_PLAYER_COUNT = 2;
+let ROOM_MAX_PLAYER_COUNT = 3;
 //关闭随机
 let DEFINE_RANDOM_TEST = true;
 
 let INFO_SERVER_URL = "http://127.0.0.1:9800/private/";
 
-let WRITE_ROOM_RECODER = true;
+let WRITE_ROOM_RECODER = false;
 
-let AUTO_CHU_PAI_TIME = 5;
+let AUTO_CHU_PAI_TIME = 18;
 
 function LogInfo(msg){
     Debug.Log(1,msg);
@@ -175,6 +175,11 @@ var ret = server.Init({
     max_client:50
 });
 LogInfo("init server ret:"+ret);
+var http = new Http();
+http.OnResponse=function(state,content){
+    LogInfo("state:"+state+" content:"+content);
+}
+http.Post("http://127.0.0.1:8080/public/getUserInfo",JSON.stringify({openid:"1234455"}));
 // var pai_dui=new PaiDui(true);
 // pai_dui.jiang_pai[0]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
 // pai_dui.jiang_pai[1]=Pai.ValueToNumber(PaiType.PAI_TONG,2);

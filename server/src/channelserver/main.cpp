@@ -26,13 +26,8 @@ struct option long_options[]=
 
 int main(int argc,char **argv)
 {
-	//AsyncFileWriter writer;
-	//bool ok = writer.Create("./xxxx.txt");
-	//for (int i = 0; i < 30; i++) {
-	//	char msg[128] = { 0 };
-	//	sprintf(msg, "msg:%d\n", i);
-	//	writer.PushContent(msg);
-	//}
+	gHttpManager.Post("http://127.0.0.1:9800/public/getUserInfo", "{\"openid\":\"asdfasdf\"}");
+
 	bool as_daemon = false;
 	while (1)
 	{
