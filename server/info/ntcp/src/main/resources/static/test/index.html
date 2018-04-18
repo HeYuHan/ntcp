@@ -8,17 +8,25 @@
 <body>
 <div>getUserInfo
 <form url="/public/getUserInfo" class="test_from" onSubmit="return false;">
-  OpenID <input type="text" name="openid" />
+  CODE <input type="text" name="code" value="CODE"/>
+  UID <input type="text" name="uid" value="UID"/>
+  CHECK CODE <input type="checkbox" name="checkCode"/>
   <button>Test</button>
 </form>
 </div>
 <script>
   (function ($) {
     $.fn.serializeJson = function () {
+        
         var serializeObj = {};
-        $(this.serializeArray()).each(function () {
-            serializeObj[this.name] = this.value;
-        });
+        var childs = this.find("input");
+        for(var i = 0;i<childs.length;i++){
+            var child = $(childs[i]);
+            var value=child.val();
+            if(child.attr("type")=="checkbox")value=child.is(':checked');
+            serializeObj[child.attr("name")]=value;
+        }
+        console.log(serializeObj);
         return serializeObj;
     };
   })(jQuery);
@@ -29,6 +37,7 @@
       var sub_button=from.find("button");
       if(!sub_button) continue;
       sub_button.click(function(){
+       
         $.ajax({
           method:"post",
           url:action,

@@ -20,6 +20,7 @@ public class User implements Serializable,IDBObject{
 
 	public String uid;
 	public String openid;
+	public String token;
 	public int glodCount;
 	public int diamondCount;
 	public boolean isProxy;
@@ -32,7 +33,7 @@ public class User implements Serializable,IDBObject{
 		update.set("glodCount", glodCount)
 		.set("diamondCount", diamondCount)
 		.set("isProxy", isProxy)
-		.set("openid", openid);
+		.set("token", token);
 	}
 	@Override
 	public Object getObject() {

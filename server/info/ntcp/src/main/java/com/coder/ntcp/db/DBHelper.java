@@ -46,4 +46,13 @@ public class DBHelper {
 		Query query=new Query(Criteria.where("uid").is(key));
 		mongoTemplate.remove(query,entityClass);
 	}
+	
+	
+	public RoomCard findUnuseCard(String ownerid) {
+		Criteria criteria = Criteria.where("ownerid").is(ownerid);
+		criteria.and("usedCount").gt(0);
+		Query query = new Query(criteria);
+		RoomCard roomCard = mongoTemplate.findOne(query, RoomCard.class);
+		return roomCard;
+	}
 }

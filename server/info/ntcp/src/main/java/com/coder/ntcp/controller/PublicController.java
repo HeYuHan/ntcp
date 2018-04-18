@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -27,9 +28,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.coder.ntcp.GConfig;
 import com.coder.ntcp.common.Tools;
 import com.coder.ntcp.db.DBHelper;
+import com.coder.ntcp.db.Room;
+import com.coder.ntcp.db.RoomCard;
 import com.coder.ntcp.db.User;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 class WeiXinUser{
 	public String errcode;
@@ -46,22 +47,44 @@ class WeiXinUser{
 }
 
 class ReqUser{
-	@NotBlank(message = "openid is null")
+	public boolean checkCode;
+	@NotBlank(message = "code is need")
 	public String code;
+	@NotBlank(message = "uid is need")
+	public String uid;
 }
 class ResUser{
 	public String openid;
+	public String uid;
+	public String token;
 	public int goldCount;
 	public boolean isProxy;
 	public int diamondCount;
 	public ResUser() {}
 	public ResUser(User dbUser){
-		this.openid=dbUser.uid;
+		this.uid=dbUser.uid;
+		this.openid=dbUser.openid;
 		this.goldCount=dbUser.glodCount;
 		this.diamondCount=dbUser.diamondCount;
 		this.isProxy=dbUser.isProxy;
+		this.token=dbUser.token;
 	}
 }
+class ResRoomCard{
+	public int roomid;
+	public String cardid;
+	public boolean isnew;
+	public String error;
+	public ResRoomCard() {}
+	public ResRoomCard(Room room) {
+		RoomCard card=room.getRoomCard();
+		isnew=card.usedCount==0;
+		cardid=card.uid;
+		roomid=room.getRoomId();
+	}
+}
+
+
 
 @RestController
 @Component
@@ -78,37 +101,73 @@ public class PublicController {
 	@RequestMapping(value="/getUserInfo",method=RequestMethod.POST)
 	@ResponseBody
 	ResUser getUserInfo(@RequestBody @Valid ReqUser reqUser) {
-
-		WeiXinUser weiXinUser=getWeiXinUser(reqUser);
-		if(weiXinUser.isError())return new ResUser();
-		User dbUser=dbHelper.findObjectByUid(weiXinUser.unionid, User.class);
-		if(dbUser != null)return new ResUser(dbUser);
-		dbUser = new User();
-		dbUser.openid=weiXinUser.openid;
-		dbUser.uid=weiXinUser.unionid;
-		dbUser.diamondCount=1000;
-		dbUser.glodCount=1000;
-		dbHelper.saveObject(dbUser);
-		return new ResUser(dbUser);
+		if(reqUser.checkCode) {
+			WeiXinUser weiXinUser=getWeiXinUser(reqUser);
+			if(weiXinUser==null || weiXinUser.isError()) {
+				return new ResUser();
+			}
+			User dbUser=dbHelper.findObjectByUid(weiXinUser.unionid, User.class);
+			if(dbUser != null)return new ResUser(dbUser);
+			dbUser = new User();
+			dbUser.openid=weiXinUser.openid;
+			dbUser.uid=weiXinUser.unionid;
+			dbUser.diamondCount=1000;
+			dbUser.glodCount=1000;
+			dbUser.token=weiXinUser.access_token;
+			dbHelper.saveObject(dbUser);
+			return new ResUser(dbUser);
+		}
+		else {
+			User dbUser=dbHelper.findObjectByUid(reqUser.uid, User.class);
+			if(dbUser != null)return new ResUser(dbUser);
+		}
+		return new ResUser();
 		
 	}
-	WeiXinUser getWeiXinUser(ReqUser reqUser) {
-		MultiValueMap<String, String> params= new LinkedMultiValueMap<String, String>();
-		params.add("appid", config.appid);
-		params.add("secret", config.appkey);
-		params.add("grant_type","authorization_code");
-		params.add("code",reqUser.code);
-		String userInfo=Tools.httpGet(config.tokenurl, params);
-		if(userInfo != null) {
-			ObjectMapper mapper = new ObjectMapper();
+	@RequestMapping(value="/getRoomCard",method=RequestMethod.POST)
+	@ResponseBody
+	ResRoomCard getRoomCard(@RequestBody @Valid ReqRoomCardOption reqRoomCardOption) {
+		RoomCard dbCard=dbHelper.findUnuseCard(reqRoomCardOption.uid);
+		if(dbCard != null) {
+			Room room=Room.getRoom(dbCard.uid);
+			if(room == null) {
+				room = Room.create(dbCard);
+			}
+			return new ResRoomCard(room);
+		}else {
+			User user = dbHelper.findObjectByUid(reqRoomCardOption.uid, User.class);
+			if(user == null) {
+				ResRoomCard resRoomCard=new ResRoomCard();
+				resRoomCard.error="USER_NOT_FOUND";
+				return resRoomCard;
+			}
 			try {
-				WeiXinUser weiXinUser=mapper.readValue(userInfo, WeiXinUser.class);
-				return weiXinUser;
+				RoomCard card = RoomCard.create(user, reqRoomCardOption);
+				return new ResRoomCard(Room.create(card));
 			} catch (Exception e) {
-				return null;
-			} 
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				ResRoomCard resRoomCard=new ResRoomCard();
+				resRoomCard.error=e.getMessage();
+				return resRoomCard;
+			}
+			
+			
 		}
-		return null;
+	}
+	
+	
+	
+	WeiXinUser getWeiXinUser(ReqUser reqUser) {
+		
+		try {
+			String userInfo=Tools.httpGet(config.tokenurl+"?appid="+config.appid+"&secret="+config.appkey+"&code="+reqUser.code+"&grant_type=authorization_code");
+			ObjectMapper mapper = new ObjectMapper();
+			WeiXinUser weiXinUser=mapper.readValue(userInfo, WeiXinUser.class);
+			return weiXinUser;
+		} catch (Exception e) {
+			return null;
+		}
 	}
 	
 }
