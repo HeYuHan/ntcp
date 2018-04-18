@@ -26,7 +26,7 @@ struct option long_options[]=
 
 int main(int argc,char **argv)
 {
-	gHttpManager.Post("http://127.0.0.1:9800/public/getUserInfo", "{\"openid\":\"asdfasdf\"}");
+	
 
 	bool as_daemon = false;
 	while (1)

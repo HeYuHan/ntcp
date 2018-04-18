@@ -160,5 +160,5 @@ var http = new Http();
 http.OnResponse = function (state, content) {
     LogInfo("state:" + state + " content:" + content);
 };
-http.Post("http://127.0.0.1:8080/public/getUserInfo", JSON.stringify({ openid: "1234455" }));
+http.Post("http://127.0.0.1:9800/public/getUserInfo", JSON.stringify({ openid2: "1234455" }), "application/json");
 server.Start();

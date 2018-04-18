@@ -14,16 +14,16 @@ public class DBHelper {
 	@Autowired
     private MongoTemplate mongoTemplate;
 	public void saveObject(IDBObject dbobj) {
-		Object object =findObject(dbobj, dbobj.getObject().getClass());
-		if(null == object) {
-			mongoTemplate.save(dbobj.getObject());
-		}
-		else {
-			updateObject(dbobj, false);
-		}
+		mongoTemplate.save(dbobj.getObject());
 	}
 	public <T> T findObject(IDBObject dbobj,Class<T> entityClass) {
 		Query query = new Query(Criteria.where("uid").is(dbobj.getUid()));
+		T t = mongoTemplate.findOne(query, entityClass);
+		return t;
+		
+	}
+	public <T> T findObjectByUid(String uid,Class<T> entityClass) {
+		Query query = new Query(Criteria.where("uid").is(uid));
 		T t = mongoTemplate.findOne(query, entityClass);
 		return t;
 		

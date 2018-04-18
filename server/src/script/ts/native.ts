@@ -28,7 +28,7 @@ declare class Timer{
 declare class Http{
     public OnResponse:(state:number,data:string)=>void;
     public Get(url:string):boolean;
-    public Post(url:string,data:string):boolean;
+    public Post(url:string,data:string,type:string):boolean;
 }
 declare class NString{
     public Append(msg:string);

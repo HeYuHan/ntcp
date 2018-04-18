@@ -20,16 +20,16 @@ private:
 	struct evhttp_request* request;
 	int state;
 };
+struct RequestPack;
 class HttpManager
 {
 public:
-	bool Request(const char* url, const char* data, int port, int flag,IHttpInterface *user_data);
+	bool Request(const char* url, const char* data, const char* content_type, int port, int flag,IHttpInterface *user_data);
 	bool Get(const char* url, int port, IHttpInterface *user_data);
 	bool Get(const char* url, IHttpInterface *user_data = NULL);
-	bool Post(const char* url, const char* data,int port, IHttpInterface *user_data);
-	bool Post(const char* url, const char* data, IHttpInterface *user_data = NULL);
-	void CleanInterface(IHttpInterface *http);
-	void SetInterface(IHttpInterface *http);
+	bool Post(const char* url, const char* data,const char* content_type,int port, IHttpInterface *user_data);
+	bool Post(const char* url, const char* data, const char* content_type, IHttpInterface *user_data = NULL);
+	void SetInterface(RequestPack *http);
 
 };
 extern HttpManager gHttpManager;

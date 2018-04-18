@@ -1,0 +1,339 @@
+﻿  _FindFirst.cpp
+  WSAStartupSingleton.cpp
+e:\share\ntcp\server\3rd\raknet\source\wsastartupsingleton.cpp(56): warning C4477: “printf”: 格式字符串“%s”需要类型“char *”的参数，但可变参数 2 拥有了类型“LPVOID”
+  VitaIncludes.cpp
+  VariadicSQLParser.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  VariableListDeltaTracker.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  VariableDeltaSerializer.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  UDPProxyServer.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  UDPProxyCoordinator.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  UDPProxyClient.cpp
+e:\share\ntcp\server\3rd\raknet\source\udpproxyclient.cpp(287): warning C4458: “rakPeerInterface”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\plugininterface2.h(202): note: 参见“RakNet::PluginInterface2::rakPeerInterface”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  UDPForwarder.cpp
+e:\share\ntcp\server\3rd\raknet\source\udpforwarder.cpp(235): warning C4477: “printf”: 格式字符串“%s”需要类型“char *”的参数，但可变参数 2 拥有了类型“LPVOID”
+e:\share\ntcp\server\3rd\raknet\source\udpforwarder.cpp(464): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1850): note: 参见“inet_addr”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  TwoWayAuthentication.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\xlocale(341): warning C4530: 使用了 C++ 异常处理程序，但未启用展开语义。请指定 /EHsc
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  ThreadsafePacketLogger.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  TelnetTransport.cpp
+e:\share\ntcp\server\3rd\raknet\source\telnettransport.cpp(145): warning C4456: “i”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\telnettransport.cpp(125): note: 参见“i”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  TeamManager.cpp
+e:\share\ntcp\server\3rd\raknet\source\teammanager.cpp(371): warning C4458: “noTeamSubcategory”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\teammanager.h(272): note: 参见“RakNet::TM_TeamMember::noTeamSubcategory”的声明
+e:\share\ntcp\server\3rd\raknet\source\teammanager.cpp(484): warning C4458: “world”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\teammanager.h(268): note: 参见“RakNet::TM_TeamMember::world”的声明
+e:\share\ntcp\server\3rd\raknet\source\teammanager.cpp(982): warning C4458: “world”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\teammanager.h(396): note: 参见“RakNet::TM_Team::world”的声明
+e:\share\ntcp\server\3rd\raknet\source\teammanager.cpp(1167): warning C4457: “team”的声明隐藏了函数参数
+  e:\share\ntcp\server\3rd\raknet\source\teammanager.cpp(1160): note: 参见“team”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  TeamBalancer.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  TCPInterface.cpp
+e:\share\ntcp\server\3rd\raknet\source\tcpinterface.cpp(117): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1850): note: 参见“inet_addr”的声明
+e:\share\ntcp\server\3rd\raknet\source\tcpinterface.cpp(595): warning C4456: “i”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\tcpinterface.cpp(583): note: 参见“i”的声明
+e:\share\ntcp\server\3rd\raknet\source\tcpinterface.cpp(799): warning C4996: 'gethostbyname': Use getaddrinfo() or GetAddrInfoW() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(2238): note: 参见“gethostbyname”的声明
+e:\share\ntcp\server\3rd\raknet\source\tcpinterface.cpp(824): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1850): note: 参见“inet_addr”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  TableSerializer.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  SuperFastHash.cpp
+  StringTable.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  StringCompressor.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  正在生成代码...
+  正在编译...
+  StatisticsHistory.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  SocketLayer.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\xlocale(341): warning C4530: 使用了 C++ 异常处理程序，但未启用展开语义。请指定 /EHsc
+e:\share\ntcp\server\3rd\raknet\source\socketlayer.cpp(170): warning C4477: “printf”: 格式字符串“%s”需要类型“char *”的参数，但可变参数 2 拥有了类型“LPVOID”
+e:\share\ntcp\server\3rd\raknet\source\socketlayer.cpp(210): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1868): note: 参见“inet_ntoa”的声明
+e:\share\ntcp\server\3rd\raknet\source\socketlayer.cpp(215): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1868): note: 参见“inet_ntoa”的声明
+e:\share\ntcp\server\3rd\raknet\source\socketlayer.cpp(371): warning C4477: “printf”: 格式字符串“%s”需要类型“char *”的参数，但可变参数 2 拥有了类型“LPVOID”
+e:\share\ntcp\server\3rd\raknet\source\socketlayer.cpp(402): warning C4996: 'gethostbyname': Use getaddrinfo() or GetAddrInfoW() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(2238): note: 参见“gethostbyname”的声明
+e:\share\ntcp\server\3rd\raknet\source\socketlayer.cpp(413): warning C4477: “printf”: 格式字符串“%s”需要类型“char *”的参数，但可变参数 2 拥有了类型“LPVOID”
+e:\share\ntcp\server\3rd\raknet\source\socketlayer.cpp(490): warning C4477: “printf”: 格式字符串“%s”需要类型“char *”的参数，但可变参数 2 拥有了类型“LPVOID”
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  SimpleMutex.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  SignaledEvent.cpp
+  SendToThread.cpp
+  SecureHandshake.cpp
+  RPC4Plugin.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  Router2.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  ReplicaManager3.cpp
+e:\share\ntcp\server\3rd\raknet\source\replicamanager3.cpp(728): warning C4458: “constructionMode”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\replicamanager3.h(699): note: 参见“RakNet::Connection_RM3::constructionMode”的声明
+e:\share\ntcp\server\3rd\raknet\source\replicamanager3.cpp(909): warning C4456: “index”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\replicamanager3.cpp(877): note: 参见“index”的声明
+e:\share\ntcp\server\3rd\raknet\source\replicamanager3.cpp(1771): warning C4458: “constructionMode”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\replicamanager3.h(699): note: 参见“RakNet::Connection_RM3::constructionMode”的声明
+e:\share\ntcp\server\3rd\raknet\source\replicamanager3.cpp(1865): warning C4458: “constructionMode”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\replicamanager3.h(699): note: 参见“RakNet::Connection_RM3::constructionMode”的声明
+e:\share\ntcp\server\3rd\raknet\source\replicamanager3.cpp(1894): warning C4458: “constructionMode”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\replicamanager3.h(699): note: 参见“RakNet::Connection_RM3::constructionMode”的声明
+e:\share\ntcp\server\3rd\raknet\source\replicamanager3.cpp(1914): warning C4458: “constructionMode”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\replicamanager3.h(699): note: 参见“RakNet::Connection_RM3::constructionMode”的声明
+e:\share\ntcp\server\3rd\raknet\source\replicamanager3.cpp(1929): warning C4458: “constructionMode”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\replicamanager3.h(699): note: 参见“RakNet::Connection_RM3::constructionMode”的声明
+e:\share\ntcp\server\3rd\raknet\source\replicamanager3.cpp(1982): warning C4458: “constructionMode”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\replicamanager3.h(699): note: 参见“RakNet::Connection_RM3::constructionMode”的声明
+e:\share\ntcp\server\3rd\raknet\source\replicamanager3.cpp(2004): warning C4458: “constructionMode”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\replicamanager3.h(699): note: 参见“RakNet::Connection_RM3::constructionMode”的声明
+e:\share\ntcp\server\3rd\raknet\source\replicamanager3.cpp(2026): warning C4458: “constructionMode”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\replicamanager3.h(699): note: 参见“RakNet::Connection_RM3::constructionMode”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  ReliabilityLayer.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\xlocale(341): warning C4530: 使用了 C++ 异常处理程序，但未启用展开语义。请指定 /EHsc
+e:\share\ntcp\server\3rd\raknet\source\reliabilitylayer.cpp(579): warning C4456: “i”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\reliabilitylayer.cpp(470): note: 参见“i”的声明
+e:\share\ntcp\server\3rd\raknet\source\reliabilitylayer.cpp(3225): warning C4458: “splitPacketId”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\reliabilitylayer.h(416): note: 参见“RakNet::ReliabilityLayer::splitPacketId”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  RelayPlugin.cpp
+e:\share\ntcp\server\3rd\raknet\source\relayplugin.cpp(352): warning C4456: “i”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\relayplugin.cpp(339): note: 参见“i”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  ReadyEvent.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  RandSync.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  Rand.cpp
+  RakWString.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  RakThread.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  RakString.cpp
+e:\share\ntcp\server\3rd\raknet\source\rakstring.cpp(153): warning C4458: “sharedString”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\rakstring.h(318): note: 参见“RakNet::RakString::sharedString”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  RakSleep.cpp
+  RakPeer.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\xlocale(341): warning C4530: 使用了 C++ 异常处理程序，但未启用展开语义。请指定 /EHsc
+e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(429): warning C4018: “<”: 有符号/无符号不匹配
+e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(577): warning C4018: “<”: 有符号/无符号不匹配
+e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(622): warning C4018: “<”: 有符号/无符号不匹配
+e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(641): warning C4456: “i”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(427): note: 参见“i”的声明
+e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(728): warning C4018: “<”: 有符号/无符号不匹配
+e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(733): warning C4018: “<”: 有符号/无符号不匹配
+e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(4660): warning C4456: “i”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(4545): note: 参见“i”的声明
+e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(4763): warning C4456: “i”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(4545): note: 参见“i”的声明
+e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(4904): warning C4456: “i”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(4545): note: 参见“i”的声明
+e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(5095): warning C4456: “i”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(4545): note: 参见“i”的声明
+e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(5135): warning C4456: “i”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(4545): note: 参见“i”的声明
+e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(5319): warning C4456: “i”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(4545): note: 参见“i”的声明
+e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(5409): warning C4456: “i”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\rakpeer.cpp(4545): note: 参见“i”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  RakNetTypes.cpp
+e:\share\ntcp\server\3rd\raknet\source\raknettypes.cpp(295): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1868): note: 参见“inet_ntoa”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  正在生成代码...
+  正在编译...
+  RakNetTransport2.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  RakNetStatistics.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  RakNetSocket2_Windows_Linux_360.cpp
+  RakNetSocket2_Windows_Linux.cpp
+  RakNetSocket2_WindowsStore8.cpp
+  RakNetSocket2_Vita.cpp
+  RakNetSocket2_PS4.cpp
+  RakNetSocket2_PS3_PS4.cpp
+  RakNetSocket2_NativeClient.cpp
+  RakNetSocket2_Berkley_NativeClient.cpp
+  RakNetSocket2_Berkley.cpp
+  RakNetSocket2_360_720.cpp
+  RakNetSocket2.cpp
+e:\share\ntcp\server\3rd\raknet\source\raknetsocket2_windows_linux.cpp(81): warning C4996: 'gethostbyname': Use getaddrinfo() or GetAddrInfoW() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(2238): note: 参见“gethostbyname”的声明
+e:\share\ntcp\server\3rd\raknet\source\raknetsocket2_berkley.cpp(99): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1850): note: 参见“inet_addr”的声明
+e:\share\ntcp\server\3rd\raknet\source\raknetsocket2_berkley.cpp(193): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1850): note: 参见“inet_addr”的声明
+e:\share\ntcp\server\3rd\raknet\source\raknetsocket2_berkley_nativeclient.cpp(77): warning C4996: 'gethostbyname': Use getaddrinfo() or GetAddrInfoW() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(2238): note: 参见“gethostbyname”的声明
+e:\share\ntcp\server\3rd\raknet\source\raknetsocket2_berkley_nativeclient.cpp(93): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1868): note: 参见“inet_ntoa”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  RakNetSocket.cpp
+  RakNetCommandParser.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  RakMemoryOverride.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  Rackspace.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  PS4Includes.cpp
+  PluginInterface2.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  PacketOutputWindowLogger.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  正在生成代码...
+  正在编译...
+  PacketLogger.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  PacketizedTCP.cpp
+e:\share\ntcp\server\3rd\raknet\source\packetizedtcp.cpp(94): warning C4456: “i”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\packetizedtcp.cpp(72): note: 参见“i”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  PacketFileLogger.cpp
+  PacketConsoleLogger.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  NetworkIDObject.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  NetworkIDManager.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  NatTypeDetectionServer.cpp
+e:\share\ntcp\server\3rd\raknet\source\nattypedetectionserver.cpp(147): warning C4456: “i”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\nattypedetectionserver.cpp(122): note: 参见“i”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  NatTypeDetectionCommon.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  NatTypeDetectionClient.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  NatPunchthroughServer.cpp
+e:\share\ntcp\server\3rd\raknet\source\natpunchthroughserver.cpp(246): warning C4018: “<”: 有符号/无符号不匹配
+e:\share\ntcp\server\3rd\raknet\source\natpunchthroughserver.cpp(438): warning C4458: “sessionId”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\natpunchthroughserver.h(144): note: 参见“RakNet::NatPunchthroughServer::sessionId”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  NatPunchthroughClient.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  MessageFilter.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  LogCommandParser.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  LocklessTypes.cpp
+  LinuxStrings.cpp
+  Itoa.cpp
+  IncrementalReadInterface.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  HTTPConnection2.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  HTTPConnection.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  GridSectorizer.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  正在生成代码...
+  正在编译...
+  gettimeofday.cpp
+  GetTime.cpp
+  Gets.cpp
+  Getche.cpp
+  FullyConnectedMesh2.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  FormatString.cpp
+  FileOperations.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  FileListTransfer.cpp
+e:\share\ntcp\server\3rd\raknet\source\filelisttransfer.cpp(231): warning C4456: “i”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\filelisttransfer.cpp(153): note: 参见“i”的声明
+e:\share\ntcp\server\3rd\raknet\source\filelisttransfer.cpp(546): warning C4456: “i”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\filelisttransfer.cpp(535): note: 参见“i”的声明
+e:\share\ntcp\server\3rd\raknet\source\filelisttransfer.cpp(564): warning C4458: “setId”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\filelisttransfer.h(137): note: 参见“RakNet::FileListTransfer::setId”的声明
+e:\share\ntcp\server\3rd\raknet\source\filelisttransfer.cpp(634): warning C4458: “setId”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\filelisttransfer.h(137): note: 参见“RakNet::FileListTransfer::setId”的声明
+e:\share\ntcp\server\3rd\raknet\source\filelisttransfer.cpp(1103): warning C4458: “setId”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\filelisttransfer.h(137): note: 参见“RakNet::FileListTransfer::setId”的声明
+e:\share\ntcp\server\3rd\raknet\source\filelisttransfer.cpp(1124): warning C4458: “setId”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\filelisttransfer.h(137): note: 参见“RakNet::FileListTransfer::setId”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  FileList.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  EpochTimeToString.cpp
+  EmailSender.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  DynDNS.cpp
+e:\share\ntcp\server\3rd\raknet\source\dyndns.cpp(148): warning C4458: “result”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\dyndns.h(102): note: 参见“RakNet::DynDNS::result”的声明
+e:\share\ntcp\server\3rd\raknet\source\dyndns.cpp(209): warning C4458: “result”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\dyndns.h(102): note: 参见“RakNet::DynDNS::result”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  DS_Table.cpp
+e:\share\ntcp\server\3rd\raknet\source\ds_table.cpp(194): warning C4458: “ptr”的声明隐藏了类成员
+  e:\share\ntcp\server\3rd\raknet\source\ds_table.h(106): note: 参见“DataStructures::Table::Cell::ptr”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  DS_HuffmanEncodingTree.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  DS_ByteQueue.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  DS_BytePool.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  DR_SHA1.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\xlocale(341): warning C4530: 使用了 C++ 异常处理程序，但未启用展开语义。请指定 /EHsc
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  DirectoryDeltaTransfer.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  DataCompressor.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  ConsoleServer.cpp
+e:\share\ntcp\server\3rd\raknet\source\consoleserver.cpp(184): warning C4456: “rc”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\consoleserver.cpp(109): note: 参见“rc”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  正在生成代码...
+  正在编译...
+  ConnectionGraph2.cpp
+e:\share\ntcp\server\3rd\raknet\source\connectiongraph2.cpp(298): warning C4456: “objectExists”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\connectiongraph2.cpp(284): note: 参见“objectExists”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  CommandParserInterface.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  CloudServer.cpp
+e:\share\ntcp\server\3rd\raknet\source\cloudserver.cpp(651): warning C4456: “specificSystemIndex”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\cloudserver.cpp(628): note: 参见“specificSystemIndex”的声明
+e:\share\ntcp\server\3rd\raknet\source\cloudserver.cpp(690): warning C4456: “keySubscriberId”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\cloudserver.cpp(618): note: 参见“keySubscriberId”的声明
+e:\share\ntcp\server\3rd\raknet\source\cloudserver.cpp(692): warning C4456: “specificSystemIndex”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\cloudserver.cpp(628): note: 参见“specificSystemIndex”的声明
+e:\share\ntcp\server\3rd\raknet\source\cloudserver.cpp(763): warning C4456: “cloudKey”的声明隐藏了上一个本地声明
+  e:\share\ntcp\server\3rd\raknet\source\cloudserver.cpp(735): note: 参见“cloudKey”的声明
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  CloudCommon.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  CloudClient.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  CheckSum.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  CCRakNetUDT.cpp
+  CCRakNetSlidingWindow.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  BitStream.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  Base64Encoder.cpp
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\exception(359): warning C4577: 在未指定异常处理模式的情况下使用了 "noexcept"；不一定会在异常时终止。指定 /EHsc
+  正在生成代码...
+C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(1357,5): warning MSB8012: TargetPath(E:\Share\ntcp\server\Lib\LibStatic.lib) does not match the Library's OutputFile property value (E:\Share\ntcp\server\Lib\Server_LibStatic_Debug_Win32.lib). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Lib.OutputFile).
+C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(1359,5): warning MSB8012: TargetName(LibStatic) does not match the Library's OutputFile property value (Server_LibStatic_Debug_Win32). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Lib.OutputFile).
+  LibStatic_vc9.vcxproj -> E:\Share\ntcp\server\Lib\LibStatic.lib

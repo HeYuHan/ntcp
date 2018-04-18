@@ -33,6 +33,9 @@
     <ClCompile Include="..\src\channelserver\jsb.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\channelserver\httptest.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\channelserver\Server.h">

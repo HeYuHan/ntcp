@@ -3,64 +3,69 @@
 #include <jsfriendapi.h>
 #include <common.h>
 #include <ccUTF8.h>
+#include <iconv.h>
 #ifdef _WIN32
 #pragma comment(lib,"./../3rd/icon/lib/iconv.lib")
 #endif // _WIN32
 
-void GetJSString(JSContext * cx, JS::HandleValue str, std::string & ret)
+void GetJSUTF8String(JSContext * cx, JS::HandleValue str, std::string & ret)
 {
 	char* data = JS_EncodeStringToUTF8(cx, JS::RootedString(cx, JS::ToString(cx, str)));
 	ret = std::string(data);
 	JS_free(cx, data);
 	//delete[] data;
 }
+void GetJSString(JSContext * cx, JS::HandleValue str, std::string & ret)
+{
+	char* data = JS_EncodeString(cx, JS::RootedString(cx, JS::ToString(cx, str)));
+	ret = std::string(data);
+	JS_free(cx, data);
+	//delete[] data;
+}
+bool js_utf8_to_utf16(std::string &utf8, std::string &retStr)
+{
+	bool ok = true;
+	iconv_t iconvH = iconv_open("utf-8", "gb2312");
+	do 
+	{
+		
+		if (iconvH == 0)
+		{
+			ok = false;
+			break;
+		}
+		size_t srclen = strlen(utf8.c_str());
+		size_t outLen = 1024;
+		/* 存放转换后的字符串 */
+		char outbuf[1024];
+		memset(outbuf, 0, 1024);
+		/* 由于iconv()函数会修改指针，所以要保存源指针 */
+		const char *pin = utf8.c_str();
+		char *pout = outbuf;
 
-//bool js_utf8_to_utf16(JSContext * cx, JS::HandleValue str, std::string &retStr)
-//{
-//	char* url = JS_EncodeStringToUTF8(cx, JS::RootedString(cx, JS::ToString(cx, str)));
-//	bool ok = true;
-//	iconv_t iconvH = iconv_open("unicode", "utf-8");
-//	if (iconvH == 0)
-//	{
-//		ok = false;
-//		//goto EXIT;
-//	}
-//	size_t srclen = strlen(url);
-//	size_t outLen = 1024;
-//	/* 存放转换后的字符串 */
-//	char outbuf[1024];
-//	memset(outbuf, 0, 1024);
-//	/* 由于iconv()函数会修改指针，所以要保存源指针 */
-//	const char *srcstart = url;
-//	char *tempoutbuf = outbuf;
-//
-//	/* 进行转换
-//	*@param cd iconv_open()产生的句柄
-//	*@param srcstart 需要转换的字符串
-//	*@param srclen 存放还有多少字符没有转换
-//	*@param tempoutbuf 存放转换后的字符串
-//	*@param outlen 存放转换后,tempoutbuf剩余的空间
-//	*
-//	* */
-//	//std::string tempStr="";
-//	do {
-//		size_t ret = iconv(iconvH, &srcstart, &srclen, &tempoutbuf, &outLen);
-//		if (ret == -1)
-//		{
-//			ret = false;
-//			//goto EXIT;
-//		}
-//		retStr += std::string(tempoutbuf);
-//
-//	} while (srclen > 0);
-//
-//	//retStr = tempStr;
-//
-//EXIT:
-//	/* 关闭句柄 */
-//	iconv_close(iconvH);
-//	return true;
-//}
+		/* 进行转换
+		*@param cd iconv_open()产生的句柄
+		*@param srcstart 需要转换的字符串
+		*@param srclen 存放还有多少字符没有转换
+		*@param tempoutbuf 存放转换后的字符串
+		*@param outlen 存放转换后,tempoutbuf剩余的空间
+		*
+		* */
+		do {
+			size_t ret = iconv(iconvH, &pin, &srclen, &pout, &outLen);
+			if (ret == -1)
+			{
+				ret = false;
+				ok = false;
+				break;
+			}
+		} while (srclen > 0);
+		retStr = std::string(outbuf);
+	} while (0);
+	/* 关闭句柄 */
+	iconv_close(iconvH);
+	return true;
+}
 
 jsval std_string_to_jsval(JSContext* cx, const std::string& v)
 {

@@ -8,8 +8,19 @@
 HttpManager gHttpManager;
 struct RequestPack 
 {
+	IHttpInterface* handle;
+	struct evhttp_connection* connection;
+	struct evhttp_request* request;
 
 };
+void free_request_pack(RequestPack* p)
+{
+	if (p) 
+	{
+		//if (p->url)delete[] p->url;
+		delete p;
+	}
+}
 void http_request(struct evhttp_request *req, void *arg)
 {
 
@@ -41,58 +52,47 @@ void http_request_done(struct evhttp_request *req, void *arg)
 	{
 		printf("len = %d, str = %s\n", len, buf);
 	}*/
-	struct evhttp_connection* connection = NULL;
-	IHttpInterface * http = static_cast<IHttpInterface*>(arg);
-	if (NULL != http && http->IsSet())
+	RequestPack * http = static_cast<RequestPack*>(arg);
+	if (NULL != http)
 	{
 		gHttpManager.SetInterface(http);
-		http->OnResponse();
-		gHttpManager.CleanInterface(http);
-	}
-	else
-	{
-#ifdef WIN32
-		//int state = evhttp_request_get_response_code(req);
-		//if (state == 200)
-		//{
-		//	size_t len = evbuffer_get_length(req->input_buffer);
-		//	unsigned char * str = evbuffer_pullup(req->input_buffer, len);
-		//	log_info("response => %s", str);
-		//}
-
-#endif // WIN32
-
-
-
-
-		connection = static_cast<evhttp_connection*>(arg);
-		if (NULL != connection)
+		if (http->handle)http->handle->OnResponse();
+		else
 		{
-			evhttp_connection_free(connection);
+#ifdef WIN32
+			int state = evhttp_request_get_response_code(req);
+			char* content = "";
+			size_t len = evbuffer_get_length(req->input_buffer);
+			if(len>0)content=(char*)evbuffer_pullup(req->input_buffer, len);
+			content[len] = 0;
+			log_info("response %d => %s", state,content);
+#endif // WIN32
 		}
-		
+		evhttp_connection_free(http->connection);
+		free_request_pack(http);
 	}
+	
 }
 
 
 
 
-bool HttpManager::Request(const char * url, const  char * data, int port, int flag, IHttpInterface * user_data)
+bool HttpManager::Request(const char * url, const  char * data, const char* content_type, int port, int flag, IHttpInterface * user_data)
 {
+	RequestPack *pack = new RequestPack();
+	memset(pack, 0, sizeof(RequestPack));
 	struct evhttp_uri *uri = evhttp_uri_parse(url);
 	const char* host = evhttp_uri_get_host(uri);
 	int url_port = evhttp_uri_get_port(uri);
 	if (url_port > 0)port = url_port;
+	
 	struct event_base* base = (NULL == user_data) ? Timer::GetEventBase() : user_data->GetEventBase();
-	struct evhttp_connection* connection = evhttp_connection_base_new(base, NULL, evhttp_uri_get_host(uri), port);
-	struct evhttp_request* req = evhttp_request_new(http_request_done, (user_data == NULL) ? connection : (void*)user_data);
+	struct evhttp_connection* connection = evhttp_connection_base_new(base, NULL, host, port);
+	struct evhttp_request* req = evhttp_request_new(http_request_done, pack);
+	pack->connection = connection;
+	pack->request = req;
+	pack->handle = user_data;
 	evhttp_add_header(req->output_headers, "Host", host);
-	evhttp_connection_set_timeout(connection, 10000);
-	if (NULL != user_data)
-	{
-		user_data->connection = connection;
-		user_data->request = req;
-	}
 	char query_path[512] = { 0 };
 	int index = 0;
 	const char* path = evhttp_uri_get_path(uri);
@@ -109,18 +109,21 @@ bool HttpManager::Request(const char * url, const  char * data, int port, int fl
 	{
 		sprintf(&query_path[index], "?%s", query);
 	}
+	int ret = evhttp_make_request(connection, pack->request, (evhttp_cmd_type)flag, query_path);
 	if (flag == EVHTTP_REQ_POST && data != NULL)
 	{
-		evbuffer_add(req->output_buffer, data, strlen(data));
+		int len = strlen(data);
+		evbuffer_add(req->output_buffer, data, len);
+		if (!content_type || strlen(content_type) == 0)content_type = "application/x-www-form-urlencoded";
+		evhttp_add_header(req->output_headers, "Content-Type", content_type);
 	}
-	int ret = evhttp_make_request(connection, req, (evhttp_cmd_type)flag, query_path);
-	evhttp_uri_free(uri);
+	//evhttp_uri_free(uri);
 	return ret == 0;
 }
 
 bool HttpManager::Get(const char * url, int port, IHttpInterface * user_data)
 {
-	return Request(url, NULL, port, EVHTTP_REQ_GET, user_data);
+	return Request(url, NULL, NULL,port, EVHTTP_REQ_GET, user_data);
 }
 
 bool HttpManager::Get(const char * url, IHttpInterface * user_data)
@@ -128,38 +131,33 @@ bool HttpManager::Get(const char * url, IHttpInterface * user_data)
 	return Get(url, 80, user_data);
 }
 
-bool HttpManager::Post(const char * url, const char * data, int port, IHttpInterface * user_data)
+bool HttpManager::Post(const char * url, const char * data, const char* content_type, int port, IHttpInterface * user_data)
 {
-	return Request(url, data, port, EVHTTP_REQ_POST, user_data);
+	return Request(url, data, content_type,port, EVHTTP_REQ_POST, user_data);
 }
 
-bool HttpManager::Post(const char * url, const char * data, IHttpInterface * user_data)
+bool HttpManager::Post(const char * url, const char * data, const char* content_type, IHttpInterface * user_data)
 {
-	return Post(url, data, 80, user_data);
+	return Post(url, data, content_type,80, user_data);
 }
 
-void HttpManager::CleanInterface(IHttpInterface * http)
+
+void HttpManager::SetInterface(RequestPack * http)
 {
-	
-	if (http->state > 0)
+	IHttpInterface *handle = http->handle;
+	if (handle)
 	{
-		if (http->connection)evhttp_connection_free(http->connection);
-		//if (http->request)evhttp_request_free(http->request);
+		handle->state = http->request->response_code;
+		handle->request = http->request;
+		handle->connection = http->connection;
 	}
-	http->state = 0;
-	http->connection = NULL;
-	http->request = NULL;
-}
-
-void HttpManager::SetInterface(IHttpInterface * http)
-{
-	http->state = evhttp_request_get_response_code(http->request);
 }
 
 IHttpInterface::IHttpInterface():connection(NULL),request(NULL),state(0)
 {
 
 }
+
 
 int IHttpInterface::GetBufferLength()
 {

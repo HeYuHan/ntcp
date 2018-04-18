@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body>
+<div>getUserInfo
+<form url="/public/getUserInfo" class="test_from" onSubmit="return false;">
+  OpenID <input type="text" name="openid" />
+  <button>Test</button>
+</form>
+</div>
+<script>
+  (function ($) {
+    $.fn.serializeJson = function () {
+        var serializeObj = {};
+        $(this.serializeArray()).each(function () {
+            serializeObj[this.name] = this.value;
+        });
+        return serializeObj;
+    };
+  })(jQuery);
+  var all_from =  $(".test_from");
+  for(var i=0;i<all_from.length;i++){
+      var from=$(all_from[i]);
+      var action=from.attr("url");
+      var sub_button=from.find("button");
+      if(!sub_button) continue;
+      sub_button.click(function(){
+        $.ajax({
+          method:"post",
+          url:action,
+          contentType: "application/json; charset=utf-8",
+          data:JSON.stringify(from.serializeJson()),
+          success:function(ret){
+          console.log(action,ret);
+        }});
+      });
+      
+  }
+</script>
+</body>
+</html>

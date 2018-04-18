@@ -131,6 +131,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\channelserver\Client.cpp" />
+    <ClCompile Include="..\src\channelserver\httptest.cpp" />
     <ClCompile Include="..\src\channelserver\jsb.cpp" />
     <ClCompile Include="..\src\channelserver\js_tools.cpp" />
     <ClCompile Include="..\src\channelserver\main.cpp" />

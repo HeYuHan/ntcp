@@ -1,5 +1,7 @@
 package com.coder.ntcp.db;
 
+import static org.assertj.core.api.Assertions.setAllowComparingPrivateFields;
+
 import java.io.Serializable;
 
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -16,48 +18,25 @@ public class User implements Serializable,IDBObject{
 	 */
 	private static final long serialVersionUID = 4341213811359729391L;
 
-	String uid;
-	int glodCount;
-	int diamondCount;
-	boolean isProxy;
-	String nick;
+	public String uid;
+	public String openid;
+	public int glodCount;
+	public int diamondCount;
+	public boolean isProxy;
 	@Override
 	public String getUid() {
 		return uid;
 	}
 	@Override
 	public void onUpdate(Update update) {
-		update.set("glodCount", glodCount);
+		update.set("glodCount", glodCount)
+		.set("diamondCount", diamondCount)
+		.set("isProxy", isProxy)
+		.set("openid", openid);
 	}
 	@Override
 	public Object getObject() {
+		// TODO Auto-generated method stub
 		return this;
-	}
-	public int getGlodCount() {
-		return glodCount;
-	}
-	public void setGlodCount(int glodCount) {
-		this.glodCount = glodCount;
-	}
-	public int getDiamondCount() {
-		return diamondCount;
-	}
-	public void setDiamondCount(int diamondCount) {
-		this.diamondCount = diamondCount;
-	}
-	public boolean isProxy() {
-		return isProxy;
-	}
-	public void setProxy(boolean isProxy) {
-		this.isProxy = isProxy;
-	}
-	public String getNick() {
-		return nick;
-	}
-	public void setNick(String nick) {
-		this.nick = nick;
-	}
-	public void setUid(String uid) {
-		this.uid = uid;
 	}
 }

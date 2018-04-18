@@ -179,7 +179,7 @@ var http = new Http();
 http.OnResponse=function(state,content){
     LogInfo("state:"+state+" content:"+content);
 }
-http.Post("http://127.0.0.1:8080/public/getUserInfo",JSON.stringify({openid:"1234455"}));
+http.Post("http://127.0.0.1:9800/public/getUserInfo",JSON.stringify({openid2:"1234455"}),"application/json");
 // var pai_dui=new PaiDui(true);
 // pai_dui.jiang_pai[0]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
 // pai_dui.jiang_pai[1]=Pai.ValueToNumber(PaiType.PAI_TONG,2);
