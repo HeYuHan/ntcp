@@ -117,7 +117,7 @@ bool HttpManager::Request(const char * url, const  char * data, const char* cont
 		if (!content_type || strlen(content_type) == 0)content_type = "application/x-www-form-urlencoded";
 		evhttp_add_header(req->output_headers, "Content-Type", content_type);
 	}
-	//evhttp_uri_free(uri);
+	evhttp_uri_free(uri);
 	return ret == 0;
 }
 
