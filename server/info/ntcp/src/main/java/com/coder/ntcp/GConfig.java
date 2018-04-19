@@ -12,4 +12,6 @@ public class GConfig {
 	public String appid;
 	@Value("${global.config.appkey}")
 	public String appkey;
+	@Value("${global.config.channel_token}")
+	public String channel_token;
 }

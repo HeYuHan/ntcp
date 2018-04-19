@@ -81,53 +81,43 @@ var JClient = (function () {
         }
     };
     JClient.prototype.EnterRoom = function (msg) {
-        LogInfo("EnterRoom:" + this.uid + " room_id:" + msg.room_uid);
-        var room_uid = msg.room_uid;
-        var open_id = msg.openid;
-        if (!open_id) {
+        var roomid = msg.roomid;
+        var openid = msg.openid;
+        client.info = msg;
+        if (!openid || !roomid) {
             this.native.Disconnect();
             return;
         }
         var client = this;
-        var chekc_id = new Http();
-        chekc_id.OnResponse = function (state, msg) {
-            LogInfo("check user:" + msg);
-            var json = JSON.parse(msg);
-            if (state == 200 && !json.error) {
-                client.info = json;
-                var room = Room.Get(room_uid);
-                if (room) {
+        var room = Room.Get(roomid);
+        if (room) {
+            client.state = State.IN_ROOM;
+            client.room = room;
+            room.ClientJoin(client);
+        }
+        else {
+            var http = new JHttp();
+            http.OnResponse = function (state, msg) {
+                LogInfo("check room ret:" + msg);
+                var json = JSON.parse(msg);
+                if (state == 200 && !json.error) {
+                    json.roomid = roomid;
+                    var room = Room.Create(json);
                     client.state = State.IN_ROOM;
                     client.room = room;
                     room.ClientJoin(client);
                 }
                 else {
-                    var http = new Http();
-                    http.OnResponse = function (state, msg) {
-                        LogInfo("check room ret:" + msg);
-                        var json = JSON.parse(msg);
-                        if (state == 200 && !json.error) {
-                            var room = Room.Create(json);
-                            client.state = State.IN_ROOM;
-                            client.room = room;
-                            room.ClientJoin(client);
-                        }
-                        else {
-                            client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM, {
-                                error: "room not found:" + room_uid
-                            }));
-                        }
-                    };
-                    http.Get(INFO_SERVER_URL + "checkRoom?data=" + EncodeUriMsg({ roomid: room_uid }));
+                    client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM, {
+                        error: "room not found:" + roomid
+                    }));
                 }
-            }
-            else {
-                client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM, {
-                    error: "check usr failed"
-                }));
-            }
-        };
-        chekc_id.Get(INFO_SERVER_URL + "getUserInfo?data=" + EncodeUriMsg({ openid: open_id }));
+            };
+            http.PostJson(INFO_SERVER_URL + "getRoomCard", {
+                token: INFO_ACCESS_TOKEN,
+                roomid: roomid
+            });
+        }
     };
     JClient.prototype.LeaveRoom = function (msg) {
         if (this.room)

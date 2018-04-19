@@ -9,6 +9,8 @@ let WRITE_ROOM_RECODER = false;
 
 let AUTO_CHU_PAI_TIME = 18;
 
+let INFO_ACCESS_TOKEN = "1234567";
+
 function LogInfo(msg){
     Debug.Log(1,msg);
 }
@@ -17,6 +19,12 @@ function LogWarn(msg){
 }
 function LogError(msg){
     Debug.Log(3,msg);
+}
+
+class JHttp extends Http{
+    public PostJson(url,data){
+        this.Post(url,JSON.stringify(data),"application/json");
+    }
 }
 
 class AsyncFileWriter{
@@ -175,11 +183,6 @@ var ret = server.Init({
     max_client:50
 });
 LogInfo("init server ret:"+ret);
-var http = new Http();
-http.OnResponse=function(state,content){
-    LogInfo("state:"+state+" content:"+content);
-}
-http.Post("http://127.0.0.1:9800/public/getUserInfo",JSON.stringify({openid2:"1234455"}),"application/json");
 // var pai_dui=new PaiDui(true);
 // pai_dui.jiang_pai[0]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
 // pai_dui.jiang_pai[1]=Pai.ValueToNumber(PaiType.PAI_TONG,2);

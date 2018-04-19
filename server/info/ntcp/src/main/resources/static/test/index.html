@@ -6,15 +6,81 @@
 <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
 </head>
 <body>
-<div>getUserInfo
+<div>getUserInfo<br>
+    <button url="/test/createRandomUser" class="random_button_data" >createRandomUser</button>
 <form url="/public/getUserInfo" class="test_from" onSubmit="return false;">
-  CODE <input type="text" name="code" value="CODE"/>
-  UID <input type="text" name="uid" value="UID"/>
+  CODE <input type="text" name="code" value="CODE"/><br>
+  UID <input type="text" name="uid" value="UID"/><br>
   CHECK CODE <input type="checkbox" name="checkCode"/>
   <button>Test</button>
 </form>
+<br><br>
 </div>
+<div>getRoomRecoder<br>
+  <button url="/test/createRandomRecoder" class="random_button_data" >createRandomRecoder</button>
+  <form url="/public/getRoomRecoder" class="test_from" onSubmit="return false;">
+    UID <input type="text" name="uid" value="testuid53797"/><br>
+    COUNT <input type="number" name="dayCount" value="1"/>
+    <button>Test</button>
+  </form>
+</div>
+<br><br>
+<div>getRoomCard(pulbic)<br>
+    <form url="/public/getRoomCard" class="test_from" onSubmit="return false;">
+      UID <input type="text" name="uid" value="testuid53797"/><br>
+      XI <input type="checkbox" name="includexi"/><br>
+      COUNT <input type="number" name="playCount" value="6"/><br>
+      PAY <input type="number" name="payType" value="1"/><br>
+      RATE <input type="number" name="blanceRate" value="1"/>
+      <button>Test</button>
+    </form>
+  </div>
+
+  <br><br>
+<div>getRoomCard(inner)<br>
+    <form url="/private/getRoomCard" class="test_from" onSubmit="return false;">
+      CARD <input type="text" name="cardid" value=""/><br>
+      ROOM <input type="number" name="roomid"/><br>
+      TOKEN <input type="text" name="token" value="1234567"/><br>
+      <button>Test</button>
+    </form>
+  </div>
 <script>
+  function create_random_button_click(button){
+    button.click(()=>{
+      $.get(button.attr('url'),(data)=>{
+          console.log(button.attr('url'),data);
+      });
+    })
+  }
+  var all_ranodm_button=$(".random_button_data");
+  for(var i=0;i<all_ranodm_button.length;i++){
+      create_random_button_click($(all_ranodm_button[i]));
+  }
+ 
+  function register_from_sub(from){
+    var action=from.attr("url");
+    var sub_button=from.find("button");
+    if(!sub_button) return;
+    sub_button.click(function(){
+      
+      $.ajax({
+        method:"post",
+        url:action,
+        contentType: "application/json; charset=utf-8",
+        data:JSON.stringify(from.serializeJson()),
+        success:function(ret){
+        console.log(action,ret);
+      }});
+    });
+  }
+  var all_from =  $(".test_from");
+  for(var i=0;i<all_from.length;i++){
+    register_from_sub($(all_from[i]));
+  }
+
+
+
   (function ($) {
     $.fn.serializeJson = function () {
         
@@ -26,29 +92,10 @@
             if(child.attr("type")=="checkbox")value=child.is(':checked');
             serializeObj[child.attr("name")]=value;
         }
-        console.log(serializeObj);
         return serializeObj;
     };
   })(jQuery);
-  var all_from =  $(".test_from");
-  for(var i=0;i<all_from.length;i++){
-      var from=$(all_from[i]);
-      var action=from.attr("url");
-      var sub_button=from.find("button");
-      if(!sub_button) continue;
-      sub_button.click(function(){
-       
-        $.ajax({
-          method:"post",
-          url:action,
-          contentType: "application/json; charset=utf-8",
-          data:JSON.stringify(from.serializeJson()),
-          success:function(ret){
-          console.log(action,ret);
-        }});
-      });
-      
-  }
+  
 </script>
 </body>
 </html>

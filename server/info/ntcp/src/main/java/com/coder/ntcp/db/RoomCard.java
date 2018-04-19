@@ -23,7 +23,6 @@ public class RoomCard implements Serializable,IDBObject{
 	public int maxUseCount=PLAY_COUNT_6;
 	public int usedCount=0;
 	public int payType=PAY_HOST;
-	public int playCount=PLAY_COUNT_6;
 	public int blanceRate=1;
 	public boolean includexi=true;
 	@Override
@@ -43,19 +42,23 @@ public class RoomCard implements Serializable,IDBObject{
 	}
 	public static RoomCard create(User user,ReqRoomCardOption option) throws Exception {
 
-		if(option.playCount != PLAY_COUNT_6 && option.playCount!=PLAY_COUNT_12) throw new Exception("PLAY_COUNT_ERROR");
+		if(option.playCount != PLAY_COUNT_6 && option.playCount!=PLAY_COUNT_12) throw new Exception("ERROR_PLAY_COUNT");
+		if(option.payType<1||option.payType>3)throw new Exception("ERROR_PAY_TYPE");
+		if(option.blanceRate<1||option.blanceRate>3)throw new Exception("ERROR_RATE_TYPE");
 		if(option.playCount == PLAY_COUNT_6) {
-			if(user.diamondCount<3)throw new Exception("DIAMOND_NOT_FULL");
+			if(user.diamondCount<3)throw new Exception("ERROR_DIAMOND_NOT_FULL");
+			user.diamondCount-=3;
 		}
 		else if(option.playCount == PLAY_COUNT_12) {
-			if(user.diamondCount<6)throw new Exception("DIAMOND_NOT_FULL");
+			if(user.diamondCount<6)throw new Exception("ERROR_DIAMOND_NOT_FULL");
+			user.diamondCount-=6;
 		}
 		RoomCard card = new RoomCard();
 		card.ownerid=user.uid;
 		card.uid=DigestUtils.md5Hex(user.uid+System.currentTimeMillis());
 		card.includexi=option.includexi;
 		card.payType=option.payType;
-		card.maxUseCount=option.maxUseCount;
+		card.maxUseCount=option.playCount;
 		card.usedCount=0;
 		card.blanceRate=option.blanceRate;
 		return card;

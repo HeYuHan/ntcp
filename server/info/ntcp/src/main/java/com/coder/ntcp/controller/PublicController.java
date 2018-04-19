@@ -1,10 +1,13 @@
 package com.coder.ntcp.controller;
 
+import static org.assertj.core.api.Assertions.in;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +33,7 @@ import com.coder.ntcp.common.Tools;
 import com.coder.ntcp.db.DBHelper;
 import com.coder.ntcp.db.Room;
 import com.coder.ntcp.db.RoomCard;
+import com.coder.ntcp.db.RoomRecoder;
 import com.coder.ntcp.db.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 class WeiXinUser{
@@ -84,6 +88,22 @@ class ResRoomCard{
 	}
 }
 
+class ReqRoomRecoder{
+	public int dayCount;
+	@NotBlank(message = "uid is need")
+	public String uid;
+}
+class ResRoomRecoder{
+	public String cardid;
+	public int roomid;
+	public int useIndex;
+	public ResRoomRecoder(RoomRecoder dbRecoder) {
+		this.cardid=dbRecoder.cardid;
+		this.roomid=dbRecoder.roomid;
+		this.useIndex=dbRecoder.useIndex;
+	}
+}
+
 
 
 @RestController
@@ -100,12 +120,13 @@ public class PublicController {
 	
 	@RequestMapping(value="/getUserInfo",method=RequestMethod.POST)
 	@ResponseBody
-	ResUser getUserInfo(@RequestBody @Valid ReqUser reqUser) {
+	Object getUserInfo(@RequestBody @Valid ReqUser reqUser) {
 		if(reqUser.checkCode) {
 			WeiXinUser weiXinUser=getWeiXinUser(reqUser);
-			if(weiXinUser==null || weiXinUser.isError()) {
-				return new ResUser();
+			if(weiXinUser==null) {
+				return new ResException("ERROR_GET_WEIXIN_INFO");
 			}
+			if(weiXinUser.isError())return new ResException("ERROR_GET_WEIXIN_INFO",weiXinUser.errmsg);
 			User dbUser=dbHelper.findObjectByUid(weiXinUser.unionid, User.class);
 			if(dbUser != null)return new ResUser(dbUser);
 			dbUser = new User();
@@ -126,7 +147,7 @@ public class PublicController {
 	}
 	@RequestMapping(value="/getRoomCard",method=RequestMethod.POST)
 	@ResponseBody
-	ResRoomCard getRoomCard(@RequestBody @Valid ReqRoomCardOption reqRoomCardOption) {
+	Object getRoomCard(@RequestBody @Valid ReqRoomCardOption reqRoomCardOption) {
 		RoomCard dbCard=dbHelper.findUnuseCard(reqRoomCardOption.uid);
 		if(dbCard != null) {
 			Room room=Room.getRoom(dbCard.uid);
@@ -143,20 +164,27 @@ public class PublicController {
 			}
 			try {
 				RoomCard card = RoomCard.create(user, reqRoomCardOption);
+				dbHelper.saveObject(card);
+				dbHelper.updateObject(user, false);
 				return new ResRoomCard(Room.create(card));
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				ResRoomCard resRoomCard=new ResRoomCard();
-				resRoomCard.error=e.getMessage();
-				return resRoomCard;
+				return new ResException(e.getMessage());
 			}
 			
 			
 		}
 	}
 	
-	
+	@RequestMapping(value="/getRoomRecoder",method=RequestMethod.POST)
+	@ResponseBody
+	ArrayList<ResRoomRecoder> getRoomRecoder(@RequestBody @Valid ReqRoomRecoder reqRoomRecoder) {
+		ArrayList<ResRoomRecoder> list = new ArrayList<>();
+		List<RoomRecoder> findlist = dbHelper.findRoomRecoderByDay(reqRoomRecoder.uid, reqRoomRecoder.dayCount);
+		for(RoomRecoder item : findlist) {
+			list.add(new ResRoomRecoder(item));
+		}
+		return list;
+	}
 	
 	WeiXinUser getWeiXinUser(ReqUser reqUser) {
 		

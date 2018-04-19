@@ -1,4 +1,8 @@
 package com.coder.ntcp.db;
+import java.util.List;
+import java.util.Calendar;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -54,5 +58,17 @@ public class DBHelper {
 		Query query = new Query(criteria);
 		RoomCard roomCard = mongoTemplate.findOne(query, RoomCard.class);
 		return roomCard;
+	}
+	public List<RoomRecoder> findRoomRecoderByDay(String userid,int daycount) {
+		Calendar calendar = Calendar.getInstance(); 
+		Date endStart = calendar.getTime();
+		calendar.add(Calendar.DATE, -daycount); 
+	    Date todayStart = calendar.getTime();
+	    
+	    
+	    Criteria criteria = Criteria.where("players").is(userid);
+	    criteria.and("createTime").gte(todayStart).lte(endStart); 
+	    Query query = new Query(criteria);
+	    return mongoTemplate.find(query, RoomRecoder.class);
 	}
 }

@@ -396,7 +396,7 @@ class Room{
             this.state=RoomState.IN_END;
             return;
         }
-        var http=new Http();
+        var http=new JHttp();
         http.OnResponse=function(state,msg){
             var json=JSON.parse(msg);
             if(state == 200 && !json.error){
@@ -405,11 +405,12 @@ class Room{
                 LogInfo("release room error:"+json.error);
             }
         }
-        http.Get(INFO_SERVER_URL+"playEnd?data="+EncodeUriMsg({
-            info:this.info,
+        http.PostJson(INFO_SERVER_URL+"useRoomCard",{
+            roomid:this.info.roomid,
+            token:INFO_ACCESS_TOKEN,
             players:players,
-            state:this.state
-        }));
+            cardid:this.info.cardid
+        });
         this.state=RoomState.IN_END;
     }
     public GetRoomStateInfo(c:JClient){
@@ -522,7 +523,7 @@ class Room{
         if(WRITE_ROOM_RECODER)
         {
             if(!this.recoder_stream){
-                this.recoder_stream=new AsyncFileWriter("./recoder/"+this.info.hashcode);
+                this.recoder_stream=new AsyncFileWriter("./recoder/"+this.info.cardid+"_"+(this.info.usedCount+1));
                 var infos=[];
                 for(var i=0;i<this.m_clients.length;i++){
                     infos.push([this.m_clients[i].uid,this.m_clients[i].info.openid]);
