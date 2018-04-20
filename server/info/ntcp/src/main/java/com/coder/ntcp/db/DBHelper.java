@@ -54,7 +54,7 @@ public class DBHelper {
 	
 	public RoomCard findUnuseCard(String ownerid) {
 		Criteria criteria = Criteria.where("ownerid").is(ownerid);
-		criteria.and("usedCount").gt(0);
+		criteria.and("canUseCount").gt(0);
 		Query query = new Query(criteria);
 		RoomCard roomCard = mongoTemplate.findOne(query, RoomCard.class);
 		return roomCard;

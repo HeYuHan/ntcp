@@ -90,7 +90,8 @@ class JClient{
     public EnterRoom(msg){
         var roomid=msg.roomid;
         var openid=msg.openid;
-        client.info=msg;
+        this.info=this.info||{};
+        this.info.openid=openid;
         if(!openid || !roomid){
             this.native.Disconnect();
             return;
@@ -109,8 +110,7 @@ class JClient{
                 LogInfo("check room ret:"+msg);
                 var json = JSON.parse(msg);
                 if(state == 200 && !json.error){
-                    json.roomid=roomid;
-                    var room = Room.Create(json);
+                    var room = Room.Create(roomid,json);
                     client.state=State.IN_ROOM;
                     client.room=room;
                     room.ClientJoin(client);

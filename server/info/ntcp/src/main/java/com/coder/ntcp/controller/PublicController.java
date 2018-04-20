@@ -16,9 +16,11 @@ import java.util.Map.Entry;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,6 +38,8 @@ import com.coder.ntcp.db.RoomCard;
 import com.coder.ntcp.db.RoomRecoder;
 import com.coder.ntcp.db.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.java.Log;
 class WeiXinUser{
 	public String errcode;
 	public String errmsg;
@@ -78,13 +82,15 @@ class ResRoomCard{
 	public int roomid;
 	public String cardid;
 	public boolean isnew;
+	public int canUseCount;
 	public String error;
 	public ResRoomCard() {}
 	public ResRoomCard(Room room) {
 		RoomCard card=room.getRoomCard();
-		isnew=card.usedCount==0;
+		isnew=card.canUseCount==card.maxUseCount;
 		cardid=card.uid;
 		roomid=room.getRoomId();
+		canUseCount=card.canUseCount;
 	}
 }
 
@@ -106,11 +112,12 @@ class ResRoomRecoder{
 
 
 
+@Controller
 @RestController
 @Component
 @RequestMapping("/public")
 public class PublicController {
-	
+	private static final Logger logeer = LoggerFactory.getLogger(PublicController.class);
 	
 	@Autowired
 	GConfig config;
@@ -148,7 +155,20 @@ public class PublicController {
 	@RequestMapping(value="/getRoomCard",method=RequestMethod.POST)
 	@ResponseBody
 	Object getRoomCard(@RequestBody @Valid ReqRoomCardOption reqRoomCardOption) {
+		User user = dbHelper.findObjectByUid(reqRoomCardOption.uid, User.class);
+		if(user == null) {
+			ResRoomCard resRoomCard=new ResRoomCard();
+			resRoomCard.error="ERROR_USER_NOT_FOUND";
+			return resRoomCard;
+		}
 		RoomCard dbCard=dbHelper.findUnuseCard(reqRoomCardOption.uid);
+		if(reqRoomCardOption.froceNew && dbCard!=null) {
+			dbCard.canUseCount=0;
+			dbHelper.updateObject(dbCard, false);
+			Room room = Room.getRoom(dbCard.getUid());
+			if(room != null)Room.freeRoom(room);
+			dbCard=null;
+		}
 		if(dbCard != null) {
 			Room room=Room.getRoom(dbCard.uid);
 			if(room == null) {
@@ -156,16 +176,9 @@ public class PublicController {
 			}
 			return new ResRoomCard(room);
 		}else {
-			User user = dbHelper.findObjectByUid(reqRoomCardOption.uid, User.class);
-			if(user == null) {
-				ResRoomCard resRoomCard=new ResRoomCard();
-				resRoomCard.error="USER_NOT_FOUND";
-				return resRoomCard;
-			}
+			
 			try {
-				RoomCard card = RoomCard.create(user, reqRoomCardOption);
-				dbHelper.saveObject(card);
-				dbHelper.updateObject(user, false);
+				RoomCard card = RoomCard.create(user, reqRoomCardOption,dbHelper);
 				return new ResRoomCard(Room.create(card));
 			} catch (Exception e) {
 				return new ResException(e.getMessage());
@@ -194,6 +207,7 @@ public class PublicController {
 			WeiXinUser weiXinUser=mapper.readValue(userInfo, WeiXinUser.class);
 			return weiXinUser;
 		} catch (Exception e) {
+			logeer.error(e.getMessage());
 			return null;
 		}
 	}

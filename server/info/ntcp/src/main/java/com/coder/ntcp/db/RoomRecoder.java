@@ -41,7 +41,7 @@ public class RoomRecoder implements Serializable,IDBObject{
 		recoder.cardid=card.getUid();
 		recoder.roomid=room.getRoomId();
 		recoder.players=players;
-		recoder.useIndex=card.usedCount;
+		recoder.useIndex=card.maxUseCount - card.canUseCount;
 		recoder.createTime=new Date();
 		recoder.caculateUid();
 		return recoder;

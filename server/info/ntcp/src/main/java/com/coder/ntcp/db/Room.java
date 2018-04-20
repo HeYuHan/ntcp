@@ -2,6 +2,7 @@ package com.coder.ntcp.db;
 
 import static org.hamcrest.CoreMatchers.nullValue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.coder.ntcp.common.RandomInt;
@@ -12,9 +13,22 @@ public class Room {
 	static HashMap<String, Room> gCardRoomMap;
 	int roomid;
 	RoomCard roomCard;
+	public HashMap<String, RoomPlayer> roomPlayers;
 	private Room(int id,RoomCard card) {
 		this.roomid=id;
 		this.roomCard=card;
+		this.roomPlayers=new HashMap<>();
+	}
+	public RoomPlayer createPlayer(String userid) {
+		RoomPlayer p = getRoomPlayer(userid);
+		if(p != null)return p;
+		p = new RoomPlayer();
+		p.userid=userid;
+		roomPlayers.put(userid, p);
+		return p;
+	}
+	public RoomPlayer getRoomPlayer(String userid) {
+		return roomPlayers.get(userid);
 	}
 	public int getRoomId() {
 		return this.roomid;

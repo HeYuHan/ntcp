@@ -303,13 +303,13 @@ class Room{
     //记录写入流
     public recoder_stream:AsyncFileWriter=null;
     private static gRoomList:Array<Room>=[];
-    public static Create(info:any):Room{
-        var room = Room.Get(info.roomid);
+    public static Create(roomid:number, info:any):Room{
+        var room = Room.Get(roomid);
         if(room){
             return room;
         }
         room = new Room();
-        room.uid=info.roomid;
+        room.uid=roomid;
         room.info=info;
         Room.gRoomList.push(room);
         return room;
@@ -406,7 +406,7 @@ class Room{
             }
         }
         http.PostJson(INFO_SERVER_URL+"useRoomCard",{
-            roomid:this.info.roomid,
+            roomid:this.uid,
             token:INFO_ACCESS_TOKEN,
             players:players,
             cardid:this.info.cardid
@@ -523,7 +523,7 @@ class Room{
         if(WRITE_ROOM_RECODER)
         {
             if(!this.recoder_stream){
-                this.recoder_stream=new AsyncFileWriter("./recoder/"+this.info.cardid+"_"+(this.info.usedCount+1));
+                this.recoder_stream=new AsyncFileWriter("./recoder/"+this.info.cardid+"_"+(this.info.maxUseCount - this.info.canUseCount+1));
                 var infos=[];
                 for(var i=0;i<this.m_clients.length;i++){
                     infos.push([this.m_clients[i].uid,this.m_clients[i].info.openid]);
@@ -593,7 +593,7 @@ class Room{
     }
     //初始化牌
     public CreatePai(){
-        this.pais=new PaiDui(true);
+        this.pais=new PaiDui(this.info.includexi);
         //摸将牌
         var test =1;
         for(var p=0;p<this.room_players.length;p++)
@@ -722,7 +722,6 @@ class Room{
                 p.CaculateHu(this.pais);
             }
             var msg:any={
-                playcount:this.info.playcount,
                 uid:p.uid,
                 shou:p.shou_pai,
                 di:p.di_pai,
@@ -738,7 +737,15 @@ class Room{
             msgs.push(msg);
         }
         LogInfo("Hu Pai La ........");
-        this.BroadCastMessage(CreateMsg(SERVER_MSG.SM_GAME_BALANCE,msgs));
+        this.BroadCastMessage(CreateMsg(SERVER_MSG.SM_GAME_BALANCE,{
+            card:{
+                players:this.info.players,
+                canUseCount:this.info.canUseCount-1,
+                blanceRate:this.info.blanceRate,
+                includexi:this.info.includexi
+            },
+            data:msgs
+        }));
         this.Release();
     }
     // public CaculatePlayerTotleScore(player:RoomPlayer){

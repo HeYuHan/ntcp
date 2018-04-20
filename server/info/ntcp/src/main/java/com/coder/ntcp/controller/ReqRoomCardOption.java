@@ -9,4 +9,5 @@ public class ReqRoomCardOption{
 	public int payType;
 	public int playCount;
 	public int blanceRate;
+	public boolean froceNew;
 }
