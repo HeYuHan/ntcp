@@ -5,9 +5,13 @@ import javax.validation.constraints.NotBlank;
 public class ReqRoomCardOption{
 	@NotBlank
 	public String uid;
+	@NotBlank
+	public String currencyType;
 	public boolean includexi;
-	public int payType;
+	@NotBlank(message="type:(Host|AA|Winer)")
+	public String payType;
 	public int playCount;
 	public int balanceRate;
 	public boolean forceNew;
+
 }

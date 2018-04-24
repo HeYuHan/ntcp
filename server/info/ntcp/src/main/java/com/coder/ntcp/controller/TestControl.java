@@ -31,7 +31,7 @@ public class TestControl {
 		Map<String, Object> tipMap = new HashMap<String, Object>();
 		tipMap.put("cardid", recoder.cardid);
 		tipMap.put("roomid", recoder.roomid);
-		tipMap.put("players", recoder.players);
+		tipMap.put("scores", recoder.scores);
 		tipMap.put("useIndex", recoder.useIndex);
 		return mapper.writeValueAsString(tipMap);
 	}

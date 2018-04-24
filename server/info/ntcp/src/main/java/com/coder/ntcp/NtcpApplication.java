@@ -12,6 +12,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import com.coder.ntcp.db.CurrencyType;
 import com.coder.ntcp.db.DBHelper;
 import com.coder.ntcp.db.Room;
 import com.coder.ntcp.db.RoomCard;
