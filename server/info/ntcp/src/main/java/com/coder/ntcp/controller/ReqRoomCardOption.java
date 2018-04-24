@@ -8,6 +8,6 @@ public class ReqRoomCardOption{
 	public boolean includexi;
 	public int payType;
 	public int playCount;
-	public int blanceRate;
-	public boolean froceNew;
+	public int balanceRate;
+	public boolean forceNew;
 }

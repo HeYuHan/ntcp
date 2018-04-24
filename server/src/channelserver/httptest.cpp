@@ -1,6 +1,10 @@
 /* Base on code from:
 http://archives.seul.org/libevent/users/Sep-2010/msg00050.html
 */
+#ifdef WIN32
+
+
+
 #include <log.h>
 #include <errno.h>  
 #include <stdlib.h>  
@@ -293,3 +297,4 @@ int main2(int argc, char *argv[])
 
 	return 0;
 }
+#endif // WIN32

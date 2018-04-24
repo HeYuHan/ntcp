@@ -20,19 +20,24 @@ public class User implements Serializable,IDBObject{
 
 	public String uid;
 	public String openid;
+	public String nick;
 	public String token;
-	public int glodCount;
+	public String headimgurl;
+	public int goldCount;
 	public int diamondCount;
 	public boolean isProxy;
+	
 	@Override
 	public String getUid() {
 		return uid;
 	}
 	@Override
 	public void onUpdate(Update update) {
-		update.set("glodCount", glodCount)
+		update.set("goldCount", goldCount)
 		.set("diamondCount", diamondCount)
 		.set("isProxy", isProxy)
+		.set("nick", nick)
+		.set("headimgurl", headimgurl)
 		.set("token", token);
 	}
 	@Override

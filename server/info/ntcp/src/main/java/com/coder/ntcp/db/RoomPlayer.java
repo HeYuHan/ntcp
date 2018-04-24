@@ -6,7 +6,7 @@ public class RoomPlayer {
 	public int[] scores=new int[15];
 	public RoomPlayer() {
 		for(int i=0;i<scores.length;i++) {
-			this.scores[i]=-1;
+			this.scores[i]=0;
 		}
 	}
 }

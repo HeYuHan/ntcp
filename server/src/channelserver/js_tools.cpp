@@ -22,50 +22,50 @@ void GetJSString(JSContext * cx, JS::HandleValue str, std::string & ret)
 	JS_free(cx, data);
 	//delete[] data;
 }
-bool js_utf8_to_utf16(std::string &utf8, std::string &retStr)
-{
-	bool ok = true;
-	iconv_t iconvH = iconv_open("utf-8", "gb2312");
-	do 
-	{
-		
-		if (iconvH == 0)
-		{
-			ok = false;
-			break;
-		}
-		size_t srclen = strlen(utf8.c_str());
-		size_t outLen = 1024;
-		/* 存放转换后的字符串 */
-		char outbuf[1024];
-		memset(outbuf, 0, 1024);
-		/* 由于iconv()函数会修改指针，所以要保存源指针 */
-		const char *pin = utf8.c_str();
-		char *pout = outbuf;
-
-		/* 进行转换
-		*@param cd iconv_open()产生的句柄
-		*@param srcstart 需要转换的字符串
-		*@param srclen 存放还有多少字符没有转换
-		*@param tempoutbuf 存放转换后的字符串
-		*@param outlen 存放转换后,tempoutbuf剩余的空间
-		*
-		* */
-		do {
-			size_t ret = iconv(iconvH, &pin, &srclen, &pout, &outLen);
-			if (ret == -1)
-			{
-				ret = false;
-				ok = false;
-				break;
-			}
-		} while (srclen > 0);
-		retStr = std::string(outbuf);
-	} while (0);
-	/* 关闭句柄 */
-	iconv_close(iconvH);
-	return true;
-}
+//bool js_utf8_to_utf16(std::string &utf8, std::string &retStr)
+//{
+//	bool ok = true;
+//	iconv_t iconvH = iconv_open("utf-8", "gb2312");
+//	do 
+//	{
+//		
+//		if (iconvH == 0)
+//		{
+//			ok = false;
+//			break;
+//		}
+//		size_t srclen = strlen(utf8.c_str());
+//		size_t outLen = 1024;
+//		/* 存放转换后的字符串 */
+//		char outbuf[1024];
+//		memset(outbuf, 0, 1024);
+//		/* 由于iconv()函数会修改指针，所以要保存源指针 */
+//		const char *pin = utf8.c_str();
+//		char *pout = outbuf;
+//
+//		/* 进行转换
+//		*@param cd iconv_open()产生的句柄
+//		*@param srcstart 需要转换的字符串
+//		*@param srclen 存放还有多少字符没有转换
+//		*@param tempoutbuf 存放转换后的字符串
+//		*@param outlen 存放转换后,tempoutbuf剩余的空间
+//		*
+//		* */
+//		do {
+//			size_t ret = iconv(iconvH, &pin, &srclen, &pout, &outLen);
+//			if (ret == -1)
+//			{
+//				ret = false;
+//				ok = false;
+//				break;
+//			}
+//		} while (srclen > 0);
+//		retStr = std::string(outbuf);
+//	} while (0);
+//	/* 关闭句柄 */
+//	iconv_close(iconvH);
+//	return true;
+//}
 
 jsval std_string_to_jsval(JSContext* cx, const std::string& v)
 {

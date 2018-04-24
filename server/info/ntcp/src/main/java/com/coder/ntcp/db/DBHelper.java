@@ -1,7 +1,9 @@
 package com.coder.ntcp.db;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -9,6 +11,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
+
+import com.coder.ntcp.controller.ReqRoomCardOption;
 
 @Component
 public class DBHelper {
@@ -52,13 +56,39 @@ public class DBHelper {
 	}
 	
 	
-	public RoomCard findUnuseCard(String ownerid) {
-		Criteria criteria = Criteria.where("ownerid").is(ownerid);
+	public List<Room> cleanRoomCardByHour(int hour) {
+		Calendar calendar = Calendar.getInstance(); 
+		calendar.add(Calendar.HOUR, -hour); 
+	    Date todayStart = calendar.getTime();
+		Criteria criteria = Criteria.where("timeOut").is(false);
+		criteria.and("createTime").lt(todayStart); 
 		criteria.and("canUseCount").gt(0);
 		Query query = new Query(criteria);
-		RoomCard roomCard = mongoTemplate.findOne(query, RoomCard.class);
-		return roomCard;
+//		List<RoomCard> roomCards = mongoTemplate.find(query, RoomCard.class);
+//		if(roomCards == null )return;
+//		for(int i=0;i<roomCards.size();i++) {
+//			RoomCard card = roomCards.get(i);
+//			card.timeOut=true;
+//			Room room = Room.getRoom(card.getUid());
+//			if(room != null)Room.freeRoom(room);
+//		}
+		Update update = new Update();
+		update.set("timeOut", true);
+		mongoTemplate.updateMulti(query, update, RoomCard.class);
+		return Room.freeRoomsByDateBefore(todayStart);
+		//return roomCard;
 	}
+	public List<RoomCard> getRecoveryRoomCard(int hour){
+		Calendar calendar = Calendar.getInstance(); 
+		calendar.add(Calendar.HOUR, -hour); 
+	    Date todayStart = calendar.getTime();
+		Criteria criteria = Criteria.where("timeOut").is(false);
+		criteria.and("createTime").gt(todayStart);
+		criteria.and("canUseCount").gt(0);
+		Query query = new Query(criteria);
+		return mongoTemplate.find(query, RoomCard.class);
+	}
+	
 	public List<RoomRecoder> findRoomRecoderByDay(String userid,int daycount) {
 		Calendar calendar = Calendar.getInstance(); 
 		Date endStart = calendar.getTime();

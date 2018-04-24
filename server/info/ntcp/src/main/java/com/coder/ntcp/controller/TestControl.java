@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,6 +23,7 @@ public class TestControl {
 	DBHelper dbHelper;
 	
 	@RequestMapping("/createRandomRecoder")
+	@CrossOrigin
 	String createRandomRecoder() throws JsonProcessingException {
 		RoomRecoder recoder = RoomRecoder.createTest();
 		dbHelper.saveObject(recoder);
@@ -34,13 +36,14 @@ public class TestControl {
 		return mapper.writeValueAsString(tipMap);
 	}
 	@RequestMapping("/createRandomUser")
+	@CrossOrigin
 	String createRandomUser() throws JsonProcessingException {
 		User dbUser = new User();
 		dbUser.uid="testuid"+Integer.toString((int)(Math.random()*100000));;
 		dbUser.openid="testopenid"+Integer.toString((int)(Math.random()*100000));;
 		
 		dbUser.diamondCount=1000;
-		dbUser.glodCount=1000;
+		dbUser.goldCount=1000;
 		dbUser.token="testtoken"+Integer.toString((int)(Math.random()*100000));;
 		dbHelper.saveObject(dbUser);
 		ObjectMapper mapper = new ObjectMapper();
@@ -48,7 +51,7 @@ public class TestControl {
 		tipMap.put("uid", dbUser.uid);
 		tipMap.put("openid", dbUser.openid);
 		tipMap.put("diamondCount", dbUser.diamondCount);
-		tipMap.put("glodCount", dbUser.glodCount);
+		tipMap.put("glodCount", dbUser.goldCount);
 		tipMap.put("token", dbUser.token);
 		return mapper.writeValueAsString(tipMap);
 	}

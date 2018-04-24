@@ -82,10 +82,9 @@ var JClient = (function () {
     };
     JClient.prototype.EnterRoom = function (msg) {
         var roomid = msg.roomid;
-        var openid = msg.openid;
-        this.info = this.info || {};
-        this.info.openid = openid;
-        if (!openid || !roomid) {
+        var unionid = msg.unionid;
+        this.info = msg;
+        if (!unionid || !roomid) {
             this.native.Disconnect();
             return;
         }
@@ -97,8 +96,10 @@ var JClient = (function () {
             room.ClientJoin(client);
         }
         else {
-            var http = new JHttp();
-            http.OnResponse = function (state, msg) {
+            PostJson(INFO_SERVER_URL + "getRoomCard", {
+                token: INFO_ACCESS_TOKEN,
+                roomid: roomid
+            }, function (state, msg) {
                 LogInfo("check room ret:" + msg);
                 var json = JSON.parse(msg);
                 if (state == 200 && !json.error) {
@@ -112,10 +113,6 @@ var JClient = (function () {
                         error: "room not found:" + roomid
                     }));
                 }
-            };
-            http.PostJson(INFO_SERVER_URL + "getRoomCard", {
-                token: INFO_ACCESS_TOKEN,
-                roomid: roomid
             });
         }
     };

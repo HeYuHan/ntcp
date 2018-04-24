@@ -1,9 +1,10 @@
 package com.coder.ntcp.db;
-
-import static org.hamcrest.CoreMatchers.nullValue;
-
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
 
 import com.coder.ntcp.common.RandomInt;
 
@@ -36,23 +37,47 @@ public class Room {
 	public RoomCard getRoomCard() {
 		return this.roomCard;
 	}
-	public static Room create(RoomCard card) {
+	static RandomInt getIdCreater() {
 		if(roomCreater == null) {
 			roomCreater = new RandomInt(100000, 999999, false);
 			gRoomMap=new HashMap<>();
 			gCardRoomMap=new HashMap<>();
 		}
-		try {
-			int id=roomCreater.get();
-			Room room=new Room(id,card);
-			gRoomMap.put(id, room);
-			gCardRoomMap.put(card.uid, room);
-			return room;
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
+		return roomCreater;
+	}
+	public static int getRandomId() throws Exception {
+		
+		return getIdCreater().get();
+	}
+	public static Room create(RoomCard card){
+		
+		Room room=new Room(card.roomid,card);
+		gRoomMap.put(card.roomid, room);
+		gCardRoomMap.put(card.uid, room);
+		return room;
+	}
+	public static List<Room> freeRoomsByDateBefore(Date date) {
+		if(gRoomMap==null)return null ;
+		Iterator<Entry<Integer, Room>> iter =  gRoomMap.entrySet().iterator();
+		ArrayList<Room> frees = new ArrayList<Room>();
+		while (iter.hasNext()) {
+			Entry<Integer, Room> entery = iter.next();
+			Room room = entery.getValue();
+			RoomCard card = room.getRoomCard();
+			int d = card.createTime.compareTo(date);
+			if(d<=0)frees.add(room);
+			
 		}
+		for(int i=0;i<frees.size();i++) {
+			freeRoom(frees.get(i));
+		}
+		return frees;
+	}
+	public static boolean RecoverRoom(RoomCard card) {
+		boolean r = getIdCreater().getByInput(card.roomid);
+		if(!r)return false;
+		create(card);
+		return true;
 	}
 	public static void freeRoom(Room r) {
 		Room r2=gRoomMap.get(r.getRoomId());

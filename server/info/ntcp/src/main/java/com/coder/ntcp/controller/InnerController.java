@@ -50,7 +50,7 @@ class ResRoomCardDetail{
 	public int maxUseCount;
 	public int canUseCount;
 	public int payType;
-	public int blanceRate;
+	public int balanceRate;
 	public boolean includexi;
 	public boolean isPay;
 	public RoomPlayer[] players;
@@ -61,7 +61,7 @@ class ResRoomCardDetail{
 		this.maxUseCount=dbCard.maxUseCount;
 		this.canUseCount=dbCard.canUseCount;
 		this.payType=dbCard.payType;
-		this.blanceRate=dbCard.blanceRate;
+		this.balanceRate=dbCard.balanceRate;
 		this.includexi=dbCard.includexi;
 		this.isPay = dbCard.isPay;
 		this.players = new RoomPlayer[room.roomPlayers.size()];
@@ -194,6 +194,7 @@ public class InnerController {
 		
 		if(reqRoomCard.freecard ||card.canUseCount == 0) {
 			Room.freeRoom(room);
+			logeer.info("free room:"+room.getRoomId()+" card:"+card.getUid());
 		}
 		dbHelper.updateObject(card, false);
 		resUseRoomCard.ok=true;

@@ -1,5 +1,6 @@
 package com.coder.ntcp.common;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 
 import java.util.ArrayList;
@@ -39,6 +40,15 @@ public class RandomInt{
 			}
 			return this.recoders.remove(0);
 		}
+	}
+	public boolean getByInput(int input) {
+		for(int i=0;i<this.recoders.size();i++) {
+			if(this.recoders.get(i)== input) {
+				this.recoders.remove(i);
+				return true;
+			}
+		}
+		return false;
 	}
 	public int size() {
 		return this.recoders.size();

@@ -1,0 +1,1 @@
+[0,{"self":65536,"state":1,"clients":[{"uid":65536,"state":3,"info":{}}]}]

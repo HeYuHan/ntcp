@@ -1,5 +1,5 @@
 //人数限制
-let ROOM_MAX_PLAYER_COUNT = 3;
+let ROOM_MAX_PLAYER_COUNT = 2;
 //关闭随机
 let DEFINE_RANDOM_TEST = true;
 
@@ -20,11 +20,10 @@ function LogWarn(msg){
 function LogError(msg){
     Debug.Log(3,msg);
 }
-
-class JHttp extends Http{
-    public PostJson(url,data){
-        this.Post(url,JSON.stringify(data),"application/json");
-    }
+function PostJson(url,data,call_back){
+    var http=new Http();
+    http.OnResponse=call_back;
+    http.Post(url,JSON.stringify(data),"application/json");
 }
 
 class AsyncFileWriter{

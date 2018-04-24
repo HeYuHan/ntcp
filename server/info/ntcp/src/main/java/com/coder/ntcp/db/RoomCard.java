@@ -2,6 +2,7 @@ package com.coder.ntcp.db;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -23,9 +24,12 @@ public class RoomCard implements Serializable,IDBObject{
 	public int maxUseCount=PLAY_COUNT_6;
 	public int canUseCount=0;
 	public int payType=PAY_HOST;
-	public int blanceRate=1;
+	public int balanceRate=1;
 	public boolean includexi=true;
 	public boolean isPay;
+	public Date createTime;
+	public boolean timeOut;
+	public int roomid;
 	@Override
 	public String getUid() {
 		// TODO Auto-generated method stub
@@ -56,7 +60,7 @@ public class RoomCard implements Serializable,IDBObject{
 		//if(!user.isProxy)throw new Exception("ERROR_USER_IS_NOT_PROXY");
 		if(option.playCount != PLAY_COUNT_6 && option.playCount!=PLAY_COUNT_12) throw new Exception("ERROR_PLAY_COUNT");
 		if(option.payType<1||option.payType>3)throw new Exception("ERROR_PAY_TYPE");
-		if(option.blanceRate<1||option.blanceRate>3)throw new Exception("ERROR_RATE_TYPE");
+		//if(option.balanceRate<1||option.balanceRate>3)throw new Exception("ERROR_RATE_TYPE");
 		if(option.playCount == PLAY_COUNT_6) {
 			if(user.diamondCount<3)throw new Exception("ERROR_DIAMOND_NOT_FULL");
 			user.diamondCount-=3;
@@ -69,14 +73,16 @@ public class RoomCard implements Serializable,IDBObject{
 			dbHelper.updateObject(user, false);
 			card.isPay=true;
 		}
-		
+		card.roomid=Room.getRandomId();
 		card.ownerid=user.uid;
 		card.uid=DigestUtils.md5Hex(user.uid+System.currentTimeMillis());
 		card.includexi=option.includexi;
 		card.payType=option.payType;
 		card.maxUseCount=option.playCount;
 		card.canUseCount=card.maxUseCount;
-		card.blanceRate=Math.max(1, option.blanceRate);
+		card.balanceRate=Math.max(1, option.balanceRate);
+		card.createTime=new Date();
+		card.timeOut=false;
 		dbHelper.saveObject(card);
 		return card;
 	}

@@ -38,10 +38,10 @@ var RoomPlayer = (function () {
             this.qi_pai.push(pais[i]);
         }
     };
-    RoomPlayer.prototype.SetPlayerInfo = function (client, openid) {
+    RoomPlayer.prototype.SetPlayerInfo = function (client, unionid) {
         this.uid = client.uid;
         this.client = client;
-        this.openid = openid;
+        this.unionid = unionid;
         client.player = this;
         client.state = State.IN_GAME;
     };
@@ -317,11 +317,13 @@ var Room = (function () {
         this.m_timer = null;
         Room.Remove(this.uid);
         var players = [];
+        var scores = [];
         for (var i = 0; i < this.m_clients.length; i++) {
             this.m_clients[i].room = null;
         }
         for (var i = 0; i < this.room_players.length; i++) {
-            players.push(this.room_players[i].openid);
+            players.push(this.room_players[i].unionid);
+            scores.push(this.room_players[i].hu_pai_info.totle_socre);
             if (this.room_players[i].client)
                 this.room_players[i].client.player = null;
         }
@@ -336,8 +338,14 @@ var Room = (function () {
             this.state = RoomState.IN_END;
             return;
         }
-        var http = new JHttp();
-        http.OnResponse = function (state, msg) {
+        PostJson(INFO_SERVER_URL + "useRoomCard", {
+            roomid: this.uid,
+            token: INFO_ACCESS_TOKEN,
+            players: players,
+            scores: scores,
+            cardid: this.info.cardid
+        }, function (state, msg) {
+            LogInfo("useCard:" + msg);
             var json = JSON.parse(msg);
             if (state == 200 && !json.error) {
                 LogInfo("release room:" + msg);
@@ -345,12 +353,6 @@ var Room = (function () {
             else {
                 LogInfo("release room error:" + json.error);
             }
-        };
-        http.PostJson(INFO_SERVER_URL + "useRoomCard", {
-            roomid: this.uid,
-            token: INFO_ACCESS_TOKEN,
-            players: players,
-            cardid: this.info.cardid
         });
         this.state = RoomState.IN_END;
     };
@@ -381,9 +383,9 @@ var Room = (function () {
         else if (this.state > RoomState.IN_WAIT) {
             for (var i = 0; i < this.room_players.length; i++) {
                 var p = this.room_players[i];
-                if (c.info.openid == p.openid) {
+                if (c.info.unionid == p.unionid) {
                     var old_uid = p.uid;
-                    p.SetPlayerInfo(c, c.info.openid);
+                    p.SetPlayerInfo(c, c.info.unionid);
                     this.BroadCastMessageByPlayer(p, CreateMsg(SERVER_MSG.SM_SYNC_ROOM_STATE, this.GetRoomStateInfo(c)), CreateMsg(SERVER_MSG.SM_ENTER_ROOM, { uid: p.uid, origin: old_uid }));
                     return;
                 }
@@ -401,15 +403,15 @@ var Room = (function () {
             }));
             return;
         }
-        LogInfo("client enter room openid:" + c.info.openid);
+        LogInfo("client enter room openid:" + c.info.unionid);
         this.AddClient(c);
         var all_clients = [];
         for (var i = 0; i < this.m_clients.length; i++) {
             var other = this.m_clients[i];
             all_clients.push({
                 uid: other.uid,
-                state: other.state,
-                info: other.info
+                info: other.info,
+                state: other.state
             });
         }
         for (var i = 0; i < this.m_clients.length; i++) {
@@ -463,7 +465,7 @@ var Room = (function () {
                 this.recoder_stream = new AsyncFileWriter("./recoder/" + this.info.cardid + "_" + (this.info.maxUseCount - this.info.canUseCount + 1));
                 var infos = [];
                 for (var i = 0; i < this.m_clients.length; i++) {
-                    infos.push([this.m_clients[i].uid, this.m_clients[i].info.openid]);
+                    infos.push([this.m_clients[i].uid, this.m_clients[i].info.unionid]);
                 }
                 this.recoder_stream.Write(JSON.stringify(infos) + "\n");
             }
@@ -478,7 +480,7 @@ var Room = (function () {
             var p = new RoomPlayer();
             p.index = i;
             var c = this.m_clients[i];
-            p.SetPlayerInfo(c, c.info.openid);
+            p.SetPlayerInfo(c, c.info.unionid);
             this.room_players.push(p);
         }
         this.CreatePai();
@@ -533,6 +535,7 @@ var Room = (function () {
         }
     };
     Room.prototype.MoPai = function () {
+        this.auto_chu_pai_timer = 0;
         var player = this.room_players[this.next_mo_palyer];
         this.AutoUpdateNextPlayer();
         var pai = 0;
@@ -581,6 +584,7 @@ var Room = (function () {
                 return;
             }
             ;
+            this.auto_chu_pai_timer = 0;
             this.last_chu_pai = value;
             this.last_chu_pai_player = player;
             if (!Pai.Equal(this.last_mo_pai, this.last_chu_pai)) {
@@ -663,8 +667,7 @@ var Room = (function () {
             card: {
                 players: this.info.players,
                 canUseCount: this.info.canUseCount - 1,
-                blanceRate: this.info.blanceRate,
-                includexi: this.info.includexi
+                balanceRate: this.info.balanceRate
             },
             data: msgs
         }));
@@ -795,7 +798,6 @@ var Room = (function () {
             }
         }
         if ((this.players_result_msg_count == this.wait_result_players.length) || time_out) {
-            this.auto_chu_pai_timer = 0;
             if (this.last_chu_pai_player)
                 this.last_chu_pai_player.AddQiPais(this.last_chu_pai);
             this.wait_result = false;

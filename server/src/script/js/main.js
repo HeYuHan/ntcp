@@ -1,14 +1,4 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var ROOM_MAX_PLAYER_COUNT = 3;
+var ROOM_MAX_PLAYER_COUNT = 2;
 var DEFINE_RANDOM_TEST = true;
 var INFO_SERVER_URL = "http://127.0.0.1:9800/private/";
 var WRITE_ROOM_RECODER = false;
@@ -23,16 +13,11 @@ function LogWarn(msg) {
 function LogError(msg) {
     Debug.Log(3, msg);
 }
-var JHttp = (function (_super) {
-    __extends(JHttp, _super);
-    function JHttp() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    JHttp.prototype.PostJson = function (url, data) {
-        this.Post(url, JSON.stringify(data), "application/json");
-    };
-    return JHttp;
-}(Http));
+function PostJson(url, data, call_back) {
+    var http = new Http();
+    http.OnResponse = call_back;
+    http.Post(url, JSON.stringify(data), "application/json");
+}
 var AsyncFileWriter = (function () {
     function AsyncFileWriter(path) {
         this.native = 0;

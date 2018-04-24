@@ -1,15 +1,12 @@
 package com.coder.ntcp.common;
 
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -19,7 +16,12 @@ public class Tools {
 	
 	public static String httpGet(String url)
 	{
+		//utf-8
 		RestTemplate client=new RestTemplate();
+		StringHttpMessageConverter stringHttpMessageConverter=new StringHttpMessageConverter(StandardCharsets.UTF_8);    
+	    List<HttpMessageConverter<?>> list=new ArrayList<HttpMessageConverter<?>>();   
+	    list.add(stringHttpMessageConverter);  
+	    client.setMessageConverters(list); 
 		ResponseEntity<String> response = client.getForEntity(url,String.class);
 		return response.getBody();
 		
