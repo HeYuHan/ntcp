@@ -45,7 +45,11 @@ class EditUser
 		this.nick=user.nick;
 	}
 }
-
+class ReqPageData
+{
+	public int offset;
+	public int limit;
+}
 @Controller
 @RequestMapping("/admin")
 public class AdminControl {
@@ -76,15 +80,18 @@ public class AdminControl {
 	}
 	@RequestMapping(value = "/getUsers",method=RequestMethod.POST)
 	@ResponseBody
-	Object getUsers(int start,int count)
+	Object getUsers(@RequestBody @Valid ReqPageData reqPageData)
 	{
-		if(start<0||count<=0)return null;
+		if(reqPageData.offset<0||reqPageData.limit<=0)return null;
 		ArrayList<EditUser> users=new ArrayList<EditUser>();
-		List<User> dbUsers=dbHelper.findUsers(start, count);
+		List<User> dbUsers=dbHelper.findUsers(reqPageData.offset, reqPageData.limit);
 		for(User u : dbUsers) {
 			users.add(new EditUser(u));
 		}
-		return users;
+		HashMap<String, Object> ret=new HashMap<>();
+		ret.put("totle", users.size());
+		ret.put("rows", users);
+		return ret;
 	}
 	@RequestMapping(value = "/getProxys",method=RequestMethod.POST)
 	@ResponseBody
