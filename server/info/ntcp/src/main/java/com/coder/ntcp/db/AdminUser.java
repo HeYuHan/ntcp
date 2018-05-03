@@ -5,6 +5,8 @@ import java.io.Serializable;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Update;
 
+
+
 @Document(collection="admin")
 public class AdminUser implements IDBObject,Serializable{
 	/**
@@ -13,6 +15,7 @@ public class AdminUser implements IDBObject,Serializable{
 	private static final long serialVersionUID = 7320260117183518809L;
 	public String uid;
 	public String password;
+	public String nick;
 	public int level;
 	
 	@Override

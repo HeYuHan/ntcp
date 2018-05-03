@@ -7,8 +7,6 @@ import java.io.Serializable;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Update;
 
-import lombok.Getter;
-import lombok.Setter;
 
 @Document(collection="user")
 

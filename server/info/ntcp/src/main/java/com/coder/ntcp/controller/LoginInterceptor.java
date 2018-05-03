@@ -14,7 +14,7 @@ import com.coder.ntcp.db.AdminUser;
 import com.coder.ntcp.db.DBHelper;
 @Component
 public class LoginInterceptor extends HandlerInterceptorAdapter{
-	private final static String SESSION_KEY_PREFIX = "session:"; 
+	public final static String SESSION_KEY_PREFIX = "session:"; 
 	@Autowired
 	DBHelper dbHelper;
 	
@@ -35,7 +35,8 @@ public class LoginInterceptor extends HandlerInterceptorAdapter{
 			}
 			else
 			{
-				session.setAttribute(SESSION_KEY_PREFIX, username+":"+user.level);
+				user.password="";
+				session.setAttribute(SESSION_KEY_PREFIX, user);
 				response.sendRedirect("/admin/");
 				return false;
 			}

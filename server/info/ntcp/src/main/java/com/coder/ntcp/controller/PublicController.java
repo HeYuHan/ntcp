@@ -40,8 +40,6 @@ import com.coder.ntcp.db.RoomRecoder;
 import com.coder.ntcp.db.User;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.extern.java.Log;
 class WeiXinUser{
 	public String errcode;
 	public String errmsg;
