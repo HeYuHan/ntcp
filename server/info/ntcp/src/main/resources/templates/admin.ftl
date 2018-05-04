@@ -80,8 +80,10 @@
     <script src="../js/jquery.min.js"></script>
     <script src="../bootstrap/js/bootstrap.min.js"></script>
     <script src="https://cdn.bootcss.com/bootstrap-table/1.12.1/bootstrap-table.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap-table/1.12.1/locale/bootstrap-table-zh-CN.min.js"></script>
     
     <script src="https://cdn.bootcss.com/bootstrap-table/1.12.1/extensions/editable/bootstrap-table-editable.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap-select/1.13.0/js/bootstrap-select.min.js"></script>
     <script src="https://cdn.bootcss.com/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
 </head>
 <body>
@@ -175,30 +177,111 @@
             </div>
         </div>
     </div>
-    <script>
-            GUser={
-                account:"${account}",
-                level:${level},
-                nick:"${nick}"
-            }
-            function getNextUserPage(data_callback)
-            {
-                window.currentPage=window.currentPage || 0;
-    
-                $.ajax({
-                    type:"POST",
-                    url:"getUsers",
-                    dataType:"json",
-                    data:{
-                        start:window.currentPage,
-                        count:10
-                    },
-                    success:data_callback
-                });
-    
-                window.currentPage++;
-            }
 
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="userEditModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">
+                            详细信息
+                    </h4>
+                </div>
+                <div class="modal-body" id="userEditBody">
+                        <table class="table">
+                                <caption>ID</caption>
+                                <tbody>
+                                    <tr class="active">
+                                        <td>昵称</td>
+                                        <td id="detail_nick">FFXX</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr class="success">
+                                        <td>金币</td>
+                                        <td id="detail_gold">8000</td>
+                                        <td>
+                                            <div class="input-group" >
+                                                <input type="number" class="form-control" id="change_gold">
+                                                <!-- <span class="input-group-btn">
+                                                    <button class="btn btn-default" type="button">
+                                                        确认
+                                                    </button>
+                                                </span> -->
+                                            </div><!-- /input-group -->
+                                        </td>
+                                    </tr>
+                                    <tr  class="warning">
+                                        <td>钻石</td>
+                                        <td id="detail_diamond">100</td>
+                                        <td>
+                                            <div class="input-group">
+                                                    <input type="number" class="form-control" id="change_diamond">
+                                                    <!-- <span class="input-group-btn">
+                                                        <button class="btn btn-default" type="button">
+                                                            确认
+                                                        </button>
+                                                    </span> -->
+                                            </div><!-- /input-group -->
+                                        </td>
+                                    </tr>
+                                    <tr  class="danger">
+                                        <td>代理</td>
+                                        <td id="detail_proxy">是</td>
+                                        <td>
+                                            <div class="input-group">
+                                                    <!-- <input type="text" class="form-control"> -->
+                                                    <div class="input-group-btn">
+                                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                            变更
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu pull-right" id="change_proxy">
+                                                            <li><a href="#">是</a></li>
+                                                            <li><a href="#">否</a></li>
+                                                        </ul>
+                                                    </div><!-- /btn-group -->
+                                                </div><!-- /input-group -->
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table class="table">
+                                <caption>变更信息</caption>
+                                <tbody>
+                                    <tr class="success">
+                                        <td>金币</td>
+                                        <td id="changed_gold_value" style="color: rgb(248, 37, 0);">未变更</td>
+                                    </tr>
+                                    <tr  class="warning">
+                                        <td>钻石</td>
+                                        <td id="changed_diamond_value" style="color: rgb(248, 37, 0);">未变更</td>
+                                    </tr>
+                                    <tr  class="danger">
+                                        <td>代理</td>
+                                        <td id="changed_proxy_value" style="color: rgb(248, 37, 0);">未变更</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="update_user">确认</button>
+                    <!-- <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button> -->
+                    
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <script>
+        GUser={
+            account:"${account}",
+            level:${level},
+            nick:"${nick}"
+        }
+    </script>
+ 
+    <script>
             (function () {
                 function init(table,url,params,titles,editable,hasCheckbox,toolbar) {
                     $(table).bootstrapTable({
@@ -222,12 +305,14 @@
                         minimumCountColumns: 2,             //最少允许的列数
                         clickToSelect: true,                //是否启用点击选中行
                         //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
-                        uniqueId: "ID",                     //每一行的唯一标识，一般为主键列
+                        uniqueId: "uid",                     //每一行的唯一标识，一般为主键列
                         showToggle:true,                    //是否显示详细视图和列表视图的切换按钮
                         cardView: false,                    //是否显示详细视图
                         detailView: false,                  //是否显示父子表
-
+                        editable:true,
                         columns: createCols(params,titles,editable,hasCheckbox),
+                        onEditableSave:onEditableSave,
+                        onDblClickRow:onDblClickRow
                         // data: [{
                         //     id: 1,
                         //     name: 'Item 1',
@@ -238,6 +323,13 @@
                         //     price: '$2'
                         // }]
                     });
+                }
+                function onDblClickRow(row) {
+                    editUser(row);
+                }
+                function onEditableSave(field, row, oldValue, $el)
+                {
+                    console.log(field,row,oldValue,$el);
                 }
                 function createCols(params,titles,editable,hasCheckbox) {
                     if(params.length!=titles.length||titles.length!=editable.length)
@@ -273,17 +365,101 @@
                 }
 
             })();
+            function editUser(row){
+                var modal=$("#userEditModal");
+                modal.modal('show');
+                modal.find("#detail_nick").html(row.nick);
+                modal.find("#detail_gold").html(row.goldCount);
+                modal.find("#detail_diamond").html(row.diamondCount);
+                modal.find("#detail_proxy").html(row.isProxy?"是":"否");
+                var change_gold=null;
+                var change_diamond=null;
+                var change_proxy=null;
+                $("#change_gold").on("input",function(){      //只需要找到你点击的是哪个ul里面的就行
+                    var value = parseInt($(this).val());
+                    change_gold=null;
+                    if(value!=0)
+                    {
+                        change_gold=value;
+                        modal.find("#changed_gold_value").html("+"+value);
+                    }
+                    else{
+                        modal.find("#changed_gold_value").html("未变更");
+                    }
+                });
+                $("#change_diamond").on("input",function(){      //只需要找到你点击的是哪个ul里面的就行
+
+                    var value = parseInt($(this).val());
+                    change_diamond=null;
+                    if(value!=0)
+                    {
+                        change_diamond=value;
+                        modal.find("#changed_diamond_value").html("+"+value);
+                    }
+                    else{
+                        modal.find("#changed_diamond_value").html("未变更");
+                    }
+                });
+                $("ul#change_proxy").on("click","li",function(){      //只需要找到你点击的是哪个ul里面的就行
+                    var isProxy=$(this).text()=="是";
+                    change_proxy=null;
+                    if(isProxy != row.isProxy)
+                    {
+                        change_proxy=isProxy;
+                        modal.find("#changed_proxy_value").html($(this).text());
+                    }
+                    else
+                    {
+                        modal.find("#changed_proxy_value").html("未变更");
+                    }
+                });
+                modal.find("#update_user").click(function(){
+
+                });
+            }
+            function createDropMenu(title,select){
+                var div=$('<div></div>');
+                var group=$('<div class="btn-group"></div>');
+                var btn = $('<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">'+title+'<span class="caret"></span> </button>');
+                var ul=$('<ul class="dropdown-menu" role="menu"></ul>');
+                for(var i=0;i<select.length;i++){
+                    var li=$('<li><a href="#">'+select[i]+'</a></li>');
+                    li.appendTo(ul);
+                }
+                group.appendTo(div);
+                btn.appendTo(group);
+                ul.appendTo(group);
+                return div.html();
+            }
             var proxyEdit={
-                //prepend: "not selected",
-                source: [
-                    {value: 1, text: '是'},
-                    {value: 2, text: '否'}
-                ],
-                formatter: function (value, row, index) {
-                    return "<a href=\"#\" name=\"UserName\" data-type=\"text\" data-pk=\""+row.uid+"\" data-title=\"用户名\">" + value + "</a>";
+                // title:"代理变更",
+                // type:"select",
+                // source: [
+                //     {value: 1, text: '是'},
+                //     {value: 2, text: '否'}
+                // ],
+                // display:function(value,sourceData){
+                //     var switch_value=value?1:2;
+                //     var colors = {1: "green", 2: "red"},
+                    
+                //     elem = $.grep(sourceData, function(o){return o.value == switch_value;});
+                //     if(elem.length) {    
+                //         $(this).text(elem[0].text).css("color", colors[switch_value]); 
+                //     } else {
+                //         $(this).empty(); 
+                //     }
+                // }
+                noeditFormatter:function(value,row,index){
+                    return value?"是":"否";
                 }
             }
-            createBootstrapTable('#table','getUsers',['uid','nick','diamondCount','goldCount','isProxy'],['ID','昵称','钻石','金币','代理'],[false,false,true,true,proxyEdit],false,'#toolbar'); 
+            var goldAdd={
+                title:"金币充值",
+                noeditFormatter:function(value, row, index){
+                    return '<td>'+value+'</td><td>'+createDropMenu("充值",[50,100])+'</td>';
+                }
+            }
+            createBootstrapTable('#table','getUsers',['uid','nick','diamondCount','goldCount','isProxy'],['ID','昵称','钻石','金币','代理'],[false,false,false,false,proxyEdit],false,'#toolbar'); 
         </script>
 </body>
 </html>

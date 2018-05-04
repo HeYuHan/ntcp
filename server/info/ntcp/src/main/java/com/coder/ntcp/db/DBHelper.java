@@ -101,20 +101,22 @@ public class DBHelper {
 	    Query query = new Query(criteria);
 	    return mongoTemplate.find(query, RoomRecoder.class);
 	}
-	public List<User> findUsers(int offset,int count)
+	public void findUsers(DBPageResult<User> result)
 	{
 		Criteria criteria = Criteria.where("isProxy").is(false);
 	    Query query = new Query(criteria);
-	    query.skip(offset);
-	    query.limit(count);
-	    return mongoTemplate.find(query, User.class);
+	    result.totle=mongoTemplate.count(query, User.class);
+	    query.skip(result.offest);
+	    query.limit(result.limit);
+	    result.result = mongoTemplate.find(query, User.class);
 	}
-	public List<User> findProxys(int offset,int count)
+	public void findProxys(DBPageResult<User> result)
 	{
 		Criteria criteria = Criteria.where("isProxy").is(true);
 	    Query query = new Query(criteria);
-	    query.skip(offset);
-	    query.limit(count);
-	    return mongoTemplate.find(query, User.class);
+	    result.totle=mongoTemplate.count(query, User.class);
+	    query.skip(result.offest);
+	    query.limit(result.limit);
+	    result.result = mongoTemplate.find(query, User.class);
 	}
 }

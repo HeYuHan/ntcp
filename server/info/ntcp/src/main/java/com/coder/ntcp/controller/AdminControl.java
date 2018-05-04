@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.coder.ntcp.db.AdminUser;
 import com.coder.ntcp.db.DBHelper;
+import com.coder.ntcp.db.DBPageResult;
 import com.coder.ntcp.db.User;
 
 class EditUser
@@ -84,23 +85,26 @@ public class AdminControl {
 	{
 		if(reqPageData.offset<0||reqPageData.limit<=0)return null;
 		ArrayList<EditUser> users=new ArrayList<EditUser>();
-		List<User> dbUsers=dbHelper.findUsers(reqPageData.offset, reqPageData.limit);
-		for(User u : dbUsers) {
+		DBPageResult<User> queryRet=new DBPageResult<User>(reqPageData.offset, reqPageData.limit);
+		dbHelper.findUsers(queryRet);
+		for(User u : queryRet.result) {
 			users.add(new EditUser(u));
 		}
 		HashMap<String, Object> ret=new HashMap<>();
-		ret.put("totle", users.size());
+		ret.put("total", queryRet.totle);
+		ret.put("page",(int)Math.ceil(queryRet.offest/queryRet.limit+0.1));
 		ret.put("rows", users);
 		return ret;
 	}
 	@RequestMapping(value = "/getProxys",method=RequestMethod.POST)
 	@ResponseBody
-	Object getProxys(int start,int count)
+	Object getProxys(int offset,int limit)
 	{
-		if(start<0||count<=0)return null;
+		if(offset<0||limit<=0)return null;
 		ArrayList<EditUser> users=new ArrayList<EditUser>();
-		List<User> dbUsers=dbHelper.findProxys(start, count);
-		for(User u : dbUsers) {
+		DBPageResult<User> queryRet=new DBPageResult<User>(offset, limit);
+		dbHelper.findProxys(queryRet);
+		for(User u : queryRet.result) {
 			users.add(new EditUser(u));
 		}
 		return users;
