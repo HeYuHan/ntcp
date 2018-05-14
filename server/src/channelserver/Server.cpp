@@ -45,15 +45,15 @@ void RegisterJS()
 	
 
 	engine->Start();
-	auto _global = engine->GetGlobalObject();
-	auto _cx = engine->GetGlobalContext();
-	JS::RootedObject global(_cx, _global);
+	//auto _global = engine->GetGlobalObject();
+	//auto _cx = engine->GetGlobalContext();
+	//JS::RootedObject global(_cx, _global);
 	//JSAutoCompartment ac4(_cx, global);
 	//engine->Eval("JSON.parse([1]);");
 	//JS::RootedValue rval3(_cx);
 	//bool ret = engine->Eval("var today = Server.GetServerName();return today",rval3);
 	engine->RunScript(gServer.m_MainScriptPath);
-
+	engine->Stop();
 	//JS::RootedObject obj2(_cx, _global);
 	//JSAutoCompartment ac4(_cx, obj2);
 	//jsval vals[3];
