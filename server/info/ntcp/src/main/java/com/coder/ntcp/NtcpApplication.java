@@ -43,6 +43,7 @@ public class NtcpApplication implements ApplicationListener<ContextRefreshedEven
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		// TODO Auto-generated method stub
+		dbHelper.initDB();
 		dbHelper.cleanRoomCardByHour(config.clean_room_hour);
 		List<RoomCard> cards = dbHelper.getRecoveryRoomCard(config.clean_room_hour);
 		for(int i=0;i<cards.size();i++) {

@@ -29,6 +29,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter{
 			String username=request.getParameter("username");
 			String password=request.getParameter("password");
 			AdminUser user = dbHelper.findObjectByUid(username, AdminUser.class);
+			if(!user.password.equals(password))user=null;
 			if(user == null) {
 				response.sendRedirect("/admin/login");
 				return false;

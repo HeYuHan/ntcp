@@ -100,10 +100,17 @@ var JClient = (function () {
                 token: INFO_ACCESS_TOKEN,
                 roomid: roomid
             }, function (state, msg) {
-                LogInfo("check room ret:" + msg);
+                LogInfo("getRoomCard:" + msg);
                 var json = JSON.parse(msg);
                 if (state == 200 && !json.error) {
-                    var room = Room.Create(roomid, json);
+                    var room_card = json;
+                    if (room_card.canUseCount <= 0) {
+                        client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM, {
+                            error: "room card is used"
+                        }));
+                        return;
+                    }
+                    var room = Room.Create(roomid, room_card);
                     client.state = State.IN_ROOM;
                     client.room = room;
                     room.ClientJoin(client);

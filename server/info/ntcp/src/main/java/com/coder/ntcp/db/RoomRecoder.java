@@ -1,6 +1,7 @@
 package com.coder.ntcp.db;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -14,7 +15,7 @@ public class RoomRecoder implements Serializable,IDBObject{
 	public String uid;
 	public String cardid;
 	public int roomid;
-	public PlayerScore[] scores;
+	public ArrayList<PlayerScore[]> scores;
 	public int useIndex;
 	public Date createTime;
 	@Override
@@ -36,7 +37,7 @@ public class RoomRecoder implements Serializable,IDBObject{
 	public void caculateUid() {
 		this.uid=DigestUtils.md5Hex(cardid+Integer.toString(this.roomid)+Integer.toString(this.useIndex));
 	}
-	public static RoomRecoder create(Room room,PlayerScore[] scores) {
+	public static RoomRecoder create(Room room,ArrayList<PlayerScore[]> scores) {
 		
 		RoomRecoder recoder = new RoomRecoder();
 		RoomCard card=room.getRoomCard();
@@ -53,14 +54,7 @@ public class RoomRecoder implements Serializable,IDBObject{
 		RoomRecoder recoder = new RoomRecoder();
 		recoder.cardid="abcdef"+Integer.toString((int)(Math.random()*100000));
 		recoder.roomid=(int)(Math.random()*100000);
-		recoder.scores=new PlayerScore[3];
-		recoder.scores[0]=new PlayerScore();
-		recoder.scores[1]=new PlayerScore();
-		recoder.scores[2]=new PlayerScore();
-		
-		recoder.scores[0].uid="admin1";
-		recoder.scores[1].uid="admin2";
-		recoder.scores[2].uid="admin3";
+		recoder.scores=new ArrayList<PlayerScore[]>();
 		recoder.useIndex=(int)(Math.random()*13);
 		recoder.createTime=new Date();
 		recoder.caculateUid();

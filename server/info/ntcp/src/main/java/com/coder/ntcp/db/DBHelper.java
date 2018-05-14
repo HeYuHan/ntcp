@@ -1,8 +1,14 @@
 package com.coder.ntcp.db;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +23,22 @@ import com.coder.ntcp.controller.ReqRoomCardOption;
 @Component
 public class DBHelper {
 	public DBHelper() {
-		System.out.println("create dbhelper");
+		
 	}
 	@Autowired
     private MongoTemplate mongoTemplate;
+	public void initDB() {
+		if(mongoTemplate.findAll(Price.class).size()==0) {
+			Price price=new Price();
+			price.itemType=ItemType.RoomCard;
+			price.currencyType=CurrencyType.Diamond;
+			price.itemCount=1;
+			price.price=1;
+			price.uid=Price.CaculateUid(price);
+			saveObject(price);
+		}
+		
+	}
 	public void saveObject(IDBObject dbobj) {
 		mongoTemplate.save(dbobj.getObject());
 	}
@@ -101,11 +119,28 @@ public class DBHelper {
 	    Query query = new Query(criteria);
 	    return mongoTemplate.find(query, RoomRecoder.class);
 	}
+	public <T> void findAll(DBPageResult<T> result,Class<T> enteryClass) {
+		
+		result.result = mongoTemplate.findAll(enteryClass);
+		
+	}
+	public <T> long getCount(Class<T> enteryClass) {
+		return mongoTemplate.count(new Query(), enteryClass);
+	}
 	public void findUsers(DBPageResult<User> result)
 	{
 		Criteria criteria = Criteria.where("isProxy").is(false);
+		Iterator<Entry<String, Object>> iterator = result.likeQuery.entrySet().iterator();
+	    while (iterator.hasNext()) {
+			Map.Entry<String, Object> entry=iterator.next();
+			String key = entry.getKey();
+			Object val = entry.getValue();
+			Pattern pattern = Pattern.compile("^.*"+val+".*$", Pattern.CASE_INSENSITIVE);
+			criteria.and(key).regex(pattern);
+		}
 	    Query query = new Query(criteria);
 	    result.totle=mongoTemplate.count(query, User.class);
+	    
 	    query.skip(result.offest);
 	    query.limit(result.limit);
 	    result.result = mongoTemplate.find(query, User.class);
@@ -113,6 +148,14 @@ public class DBHelper {
 	public void findProxys(DBPageResult<User> result)
 	{
 		Criteria criteria = Criteria.where("isProxy").is(true);
+		Iterator<Entry<String, Object>> iterator = result.likeQuery.entrySet().iterator();
+	    while (iterator.hasNext()) {
+			Map.Entry<String, Object> entry=iterator.next();
+			String key = entry.getKey();
+			Object val = entry.getValue();
+			Pattern pattern = Pattern.compile("^.*"+val+".*$", Pattern.CASE_INSENSITIVE);
+			criteria.and(key).regex(pattern);
+		}
 	    Query query = new Query(criteria);
 	    result.totle=mongoTemplate.count(query, User.class);
 	    query.skip(result.offest);

@@ -93,7 +93,6 @@ class ResUser{
 }
 class ResRoomCard{
 	public int roomid;
-	public boolean isnew;
 	public int canUseCount;
 	public int goldCount;
 	public int diamondCount;
@@ -101,7 +100,6 @@ class ResRoomCard{
 	public ResRoomCard() {}
 	public ResRoomCard(Room room,User user) {
 		RoomCard card=room.getRoomCard();
-		isnew=card.canUseCount==card.maxUseCount;
 		roomid=room.getRoomId();
 		canUseCount=card.canUseCount;
 		diamondCount=user.diamondCount;
@@ -172,8 +170,9 @@ public class PublicController {
 			dbUser.token=weiXinUser.access_token;
 			dbUser.nick=weiXinUserInfo.nickname;
 			dbUser.headimgurl=weiXinUserInfo.headimgurl;
-			dbUser.diamondCount=1000;
-			dbUser.goldCount=1000;
+			dbUser.diamondCount=0;
+			dbUser.goldCount=0;
+			dbUser.isProxy=false;
 			dbHelper.saveObject(dbUser);
 			return new ResUser(dbUser);
 		}

@@ -2,5 +2,6 @@ package com.coder.ntcp.controller;
 
 public class PlayerScore {
 	public String uid;
-	public int[] score;
+	public int score;
+	public boolean maizhuang;
 }

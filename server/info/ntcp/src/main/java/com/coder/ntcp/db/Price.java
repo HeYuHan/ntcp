@@ -34,7 +34,8 @@ public class Price implements IDBObject,Serializable {
 		return CaculateUid(p.itemType,p.currencyType,p.itemCount);
 	}
 	public static String CaculateUid(ItemType t1,CurrencyType t2,int count) {
-		return DigestUtils.md5Hex(t1.toString()+t2.toString()+count);
+		String string=t1.toString()+t2.toString()+count;
+		return DigestUtils.md5Hex(string);
 	}
 	@Override
 	public Object getObject() {

@@ -1,5 +1,5 @@
 //人数限制
-let ROOM_MAX_PLAYER_COUNT = 2;
+let ROOM_MAX_PLAYER_COUNT = 1;
 //关闭随机
 let DEFINE_RANDOM_TEST = true;
 

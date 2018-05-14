@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Update;
 
@@ -19,12 +20,14 @@ public class RoomCard implements Serializable,IDBObject{
 	public int maxUseCount=0;
 	public int canUseCount=0;
 	public RoomCardPayType payType;
-	public int balanceRate=1;
+	public int[] balanceRate=new int[3];
 	public boolean includexi=true;
-	public boolean isPay;
+	//public boolean isPay;
 	public Date createTime;
 	public boolean timeOut;
 	public int roomid;
+	public int price;
+	public CurrencyType currencyType;
 	@Override
 	public String getUid() {
 		// TODO Auto-generated method stub
@@ -34,7 +37,7 @@ public class RoomCard implements Serializable,IDBObject{
 	public void onUpdate(Update update) {
 		// TODO Auto-generated method stub
 		update.set("canUseCount", canUseCount);
-		update.set("isPay", isPay);
+		//update.set("isPay", isPay);
 	}
 	@Override
 	public Object getObject() {
@@ -84,9 +87,13 @@ public class RoomCard implements Serializable,IDBObject{
 		card.uid=DigestUtils.md5Hex(user.uid+System.currentTimeMillis());
 		card.includexi=option.includexi;
 		card.payType=payType;
+		card.price=price.price;
+		card.currencyType=currencyType;
 		card.maxUseCount=option.playCount;
 		card.canUseCount=card.maxUseCount;
-		card.balanceRate=Math.max(1, option.balanceRate);
+		card.balanceRate[0]=1;
+		card.balanceRate[1]=1;
+		card.balanceRate[2]=1;
 		card.createTime=new Date();
 		card.timeOut=false;
 		dbHelper.saveObject(card);

@@ -26,16 +26,16 @@
 </div>
 <br><br>
 <div>getRoomCard(pulbic)<br>
-     NEW:强制开新卡|XI:喜牌|PAY支付(1:房主,2:大赢家,3:AA)|RATE:倍率(最小1)
+     XI:喜牌|PAY支付(1:房主,2:大赢家,3:AA)|RATE:倍率(最小1)
      <br>
      目前只支持房主支付
     <form url="/public/getRoomCard" class="test_from" onSubmit="return false;">
       UID <input type="text" name="uid" value="testuid53797"/><br>
       COUNT <input type="number" name="playCount" value="6"/><br>
-      PAY <input type="number" name="payType" value="1"/><br>
-      RATE <input type="number" name="balanceRate" value="1"/>
+      RATE <input type="text" name="balanceRate" value='1,2,3' datatype="array_number"/><br>
+      CURRENCY <input type="text" name="currencyType" value="Diamond"/><br>
+      PAY <input type="text" name="payType" value="Winer"/>
       XI <input type="checkbox" name="includexi"/>
-      NEW <input type="checkbox" name="forceNew"/><br>
       <button>Test</button>
     </form>
   </div>
