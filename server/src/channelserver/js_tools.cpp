@@ -298,8 +298,8 @@ JSObject* NewGlobalObject(JSContext* cx, bool debug)
 bool ScriptingCore::Start()
 {
 	if (!JS_Init())return false;
-	const int RUN_TIME_BUFF_LEN = 32L * 1024L * 1024L;
-	const int CONTEXT_STACK_SIZE = 32 * 1024;
+	const size_t RUN_TIME_BUFF_LEN = 32L * 1024L * 1024L;
+	const size_t CONTEXT_STACK_SIZE = 32 * 1024;
 	_rt = JS_NewRuntime(RUN_TIME_BUFF_LEN);
 	JS_SetGCParameter(_rt, JSGCParamKey::JSGC_MAX_BYTES, 0xffffffff);
 	JS_SetGCParameter(_rt, JSGCParamKey::JSGC_MODE, JSGC_MODE_COMPARTMENT);
@@ -311,7 +311,7 @@ bool ScriptingCore::Start()
 	JS::RootedObject global(_cx, _global->get());
 
 	// Removed in Firefox v34
-	js::SetDefaultObjectForContext(_cx, global);
+	//js::SetDefaultObjectForContext(_cx, global);
 	JSAutoCompartment ac(_cx, global);
 	for (auto& callback : registrationList) {
 		callback(_cx, global);
@@ -328,20 +328,26 @@ void ScriptingCore::Stop()
 
 bool ScriptingCore::RunScript(const char * path)
 {
+
 	JS::RootedObject global(_cx, _global->get());
-	JSAutoCompartment ac2(_cx, global);
-	JS::RootedObject obj(_cx, global);
+	JSCompartment *comp1 = JS_EnterCompartment(_cx, global);
+	//JSAutoCompartment ac2(_cx, global);
+	//JS::RootedObject obj(_cx, global);
 	JS::CompileOptions op(_cx);
 	op.setUTF8(true);
 	JS::PersistentRootedScript* script = new (std::nothrow) JS::PersistentRootedScript(_cx);
-	bool ok = JS::Compile(_cx, obj, op, path, &(*script));
+	bool ok = JS::Compile(_cx, global, op, path, &(*script));
 	if (ok)
 	{
+		//JSCompartment *comp2 = JS_EnterCompartment(_cx, global);
 		JS::RootedValue rval(_cx);
-		JS::RootedObject global2(_cx, _global->get());
-		JSAutoCompartment ac2(_cx, global2);
-		return JS_ExecuteScript(_cx, global2, *script, &rval);
+		//JS::RootedObject global2(_cx, _global->get());
+		//JSAutoCompartment ac2(_cx, global2);
+		bool ret = JS_ExecuteScript(_cx, global, *script, &rval);
+		//JS_LeaveCompartment(_cx, comp2);
+		return ret;
 	}
+	JS_LeaveCompartment(_cx, comp1);
 	return false;
 	
 	//if (evaluatedOK)
@@ -392,23 +398,25 @@ bool ScriptingCore::CallFunction(jsval owner, const char * name, const JS::Handl
 	bool hasFunc;
 	JSContext* cx = this->_cx;
 	JS::RootedValue funcVal(cx);
-	JS::RootedValue ownerval(cx, owner);
-	JS::RootedObject obj(cx, ownerval.toObjectOrNull());
+	//JS::RootedValue ownerval(cx, owner);
+	JS::RootedObject ownerval(cx, owner.toObjectOrNull());
 	
 	do
 	{
-		JSAutoCompartment ac(cx, obj);
+		auto ac = JS_EnterCompartment(cx, ownerval);
+		//JSAutoCompartment ac(cx, ownerval);
 
-		if (JS_HasProperty(cx, obj, name, &hasFunc) && hasFunc) {
-			if (!JS_GetProperty(cx, obj, name, &funcVal)) {
+		if (JS_HasProperty(cx, ownerval, name, &hasFunc) && hasFunc) {
+			if (!JS_GetProperty(cx, ownerval, name, &funcVal)) {
 				break;
 			}
 			if (funcVal == JSVAL_VOID) {
 				break;
 			}
 
-			bRet = JS_CallFunctionValue(cx, obj, funcVal, args, retVal);
+			bRet = JS_CallFunctionValue(cx, ownerval, funcVal, args, retVal);
 		}
+		JS_LeaveCompartment(cx,ac);
 	} while (0);
 	return bRet;
 }
