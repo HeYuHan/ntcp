@@ -4,4 +4,8 @@
     <LocalDebuggerCommandArguments>--script=$(SolutionDir)src\script\js\main.js --addr=0.0.0.0:9300</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LocalDebuggerCommandArguments>--script=$(SolutionDir)src\script\js\main.js --addr=0.0.0.0:9300</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
 </Project>

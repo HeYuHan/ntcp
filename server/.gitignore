@@ -7,6 +7,9 @@
 *.lo
 node_modules/
 info/db/
+Common/Debug
+Common/Release
+Temp/
 
 
 # User-specific files

@@ -346,22 +346,17 @@ int main(int argc, char* argv[]) {
 	InnerObject *pInnerObject = new InnerObject();
 	pInnerObject->x = 3;
 	Local<External> native_ptr = External::New(isolate, pInnerObject);
-	PersistentBase<External> native_ptr = External::New(isolate, pInnerObject);
 	
 	Local<FunctionTemplate> class_template = FunctionTemplate::New(isolate, InnerObject::CreateObject, native_ptr);
 	class_template->SetClassName(String::NewFromUtf8(isolate, "Foo"));
 
-
-
-	//class_template->InstanceTemplate()->SetInternalFieldCount(1);
 	//static
 	class_template->Set(v8::String::NewFromUtf8(isolate, "V8PrintObjectName"), FunctionTemplate::New(isolate, InnerObject::V8PrintObjectName));
 	class_template->Set(v8::String::NewFromUtf8(isolate, "V8PrintAuthor"), FunctionTemplate::New(isolate, InnerObject::V8PrintAuthor));
 	//method
 	Handle<ObjectTemplate> class_proto = class_template->PrototypeTemplate();
 	class_proto->SetAccessor(String::NewFromUtf8(isolate, "f1"), InnerObject::GetF1, InnerObject::SetF1);
-	auto obj = class_template->InstanceTemplate();
-	obj->SetInternalFieldCount(1);
+	class_template->InstanceTemplate()->SetInternalFieldCount(1);
 	
 	global_templ->Set(String::NewFromUtf8(isolate, "Foo"), class_template);
     // Create a new context.

@@ -41,7 +41,7 @@
 /* #undef JS_HAVE_SYS_ISA_DEFS_H */
 
 /* Define to 1 if SpiderMonkey is in NUNBOX32 mode. */
-#define JS_NUNBOX32 1
+//#define JS_NUNBOX32 1
 
 /* Define to 1 if SpiderMonkey is in PUNBOX64 mode. */
 /* #undef JS_PUNBOX64 */
