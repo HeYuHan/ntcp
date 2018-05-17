@@ -352,10 +352,11 @@ class Room{
         this.m_clients.push(client);
     }
     public RemoveClient(c){
-        var index=this.m_clients.indexOf(c);
-        if(index>=0){
-            this.m_clients.splice(index,1);
-            return true;
+        for(var i=0;i<this.m_clients.length;i++){
+            if(this.m_clients[i].uid == c.uid){
+                this.m_clients.splice(i,1);
+                return true;
+            }
         }
         return false;
     }
@@ -445,7 +446,7 @@ class Room{
         
 
         
-        LogInfo("release room is free:"+free_room);
+        //LogInfo("release room is free:"+free_room);
         
         this.m_clients=[];
         

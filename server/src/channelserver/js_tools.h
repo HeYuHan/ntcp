@@ -4,6 +4,21 @@
 #include <jsapi.h>
 #include <string>
 #include "spidermonkey_specifics.h"
+class JSStringWrapper
+{
+public:
+	JSStringWrapper();
+	JSStringWrapper(JS::HandleString str, JSContext* cx = nullptr);
+	JSStringWrapper(JS::HandleValue val, JSContext* cx = nullptr);
+	~JSStringWrapper();
+
+	void set(JS::HandleValue val, JSContext* cx);
+	void set(JS::HandleString str, JSContext* cx);
+	const char* get();
+
+private:
+	const char* _buffer;
+};
 
 void GetJSUTF8String(JSContext *cx, JS::HandleValue str, std::string &ret);
 void GetJSString(JSContext *cx, JS::HandleValue str, std::string &ret);
@@ -77,6 +92,9 @@ public:
 	bool CallFunction(jsval owner, const char *name, uint32_t argc, jsval *vp, JS::MutableHandleValue retVal);
 	bool CallFunction(jsval owner, const char *name, const JS::HandleValueArray& args, JS::MutableHandleValue retVal);
 	bool CallFunction(jsval owner, const char *name, const JS::HandleValueArray& args);
+	bool CallFunction(jsval owner, const char *name);
+	bool CallGlobalFunction(const char* name, const JS::HandleValueArray& args, JS::MutableHandleValue retVal);
+	bool CallGlobalFunction(const char* name);
 	void GC();
 	void RemoveObjectProxy(void* obj);
 	JSObject* GetGlobalObject();

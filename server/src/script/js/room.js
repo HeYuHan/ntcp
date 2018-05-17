@@ -293,10 +293,11 @@ var Room = (function () {
         this.m_clients.push(client);
     };
     Room.prototype.RemoveClient = function (c) {
-        var index = this.m_clients.indexOf(c);
-        if (index >= 0) {
-            this.m_clients.splice(index, 1);
-            return true;
+        for (var i = 0; i < this.m_clients.length; i++) {
+            if (this.m_clients[i].uid == c.uid) {
+                this.m_clients.splice(i, 1);
+                return true;
+            }
         }
         return false;
     };
@@ -371,7 +372,6 @@ var Room = (function () {
                 card: this.room_card
             }));
         }
-        LogInfo("release room is free:" + free_room);
         this.m_clients = [];
         if (this.m_timer) {
             this.m_timer.Stop();

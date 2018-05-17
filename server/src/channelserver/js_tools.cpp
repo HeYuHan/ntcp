@@ -7,20 +7,72 @@
 #ifdef _WIN32
 #pragma comment(lib,"./../3rd/icon/lib/iconv.lib")
 #endif // _WIN32
-
-void GetJSUTF8String(JSContext * cx, JS::HandleValue str, std::string & ret)
+#define CC_SAFE_DELETE_ARRAY(p)     do { if(p) { delete[] (p); (p) = nullptr; } } while(0)
+// JSStringWrapper
+JSStringWrapper::JSStringWrapper()
+	: _buffer(nullptr)
 {
-	char* data = JS_EncodeStringToUTF8(cx, JS::RootedString(cx, JS::ToString(cx, str)));
-	ret = std::string(data);
-	JS_free(cx, data);
-	//delete[] data;
 }
-void GetJSString(JSContext * cx, JS::HandleValue str, std::string & ret)
+
+JSStringWrapper::JSStringWrapper(JS::HandleString str, JSContext* cx/* = NULL*/)
+	: _buffer(nullptr)
 {
-	char* data = JS_EncodeString(cx, JS::RootedString(cx, JS::ToString(cx, str)));
+	set(str, cx);
+}
+
+JSStringWrapper::JSStringWrapper(JS::HandleValue val, JSContext* cx/* = NULL*/)
+	: _buffer(nullptr)
+{
+	set(val, cx);
+}
+
+JSStringWrapper::~JSStringWrapper()
+{
+	JS_free(ScriptingCore::GetInstance()->GetGlobalContext(), (void*)_buffer);
+}
+
+void JSStringWrapper::set(JS::HandleValue val, JSContext* cx)
+{
+	if (val.isString())
+	{
+		JS::RootedString str(cx, val.toString());
+		this->set(str, cx);
+	}
+	else
+	{
+		CC_SAFE_DELETE_ARRAY(_buffer);
+	}
+}
+
+void JSStringWrapper::set(JS::HandleString str, JSContext* cx)
+{
+	CC_SAFE_DELETE_ARRAY(_buffer);
+
+	if (!cx)
+	{
+		cx = ScriptingCore::GetInstance()->GetGlobalContext();
+	}
+	_buffer = JS_EncodeStringToUTF8(cx, str);
+}
+
+const char* JSStringWrapper::get()
+{
+	return _buffer ? _buffer : "";
+}
+
+void GetJSUTF8String(JSContext * cx, JS::HandleValue v, std::string & ret)
+{
+	JS::RootedString str(cx, v.toString());
+	char* data = JS_EncodeStringToUTF8(cx, str);
 	ret = std::string(data);
-	JS_free(cx, data);
-	//delete[] data;
+	JS_free(cx, (void*)data);
+}
+void GetJSString(JSContext * cx, JS::HandleValue v, std::string & ret)
+{
+	JS::RootedString str(cx, v.toString());
+	char* data = JS_EncodeString(cx, str);
+	ret = std::string(data);
+	JS_free(cx, (void*)data);
 }
 //bool js_utf8_to_utf16(std::string &utf8, std::string &retStr)
 //{
@@ -340,10 +392,10 @@ bool ScriptingCore::RunScript(const char * path)
 	if (ok)
 	{
 		//JSCompartment *comp2 = JS_EnterCompartment(_cx, global);
-		JS::RootedValue rval(_cx);
+		//JS::RootedValue rval(_cx);
 		//JS::RootedObject global2(_cx, _global->get());
 		//JSAutoCompartment ac2(_cx, global2);
-		bool ret = JS_ExecuteScript(_cx, global, *script, &rval);
+		bool ret = JS_ExecuteScript(_cx, global, *script);
 		//JS_LeaveCompartment(_cx, comp2);
 		return ret;
 	}
@@ -425,6 +477,27 @@ bool ScriptingCore::CallFunction(jsval owner, const char * name, const JS::Handl
 {
 	JS::RootedValue ret(_cx);
 	return CallFunction(owner, name, args, &ret);
+}
+
+bool ScriptingCore::CallFunction(jsval owner, const char * name)
+{
+	JS::RootedValue ret(_cx);
+	JS::HandleValueArray args = JS::HandleValueArray::empty();
+	return CallFunction(owner, name, args, &ret);
+}
+
+bool ScriptingCore::CallGlobalFunction(const char * name, const JS::HandleValueArray & args, JS::MutableHandleValue retVal)
+{
+	JS::RootedObject global(_cx, _global->get());
+	JSAutoCompartment ac5(_cx, _global->get());
+	return JS_CallFunctionName(_cx, global, name, args, retVal);
+}
+
+bool ScriptingCore::CallGlobalFunction(const char * name)
+{
+	JS::HandleValueArray args = JS::HandleValueArray::empty();
+	JS::RootedValue ret(_cx);
+	return CallGlobalFunction(name, args, &ret);
 }
 
 void ScriptingCore::GC()

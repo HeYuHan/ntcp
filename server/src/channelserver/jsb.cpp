@@ -57,8 +57,8 @@ bool js_Server_Init(JSContext *cx, uint32_t argc, jsval *vp)
 	bool ok = true;
 	if (argc == 1)
 	{
-		std::string data;
-		GetJSUTF8String(cx, args.get(0), data);
+		JSStringWrapper sw(args.get(0));
+		std::string data = sw.get();
 		bool ret = false;
 		Json::Reader reader;
 		Json::Value root;
@@ -174,8 +174,8 @@ bool js_Log(JSContext *cx, uint32_t argc, jsval *vp)
 	{
 		int id = args.get(0).toInt32();
 
-		std::string data;
-		GetJSUTF8String(cx, args.get(1), data);
+		JSStringWrapper sw(args.get(1));
+		std::string data = sw.get();
 		if (id == 1)log_debug("%s", data.c_str());
 		if (id == 2)log_warn("%s", data.c_str());
 		if (id == 3)log_error("%s", data.c_str());
@@ -296,8 +296,8 @@ bool js_Client_Send(JSContext *cx, uint32_t argc, jsval *vp)
 		return false;
 	}
 	if (argc == 1) {
-		std::string msg;
-		GetJSUTF8String(cx, args.get(0), msg);
+		JSStringWrapper sw(args.get(0));
+		std::string msg = sw.get();
 		cobj->BeginWrite();
 		cobj->WriteData(msg.c_str(), msg.size());
 		cobj->EndWrite();
@@ -392,8 +392,8 @@ bool js_File_Read(JSContext *cx, uint32_t argc, jsval *vp)
 {
 	CallArgs args = CallArgsFromVp(argc, vp);
 	if (argc == 1) {
-		std::string path;
-		GetJSUTF8String(cx, args.get(0), path);
+		JSStringWrapper sw(args.get(0));
+		std::string path = sw.get();
 		std::string ret;
 		bool ok = ReadText(ret, path);
 		if (ok)
@@ -415,10 +415,10 @@ bool js_File_Write(JSContext *cx, uint32_t argc, jsval *vp)
 {
 	CallArgs args = CallArgsFromVp(argc, vp);
 	if (argc == 2) {
-		std::string path;
-		GetJSUTF8String(cx, args.get(0), path);
-		std::string content;
-		GetJSUTF8String(cx, args.get(1), content);
+		JSStringWrapper sw(args.get(0));
+		std::string path = sw.get();
+		JSStringWrapper sw2(args.get(1));
+		std::string content = sw2.get();
 		std::string ret;
 		bool ok = WriteText(content, path);
 		JS::RootedValue jsret(cx);
@@ -433,8 +433,8 @@ bool js_File_LoadScript(JSContext *cx, uint32_t argc, jsval *vp)
 {
 	CallArgs args = CallArgsFromVp(argc, vp);
 	if (argc == 1) {
-		std::string path;
-		GetJSUTF8String(cx, args.get(0), path);
+		JSStringWrapper sw(args.get(0));
+		std::string path = sw.get();
 		bool ok = ScriptingCore::GetInstance()->RunScript(path.c_str());
 		JS::RootedValue jsret(cx);
 		jsret = BOOLEAN_TO_JSVAL(ok);
@@ -508,8 +508,8 @@ bool js_AsyncFile_Get(JSContext *cx, uint32_t argc, jsval *vp)
 {
 	CallArgs args = CallArgsFromVp(argc, vp);
 	if (argc == 1) {
-		std::string path;
-		GetJSUTF8String(cx, args.get(0), path);
+		JSStringWrapper sw(args.get(0));
+		std::string path = sw.get();
 		AsyncFileWriter* w = gServer.m_FileWriters.Allocate();
 		if (w)
 		{
@@ -541,8 +541,8 @@ bool js_AsyncFile_Write(JSContext *cx, uint32_t argc, jsval *vp)
 		uint id = (uint)args.get(0).toInt32();
 		AsyncFileWriter* w = gServer.m_FileWriters.Get(id);
 
-		std::string content;
-		GetJSUTF8String(cx, args.get(1), content);
+		JSStringWrapper sw(args.get(0));
+		std::string content = sw.get();
 		if (w)
 		{
 			w->PushContent(content.c_str());
@@ -878,8 +878,8 @@ bool js_Http_Get(JSContext *cx, uint32_t argc, jsval *vp)
 	js_proxy_t *proxy = jsb_get_js_proxy(obj);
 	JSHttp* cobj = (JSHttp*)(proxy ? proxy->ptr : NULL);
 	if (argc == 1) {
-		std::string url;
-		GetJSUTF8String(cx, args.get(0),url);
+		JSStringWrapper sw(args.get(0));
+		std::string url = sw.get();
 		bool ok = gHttpManager.Get(url.c_str(), cobj);
 		args.rval().set(BOOLEAN_TO_JSVAL(ok));
 		return true;
@@ -895,12 +895,12 @@ bool js_Http_Post(JSContext *cx, uint32_t argc, jsval *vp)
 	js_proxy_t *proxy = jsb_get_js_proxy(obj);
 	JSHttp* cobj = (JSHttp*)(proxy ? proxy->ptr : NULL);
 	if (argc == 3) {
-		std::string url;
-		std::string data;
-		std::string content_type;
-		GetJSUTF8String(cx, args.get(0),url);
-		GetJSUTF8String(cx, args.get(1),data);
-		GetJSUTF8String(cx, args.get(2), content_type);
+		JSStringWrapper sw1(args.get(0));
+		std::string url = sw1.get();
+		JSStringWrapper sw2(args.get(1));
+		std::string data = sw2.get();
+		JSStringWrapper sw3(args.get(2));
+		std::string content_type = sw3.get();
 		bool ok = gHttpManager.Post(url.c_str(),data.c_str(),content_type.c_str(),cobj);
 		args.rval().set(BOOLEAN_TO_JSVAL(ok));
 		return true;
@@ -1023,8 +1023,9 @@ bool js_String_Append(JSContext *cx, uint32_t argc, jsval *vp)
 	js_proxy_t *proxy = jsb_get_js_proxy(obj);
 	NativeString* cobj = (NativeString*)(proxy ? proxy->ptr : NULL);
 	if (argc == 1) {
-		std::string data;
-		GetJSUTF8String(cx, args.get(0), data);
+		JSStringWrapper sw(args.get(0));
+		std::string data = sw.get();
+		
 		cobj->Append(data);
 		args.rval().setUndefined();
 		return true;

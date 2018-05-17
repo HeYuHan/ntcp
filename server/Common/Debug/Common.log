@@ -1,43 +1,43 @@
-﻿  tools.cpp
-e:\share\ntcp\server\src\common\tools.cpp(33): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-  sha1.cpp
-e:\share\ntcp\server\src\common\sha1.cpp(12): warning C4005: “_CRT_SECURE_NO_WARNINGS”: 宏重定义
-  e:\share\ntcp\server\src\common\sha1.cpp(12): note: 命令行参数: 参见前面的“_CRT_SECURE_NO_WARNINGS”定义
-  log.cpp
-  getopt.cpp
-  json_writer.cpp
-  json_value.cpp
-  json_reader.cpp
-  common.cpp
-e:\share\ntcp\server\src\common\common.cpp(36): warning C4244: “=”: 从“time_t”转换到“long”，可能丢失数据
-  ccUTF8.cpp
-  base64.cpp
-  WebSocket.cpp
+﻿  WebSocket.cpp
 e:\share\ntcp\server\src\common\websocket.cpp(116): warning C4244: “=”: 从“unsigned __int64”转换到“int”，可能丢失数据
   Vector3.cpp
 e:\share\ntcp\server\src\common\vector3.h(40): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
   UdpListener.cpp
   UdpConnection.cpp
 e:\share\ntcp\server\src\common\udpconnection.cpp(198): warning C4309: “初始化”: 截断常量值
+  tools.cpp
+e:\share\ntcp\server\src\common\tools.cpp(33): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
   Timer.cpp
 e:\share\ntcp\server\src\common\timer.cpp(7): warning C4244: “初始化”: 从“long”转换到“float”，可能丢失数据
   ThreadPool2.cpp
   TcpListener.cpp
   TcpConnection.cpp
+  sha1.cpp
+e:\share\ntcp\server\src\common\sha1.cpp(12): warning C4005: “_CRT_SECURE_NO_WARNINGS”: 宏重定义
+  e:\share\ntcp\server\src\common\sha1.cpp(12): note: 命令行参数: 参见前面的“_CRT_SECURE_NO_WARNINGS”定义
   NetworkConnection.cpp
 e:\share\ntcp\server\src\common\networkconnection.cpp(211): warning C4244: “初始化”: 从“float”转换到“short”，可能丢失数据
 e:\share\ntcp\server\src\common\networkconnection.cpp(212): warning C4244: “初始化”: 从“float”转换到“short”，可能丢失数据
 e:\share\ntcp\server\src\common\networkconnection.cpp(213): warning C4244: “初始化”: 从“float”转换到“short”，可能丢失数据
 e:\share\ntcp\server\src\common\networkconnection.cpp(214): warning C4244: “初始化”: 从“float”转换到“short”，可能丢失数据
 e:\share\ntcp\server\src\common\networkconnection.cpp(240): warning C4309: “=”: 截断常量值
+  log.cpp
+  getopt.cpp
+  json_writer.cpp
+  json_value.cpp
+  json_reader.cpp
   HttpListenner.cpp
-  正在生成代码...
-  正在编译...
   HttpConnection4.cpp
   HttpConnection3.cpp
   FileReader.cpp
+  正在生成代码...
+  正在编译...
   ConvertUTFWrapper.cpp
   ConvertUTF.cpp
+  common.cpp
+e:\share\ntcp\server\src\common\common.cpp(36): warning C4244: “=”: 从“time_t”转换到“long”，可能丢失数据
+  ccUTF8.cpp
   BaseServer.cpp
+  base64.cpp
   正在生成代码...
   Common.vcxproj -> E:\Share\ntcp\server\lib\libcommon_d.lib

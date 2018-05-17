@@ -177,11 +177,7 @@ require("client.js");
 require("pai.js");
 require("room.js");
 require("message_type.js");
-var server = new JServer();
-var ret = server.Init({
-    max_client:50
-});
-LogInfo("init server ret:"+ret);
+
 // var pai_dui=new PaiDui(true);
 // pai_dui.jiang_pai[0]=Pai.ValueToNumber(PaiType.PAI_TIAO,9);
 // pai_dui.jiang_pai[1]=Pai.ValueToNumber(PaiType.PAI_TONG,2);
@@ -269,7 +265,7 @@ LogInfo("init server ret:"+ret);
 
 
 
-server.Start();
+
 
 // // function start(){
 // //     this.pai_list=[];
@@ -292,3 +288,13 @@ server.Start();
 // //     check.CheckWin();
 // // }
 // // start();
+function Main(){
+    var server = new JServer();
+    var ret = server.Init({
+        max_client:50
+    });
+    LogInfo("init server ret:"+ret);
+    var ret2 = server.Start();
+    LogInfo("exit server ret:"+ret2);
+    return 0;
+}

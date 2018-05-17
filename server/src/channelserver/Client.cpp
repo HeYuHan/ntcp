@@ -55,7 +55,10 @@ void Client::OnConnected()
 	this->stream->Reset();
 	if (m_JSClient)
 	{
-		ScriptingCore::GetInstance()->CallFunction(OBJECT_TO_JSVAL(m_JSClient), "OnConnected", JS::HandleValueArray::fromMarkedLocation(0, NULL));
+		auto engine = ScriptingCore::GetInstance();
+		JSAutoCompartment ac(engine->GetGlobalContext(), m_JSClient);
+		JS::RootedObject obj(engine->GetGlobalContext(), m_JSClient);
+		engine->CallFunction(OBJECT_TO_JSVAL(obj), "OnConnected");
 	}
 }
 
@@ -63,8 +66,11 @@ void Client::OnDisconnected()
 {
 	if (m_JSClient)
 	{
-		ScriptingCore::GetInstance()->CallFunction(OBJECT_TO_JSVAL(m_JSClient), "OnDisconected", JS::HandleValueArray::fromMarkedLocation(0, NULL));
-		ScriptingCore::GetInstance()->RemoveObjectProxy(this);
+		auto engine = ScriptingCore::GetInstance();
+		JSAutoCompartment ac(engine->GetGlobalContext(), m_JSClient);
+		JS::RootedObject obj(engine->GetGlobalContext(),m_JSClient);
+		engine->CallFunction(OBJECT_TO_JSVAL(obj), "OnDisconected");
+		engine->RemoveObjectProxy(this);
 		m_JSClient = NULL;
 	}
 	gServer.RemoveClient(this->uid);

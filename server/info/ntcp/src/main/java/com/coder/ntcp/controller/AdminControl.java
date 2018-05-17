@@ -152,6 +152,7 @@ public class AdminControl {
 	@ResponseBody
 	Object updatePrice(@RequestBody @Valid ReqUpdatePrice reqUpdatePrice)
 	{
+		
 		String uid=Price.CaculateUid(reqUpdatePrice.itemType, reqUpdatePrice.currencyType, reqUpdatePrice.itemCount);
 		Price price = dbHelper.findObjectByUid(uid, Price.class);
 		if(!reqUpdatePrice.delete) {

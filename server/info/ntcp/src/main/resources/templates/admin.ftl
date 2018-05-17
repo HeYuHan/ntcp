@@ -430,6 +430,7 @@
 
             })();
             function editTable(row){
+                window.edit_select_row=row;
                 if(window.selectTable == "User")editUser(row);
                 else editPrice(row);
             }
@@ -445,47 +446,8 @@
                 modal.find("#change_currency").val(row.currencyType);
                 modal.find("#itemChangeCount").val(row.itemCount);
                 modal.find("#priceChange").val(row.price);
-                modal.find("ul#select_currency").on("click","li",function(){      //只需要找到你点击的是哪个ul里面的就行
-                        modal.find("#change_currency").val($(this).text());
-                });
-                modal.find("#update_price").click(function(){
-                    var send_data={};
-                    send_data.itemType=row.itemType;
-                    send_data.currencyType=modal.find("#change_currency").val()||row.currencyType;
-                    send_data.itemCount=modal.find("#itemChangeCount").val()||row.itemCount;
-                    send_data.price=modal.find("#priceChange").val()||row.price;
-                    $.ajax({
-                        contentType: "application/json; charset=utf-8",
-                        method:"post",
-                        data:JSON.stringify(send_data),
-                        url:"updatePrice",
-                        dataType:"json",
-                        success:(data)=>
-                        {
-                            modal.find("#price_update_result").html(data.error?data.error:(data.msg?data.msg:"操作成功"));
-                            $("#tablePrice").bootstrapTable('refresh',{});
-                        }
-                    })
-                });
-                modal.find("#del_price").click(function(){
-                    var send_data={};
-                    send_data.itemType=modal.find("#itemType").html();
-                    send_data.currencyType=modal.find("#currencyType").html();
-                    send_data.itemCount=parseInt( modal.find("#itemCount").html());
-                    send_data.delete=true;
-                    $.ajax({
-                        contentType: "application/json; charset=utf-8",
-                        method:"post",
-                        data:JSON.stringify(send_data),
-                        url:"updatePrice",
-                        dataType:"json",
-                        success:(data)=>
-                        {
-                            modal.find("#price_update_result").html(data.error?data.error:"操作成功");
-                            $("#tablePrice").bootstrapTable('refresh',{});
-                        }
-                    })
-                })
+                
+               
             }
             function editUser(row){
                 var modal=$("#userEditModal");
@@ -499,81 +461,6 @@
                 modal.find("#changed_diamond_value").html("未变更");
                 modal.find("#changed_gold_value").html("未变更");
                 modal.find("#changed_proxy_value").html("未变更");
-                var change_gold=null;
-                var change_diamond=null;
-                var change_proxy=null;
-                modal.find("#change_gold").on("input",function(){      //只需要找到你点击的是哪个ul里面的就行
-                    var value = parseInt($(this).val());
-                    change_gold=null;
-                    if(value!=0)
-                    {
-                        change_gold=value;
-                        if(GUser.level==4) modal.find("#changed_gold_value").html("+"+value);
-                        else modal.find("#changed_gold_value").html("重置:"+value);
-                    }
-                    else{
-                        modal.find("#changed_gold_value").html("未变更");
-                    }
-                });
-                modal.find("#change_diamond").on("input",function(){      //只需要找到你点击的是哪个ul里面的就行
-
-                    var value = parseInt($(this).val());
-                    change_diamond=null;
-                    if(value!=0)
-                    {
-                        change_diamond=value;
-                        if(GUser.level==4)modal.find("#changed_diamond_value").html("+"+value);
-                        else modal.find("#changed_diamond_value").html("重置:"+value);
-                    }
-                    else{
-                        modal.find("#changed_diamond_value").html("未变更");
-                    }
-                });
-                if(GUser.level==5){
-                    modal.find("ul#change_proxy").on("click","li",function(){      //只需要找到你点击的是哪个ul里面的就行
-                        var isProxy=$(this).text()=="是";
-                        change_proxy=null;
-                        if(isProxy != row.isProxy)
-                        {
-                            change_proxy=isProxy;
-                            modal.find("#changed_proxy_value").html("重置:"+$(this).text());
-                        }
-                        else
-                        {
-                            modal.find("#changed_proxy_value").html("未变更");
-                        }
-                    });
-                }
-                modal.find("#update_user").click(function(){
-                    var send_data={uid:row.uid};
-                    if(change_gold !== null){
-                        send_data.setGold=true;
-                        send_data.goldCount=change_gold;
-                    }
-                    if(change_diamond !== null){
-                        send_data.setDiamond=true;
-                        send_data.diamondCount=change_diamond;
-                    }
-                    if(change_proxy !== null){
-                        send_data.setLevel=true;
-                        send_data.level=change_proxy?4:0;
-                    }
-                    $.ajax({
-                        contentType: "application/json; charset=utf-8",
-                        method:"post",
-                        data:JSON.stringify(send_data),
-                        url:"updateUser",
-                        dataType:"json",
-                        success:(data)=>
-                        {
-                            modal.find("#update_result").html(data.error?data.error:"操作成功");
-                            $("#table").bootstrapTable('refresh',{});
-                            if(GUser.level<5){
-                                $("#logo").html(GUser.nick+'|钻石:'+data.diamondCount+'|金币:'+data.goldCount);
-                            }
-                        }
-                    })
-                });
             }
             var proxyEdit={
                 noeditFormatter:function(value,row,index){
@@ -606,7 +493,138 @@
                 window.selectTable="Price";
                 createBootstrapTable('#tablePrice','getPrices',['itemType','currencyType','itemCount','price'],['类别','货币','数量','价格'],[false,false,false,false],'',window.showPrice); 
                 window.showPrice=true;
+            });
+            var price_modal=$("#priceEditModal");
+            price_modal.find("ul#select_currency").on("click","li",function(){      //只需要找到你点击的是哪个ul里面的就行
+                price_modal.find("#change_currency").val($(this).text());
+            });
+            price_modal.find("#update_price").click(function(){
+            var send_data={};
+            send_data.itemType=edit_select_row.itemType;
+            send_data.currencyType=price_modal.find("#change_currency").val()||edit_select_row.currencyType;
+            send_data.itemCount=price_modal.find("#itemChangeCount").val()||edit_select_row.itemCount;
+            send_data.price=price_modal.find("#priceChange").val()||edit_select_row.price;
+            $.ajax({
+                    contentType: "application/json; charset=utf-8",
+                    method:"post",
+                    data:JSON.stringify(send_data),
+                    url:"updatePrice",
+                    dataType:"json",
+                    success:(data)=>
+                    {
+                        price_modal.find("#price_update_result").html(data.error?data.error:(data.msg?data.msg:"操作成功"));
+                        $("#tablePrice").bootstrapTable('refresh',{});
+                    }
+                })
+            });
+            price_modal.find("#del_price").click(function(){
+                var send_data={};
+                send_data.itemType=price_modal.find("#itemType").html();
+                send_data.currencyType=price_modal.find("#currencyType").html();
+                send_data.itemCount=parseInt( price_modal.find("#itemCount").html());
+                send_data.delete=true;
+                $.ajax({
+                    contentType: "application/json; charset=utf-8",
+                    method:"post",
+                    data:JSON.stringify(send_data),
+                    url:"updatePrice",
+                    dataType:"json",
+                    success:(data)=>
+                    {
+                        price_modal.find("#price_update_result").html(data.error?data.error:"操作成功");
+                        $("#tablePrice").bootstrapTable('refresh',{});
+                    }
+                })
             })
+
+
+
+
+
+
+
+
+
+
+
+
+        var user_modal=$("#userEditModal");
+        var change_gold=null;
+        var change_diamond=null;
+        var change_proxy=null;
+        user_modal.find("#change_gold").on("input",function(){      //只需要找到你点击的是哪个ul里面的就行
+            var value = parseInt($(this).val());
+            change_gold=null;
+            if(value!=0)
+            {
+                change_gold=value;
+                if(GUser.level==4) user_modal.find("#changed_gold_value").html("+"+value);
+                else user_modal.find("#changed_gold_value").html("重置:"+value);
+            }
+            else{
+                user_modal.find("#changed_gold_value").html("未变更");
+            }
+        });
+        user_modal.find("#change_diamond").on("input",function(){      //只需要找到你点击的是哪个ul里面的就行
+
+            var value = parseInt($(this).val());
+            change_diamond=null;
+            if(value!=0)
+            {
+                change_diamond=value;
+                if(GUser.level==4)user_modal.find("#changed_diamond_value").html("+"+value);
+                else user_modal.find("#changed_diamond_value").html("重置:"+value);
+            }
+            else{
+                user_modal.find("#changed_diamond_value").html("未变更");
+            }
+        });
+        if(GUser.level==5){
+            user_modal.find("ul#change_proxy").on("click","li",function(){      //只需要找到你点击的是哪个ul里面的就行
+                var isProxy=$(this).text()=="是";
+                change_proxy=null;
+                if(isProxy != edit_select_row.isProxy)
+                {
+                    change_proxy=isProxy;
+                    user_modal.find("#changed_proxy_value").html("重置:"+$(this).text());
+                }
+                else
+                {
+                    user_modal.find("#changed_proxy_value").html("未变更");
+                }
+            });
+        }
+        user_modal.find("#update_user").click(function(){
+            var send_data={uid:edit_select_row.uid};
+            if(change_gold !== null){
+                send_data.setGold=true;
+                send_data.goldCount=change_gold;
+            }
+            if(change_diamond !== null){
+                send_data.setDiamond=true;
+                send_data.diamondCount=change_diamond;
+            }
+            if(change_proxy !== null){
+                send_data.setLevel=true;
+                send_data.level=change_proxy?4:0;
+            }
+            $.ajax({
+                contentType: "application/json; charset=utf-8",
+                method:"post",
+                data:JSON.stringify(send_data),
+                url:"updateUser",
+                dataType:"json",
+                success:(data)=>
+                {
+                    modal.find("#update_result").html(data.error?data.error:"操作成功");
+                    $("#table").bootstrapTable('refresh',{});
+                    if(GUser.level<5){
+                        $("#logo").html(GUser.nick+'|钻石:'+data.diamondCount+'|金币:'+data.goldCount);
+                    }
+                }
+            })
+        });
+
         </script>
 </body>
 </html>

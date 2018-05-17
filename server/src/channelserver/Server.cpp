@@ -19,9 +19,12 @@ void Server::OnTcpAccept(int socket, sockaddr *addr)
 	{
 		if (gServer.m_JSObject)
 		{
+			auto engine = ScriptingCore::GetInstance();
+			JSAutoCompartment ac(engine->GetGlobalContext(), gServer.m_JSObject);
+			JS::RootedObject obj(engine->GetGlobalContext(), gServer.m_JSObject);
 			jsval vals;
 			vals = UINT_TO_JSVAL(c->uid);
-			ScriptingCore::GetInstance()->CallFunction(OBJECT_TO_JSVAL(gServer.m_JSObject), "OnAccept", JS::HandleValueArray::fromMarkedLocation(1, &vals));
+			ScriptingCore::GetInstance()->CallFunction(OBJECT_TO_JSVAL(obj), "OnAccept", JS::HandleValueArray::fromMarkedLocation(1, &vals));
 		}
 		c->InitSocket(socket, addr, Timer::GetEventBase());
 	}
@@ -45,14 +48,15 @@ void RegisterJS()
 	
 
 	engine->Start();
-	//auto _global = engine->GetGlobalObject();
-	//auto _cx = engine->GetGlobalContext();
-	//JS::RootedObject global(_cx, _global);
-	//JSAutoCompartment ac4(_cx, global);
+	auto _global = engine->GetGlobalObject();
+	auto _cx = engine->GetGlobalContext();
+	JS::RootedObject global(_cx, _global);
+	//JSAutoCompartment ac(_cx, global);
 	//engine->Eval("JSON.parse([1]);");
 	//JS::RootedValue rval3(_cx);
 	//bool ret = engine->Eval("var today = Server.GetServerName();return today",rval3);
 	engine->RunScript(gServer.m_MainScriptPath);
+	engine->CallGlobalFunction("Main");
 	engine->Stop();
 	//JS::RootedObject obj2(_cx, _global);
 	//JSAutoCompartment ac4(_cx, obj2);

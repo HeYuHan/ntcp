@@ -157,9 +157,13 @@ require("client.js");
 require("pai.js");
 require("room.js");
 require("message_type.js");
-var server = new JServer();
-var ret = server.Init({
-    max_client: 50
-});
-LogInfo("init server ret:" + ret);
-server.Start();
+function Main() {
+    var server = new JServer();
+    var ret = server.Init({
+        max_client: 50
+    });
+    LogInfo("init server ret:" + ret);
+    var ret2 = server.Start();
+    LogInfo("exit server ret:" + ret2);
+    return 0;
+}
