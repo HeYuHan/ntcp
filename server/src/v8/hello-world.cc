@@ -208,9 +208,15 @@ static void GetSum(const FunctionCallbackInfo<Value>& args)
 //}
 //
 ///*设置javascript的内置对象*/
+
 class InnerObject
 {
 public:
+	Handle<Object> js_obj;
+	~InnerObject()
+	{
+
+	}
 	int x = 1;
 	static void PrintObjectName()
 	{
@@ -218,7 +224,7 @@ public:
 	}
 	static void PrintAuthor()
 	{
-		printf("\nThe author is dennis_mi \n");
+		printf("\nThe author is hlx \n");
 	}
 	//define function for v8
 	static void V8PrintObjectName(const FunctionCallbackInfo<Value>& args)
@@ -229,13 +235,26 @@ public:
 	{
 		PrintAuthor();
 	}
+	static void ClearWeakIC(
+		const v8::WeakCallbackInfo<InnerObject>& data) {
+		printf("clear weak is called\n");
+		InnerObject *native = data.GetParameter();
+		delete[] native;
+		//Local<Object> native_ptr = data.GetParameter()->Get(data.GetIsolate());
+
+		//Local<External> wrap = Local<External>::Cast(native_ptr->GetInternalField(0));
+		//InnerObject* native = static_cast<InnerObject*>(native_ptr->Value());
+	}
 	static void CreateObject(const FunctionCallbackInfo<Value>& args)
 	{
 		if (!args.IsConstructCall())return;
 		InnerObject* obj = new InnerObject();
 		obj->x = 4;
-		Handle<External> native_ptr = External::New(args.GetIsolate(), static_cast<InnerObject*>(obj));
+		Local<External> native_ptr = External::New(args.GetIsolate(), obj);
 		args.This()->SetInternalField(0, native_ptr);
+		v8::Persistent<External> garbage(args.GetIsolate(), native_ptr);
+		garbage.SetWeak(obj, &ClearWeakIC, v8::WeakCallbackType::kParameter);
+		
 	}
 	
 	static void GetF1(Local<String> property,const PropertyCallbackInfo<Value>& info)
@@ -251,6 +270,14 @@ public:
 		void* ptr = wrap->Value();
 		InnerObject* native_ptr = static_cast<InnerObject*>(ptr);
 		int v = value->Int32Value();
+		native_ptr->x = v;
+		Handle<String> js_func_name = String::NewFromUtf8(info.GetIsolate(),"test");
+		Handle<Value>  js_func_ref = self->Get(js_func_name);
+
+		Handle<Function> js_func = Handle<Function>::Cast(js_func_ref);
+		Handle<Value> js_data_value = js_func->Call(self, 0, NULL);
+		v8::String::Utf8Value utf82(info.GetIsolate(), js_data_value);
+		printf("call test %s\n", *utf82);
 	}
 };
 //
@@ -343,11 +370,12 @@ int main(int argc, char* argv[]) {
 	global_templ->Set(String::NewFromUtf8(isolate, "GetSum"),
 		FunctionTemplate::New(isolate, GetSum));
 
-	InnerObject *pInnerObject = new InnerObject();
-	pInnerObject->x = 3;
-	Local<External> native_ptr = External::New(isolate, pInnerObject);
+	//InnerObject *pInnerObject = new InnerObject();
+	//pInnerObject->x = 3;
+	//Local<External> native_ptr = External::New(isolate, pInnerObject);
 	
-	Local<FunctionTemplate> class_template = FunctionTemplate::New(isolate, InnerObject::CreateObject, native_ptr);
+	
+	Local<FunctionTemplate> class_template = FunctionTemplate::New(isolate, InnerObject::CreateObject);
 	class_template->SetClassName(String::NewFromUtf8(isolate, "Foo"));
 
 	//static
@@ -370,17 +398,22 @@ int main(int argc, char* argv[]) {
         v8::String::NewFromUtf8(isolate, "'Hello' + ', World!'",
                                 v8::NewStringType::kNormal)
             .ToLocalChecked();
+	
 	Local<String> get_sum = String::NewFromUtf8(isolate, "var first = 2;\
 	                                        var second = 3;\
                                         var third = 4;\
                                         GetSum(2,3,4);function GetJSString(str){return 'i am from js->' + str}\
+										Foo.prototype.test=function(){Foo.V8PrintAuthor();};\
 										Foo.V8PrintObjectName();\
-										var foo = new Foo(); foo.f1=123;", NewStringType::kNormal).ToLocalChecked();
+										 var foo = new Foo(); foo.f1=123;\
+										var foo2= new Foo();foo2.f1=222;foo2=null", NewStringType::kNormal).ToLocalChecked();
 	
 	Local<String> js_func_name = String::NewFromUtf8(isolate, "GetJSString");
 	
-	
-
+	Local<String> source2 = String::NewFromUtf8(isolate, "function Point(x,y){this.x=x; this.y=y;} Point.prototype.show=function(){return '(x,y) = '+this.x+','+this.y;}");
+	v8::Local<v8::Script> script2 =
+		v8::Script::Compile(context, source2).ToLocalChecked();
+	script2->Run();
 
     // Compile the source code.
     v8::Local<v8::Script> script =
@@ -398,12 +431,11 @@ int main(int argc, char* argv[]) {
 	v8::Local<v8::String> ret_str = hResult->ToString();
 	String::Utf8Value ret_str_utf8(isolate, ret_str);
 	printf("the result of GetJSString function is %s \n", *ret_str_utf8);
-
+	isolate->LowMemoryNotification();
     // Convert the result to an UTF8 string and print it.
     v8::String::Utf8Value utf8(isolate, result);
     printf("%s\n", *utf8);
   }
-
   // Dispose the isolate and tear down V8.
   isolate->Dispose();
   v8::V8::Dispose();

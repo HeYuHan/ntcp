@@ -1,5 +1,4 @@
-#include <jsapi.h>
-#include "spidermonkey_specifics.h"
+
 #include "Server.h"
 #include "Client.h"
 #include "js_tools.h"
@@ -8,7 +7,9 @@
 #include <HttpConnection3.h>
 #include <json/json.h>
 #include <ccUTF8.h>
+#include "jsb.h"
 
+#ifdef SPIDERMONKEY_ENGINE
 
 using namespace JS;
 
@@ -1083,3 +1084,4 @@ void js_register_String(JSContext *cx, JS::HandleObject global)
 	// add the proto and JSClass to the type->js info hash table
 	jsb_register_class<NativeString>(cx, jsb_String_class, proto, JS::NullPtr());
 }
+#endif

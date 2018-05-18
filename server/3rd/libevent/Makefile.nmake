@@ -49,7 +49,7 @@ ALL_OBJS=$(CORE_OBJS) $(WIN_OBJS) $(EXTRA_OBJS) $(SSL_OBJS)
 STATIC_LIBS=libevent_core.lib libevent_extras.lib libevent.lib $(SSL_LIBS)
 
 
-all: static_libs tests
+all: static_libs
 
 static_libs: $(STATIC_LIBS)
 

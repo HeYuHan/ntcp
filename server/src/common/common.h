@@ -8,7 +8,7 @@
 //lib
 #if _WIN32
 //pthread
-#pragma comment(lib,"./../3rd/pthread/lib/x86/pthreadVC2.lib")
+#pragma comment(lib,"./../3rd/pthread/lib/x64/pthreadVC2.lib")
 //libevent
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib,"./../3rd/libevent/libevent.lib")

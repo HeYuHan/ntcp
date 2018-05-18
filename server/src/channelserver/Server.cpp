@@ -1,10 +1,8 @@
 #include "Server.h"
 #include "Client.h"
 #include <Timer.h>
-#include "js_tools.h"
-#include "jsb.h"
 Server gServer;
-Server::Server():m_JSObject(NULL)
+Server::Server()
 {
 }
 
@@ -17,7 +15,7 @@ void Server::OnTcpAccept(int socket, sockaddr *addr)
 	Client *c = m_OnLineClients.Allocate();
 	if (c)
 	{
-		if (gServer.m_JSObject)
+		/*if (gServer.m_JSObject)
 		{
 			auto engine = ScriptingCore::GetInstance();
 			JSAutoCompartment ac(engine->GetGlobalContext(), gServer.m_JSObject);
@@ -25,7 +23,7 @@ void Server::OnTcpAccept(int socket, sockaddr *addr)
 			jsval vals;
 			vals = UINT_TO_JSVAL(c->uid);
 			ScriptingCore::GetInstance()->CallFunction(OBJECT_TO_JSVAL(obj), "OnAccept", JS::HandleValueArray::fromMarkedLocation(1, &vals));
-		}
+		}*/
 		c->InitSocket(socket, addr, Timer::GetEventBase());
 	}
 	else
@@ -36,7 +34,7 @@ void Server::OnTcpAccept(int socket, sockaddr *addr)
 void RegisterJS()
 {
 
-	auto engine = ScriptingCore::GetInstance();
+	/*auto engine = ScriptingCore::GetInstance();
 	engine->RegisterJSClass(js_register_String);
 	engine->RegisterJSClass(js_register_Log);
 	engine->RegisterJSClass(js_register_Server);
@@ -45,38 +43,13 @@ void RegisterJS()
 	engine->RegisterJSClass(js_register_Timer);
 	engine->RegisterJSClass(js_register_Http);
 	engine->RegisterJSClass(js_register_AsyncFile);
-	
-
 	engine->Start();
 	auto _global = engine->GetGlobalObject();
 	auto _cx = engine->GetGlobalContext();
 	JS::RootedObject global(_cx, _global);
-	//JSAutoCompartment ac(_cx, global);
-	//engine->Eval("JSON.parse([1]);");
-	//JS::RootedValue rval3(_cx);
-	//bool ret = engine->Eval("var today = Server.GetServerName();return today",rval3);
 	engine->RunScript(gServer.m_MainScriptPath);
 	engine->CallGlobalFunction("Main");
-	engine->Stop();
-	//JS::RootedObject obj2(_cx, _global);
-	//JSAutoCompartment ac4(_cx, obj2);
-	//jsval vals[3];
-	//vals[0] = INT_TO_JSVAL(123);
-
-	//vals[1] = STRING_TO_JSVAL(JS_NewStringCopyN(_cx, "sadf", 4));
-	//vals[2] = STRING_TO_JSVAL(JS_NewStringCopyN(_cx, "11111", 5));
-	//JS::RootedValue rval2(_cx);
-	////JS::RootedObject obj3(_cx, _global->get());
-	////JSAutoCompartment ac5(_cx, obj3);
-	//engine->CallFunction(OBJECT_TO_JSVAL(_global), "calljs", JS::HandleValueArray::fromMarkedLocation(1, vals), &rval2);
-	//bool evaluatedOK = JS_CallFunctionName(_cx, global, "calljs", JS::HandleValueArray::fromMarkedLocation(2, vals), &rval2);
-	//std::cout << JS_EncodeStringToUTF8(_cx, JS::RootedString(_cx, rval2.toString()));
-	//JS::RootedValue rval3(val);
-	//JS::RootedObject obj4(_cx, _global->get());
-	//JSAutoCompartment ac6(_cx, obj4);
-	//JS_GetProperty(_cx, global, "today", &rval3);
-
-	//std::cout << JS_EncodeStringToUTF8(_cx, JS::RootedString(_cx, JS::ToString(_cx, rval3)));
+	engine->Stop();*/
 }
 bool Server::Init()
 {
@@ -99,7 +72,7 @@ int Server::Run()
 int Server::Loop()
 {
 	int ret = BaseServer::Run();
-	ScriptingCore::GetInstance()->Stop();
+	//ScriptingCore::GetInstance()->Stop();
 	 return ret;
 }
 

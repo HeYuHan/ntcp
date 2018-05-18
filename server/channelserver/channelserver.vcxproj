@@ -40,7 +40,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -78,7 +78,7 @@
     <IncludePath>$(SolutionDir)3rd\log4cpp\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)3rd\pthread\include;$(SolutionDir)3rd\libevent\WIN32-Code;$(SolutionDir)3rd\libevent\include;$(SolutionDir)3rd\RakNet\Source;$(SolutionDir)src\common;$(SolutionDir)src\common\linux</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)3rd\icon\include;$(SolutionDir)3rd\log4cpp\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)3rd\pthread\include;$(SolutionDir)3rd\libevent\WIN32-Code\nmake;$(SolutionDir)3rd\libevent\include;$(SolutionDir)3rd\RakNet\Source;$(SolutionDir)src\common;$(SolutionDir)src\common\linux;$(SolutionDir)3rd\spidermonkey\include\win32</IncludePath>
+    <IncludePath>$(SolutionDir)3rd\v82\include;$(SolutionDir)3rd\icon\include;$(SolutionDir)3rd\log4cpp\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)3rd\pthread\include;$(SolutionDir)3rd\libevent\WIN32-Code\nmake;$(SolutionDir)3rd\libevent\include;$(SolutionDir)3rd\RakNet\Source;$(SolutionDir)src\common;$(SolutionDir)src\common\linux;$(SolutionDir)3rd\spidermonkey\include\win32</IncludePath>
     <OutDir>$(SolutionDir)exe\</OutDir>
     <IntDir>$(SolutionDir)Temp\</IntDir>
     <TargetName>channelserver</TargetName>
@@ -100,7 +100,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>V8_ENGINE;WIN32;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
   </ItemDefinitionGroup>
@@ -139,10 +139,13 @@
     <ClCompile Include="..\src\channelserver\js_tools.cpp" />
     <ClCompile Include="..\src\channelserver\main.cpp" />
     <ClCompile Include="..\src\channelserver\Message.cpp" />
+    <ClCompile Include="..\src\channelserver\ScriptingCore.cpp" />
     <ClCompile Include="..\src\channelserver\Server.cpp" />
+    <ClCompile Include="..\src\channelserver\v8_jsb.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\channelserver\Client.h" />
+    <ClInclude Include="..\src\channelserver\javascript.h" />
     <ClInclude Include="..\src\channelserver\jsb.h" />
     <ClInclude Include="..\src\channelserver\js_tools.h" />
     <ClInclude Include="..\src\channelserver\Message.h" />

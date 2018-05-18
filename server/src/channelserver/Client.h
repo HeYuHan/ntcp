@@ -4,7 +4,7 @@
 #include <TcpConnection.h>
 #include <NetworkConnection.h>
 #include <common.h>
-#include <jsapi.h>
+#include "javascript.h"
 class Client:public TcpConnection,public NetworkStream
 {
 public:
@@ -13,11 +13,13 @@ public:
 	virtual void OnMessage();
 	virtual void OnConnected();
 	virtual void OnDisconnected();
+	void SetJSObject(JS_OBJECT obj);
 public:
 	uint uid;
-	JSObject* m_JSClient;
+	
 private:
-
+	bool m_SetJSObject;
+	JS_OBJECT m_JSClient;
 };
 
 #endif // !__CHANNEL_CLIENT_H__

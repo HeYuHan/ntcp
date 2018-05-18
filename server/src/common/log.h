@@ -7,7 +7,7 @@
 #ifdef _WIN32
 #include <log4cpp/config-win32.h>
 #ifdef _DEBUG
-#pragma comment(lib,"./../lib/log4cpp_d.lib")
+#pragma comment(lib,"./../lib/log4cppD_64.lib")
 #else
 #pragma comment(lib,"./../lib/log4cpp.lib")
 #endif

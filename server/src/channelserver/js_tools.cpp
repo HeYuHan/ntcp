@@ -1,3 +1,4 @@
+#ifdef SPIDERMONKEY_ENGINE
 #include "js_tools.h"
 #include <log.h>
 #include <jsfriendapi.h>
@@ -528,3 +529,4 @@ void ScriptingCore::RegisterJSClass(sc_register_sth call)
 {
 	registrationList.push_back(call);
 }
+#endif

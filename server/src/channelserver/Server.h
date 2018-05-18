@@ -21,12 +21,12 @@ public:
 	char m_MainScriptPath[512];
 	char m_Addr[128];
 public:
-	JSObject* m_JSObject;
+	JS_OBJECT m_JSObject;
 public:
 	ObjectPool<Client> m_OnLineClients;
 	ObjectPool<AsyncFileWriter> m_FileWriters;
 };
 extern Server gServer;
-
+void register_all_native();
 
 #endif // !__CHANNEL_SERVER_H__

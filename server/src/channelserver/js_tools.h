@@ -1,9 +1,10 @@
 #pragma once
 #ifndef __JS_TOOLS_H__
 #define __JS_TOOLS_H__
-#include <jsapi.h>
+#ifdef SPIDERMONKEY_ENGINE
+
 #include <string>
-#include "spidermonkey_specifics.h"
+#include "javascript.h"
 class JSStringWrapper
 {
 public:
@@ -105,5 +106,5 @@ private:
 	JSContext *_cx;
 	JSRuntime *_rt;
 };
-
+#endif
 #endif // !__JS_TOOLS__

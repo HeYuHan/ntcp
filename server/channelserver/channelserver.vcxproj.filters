@@ -36,6 +36,12 @@
     <ClCompile Include="..\src\channelserver\httptest.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\channelserver\v8_jsb.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\channelserver\ScriptingCore.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\channelserver\Server.h">
@@ -56,10 +62,13 @@
     <ClInclude Include="..\src\channelserver\spidermonkey_specifics.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\channelserver\ScriptingCore.h">
+    <ClInclude Include="..\src\channelserver\jsb.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\channelserver\jsb.h">
+    <ClInclude Include="..\src\channelserver\javascript.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\channelserver\ScriptingCore.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
