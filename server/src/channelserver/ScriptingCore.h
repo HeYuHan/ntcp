@@ -8,7 +8,7 @@ class ScriptEngine
 public:
 	~ScriptEngine();
 	static ScriptEngine* GetInstance();
-	bool Start(const char* arg);
+	bool Start();
 	void Stop();
 	void RegisterNative(native_class_register_call call);
 	bool ReadScriptFile(const char* path);
@@ -21,8 +21,8 @@ public:
 	bool CallGlobalFunction(const char* name);
 	JS_OBJECT NewObject();
 	v8::Isolate* GetIsolate() { return m_Isolate; }
-
-	private:
+	static void InitV8(char* arg);
+private:
 	ScriptEngine();
 	v8::Isolate* m_Isolate;
 	v8::Handle<v8::ObjectTemplate> m_GlobalObject;

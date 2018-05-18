@@ -365,7 +365,7 @@ int main(int argc, char* argv[]) {
     v8::Isolate::Scope isolate_scope(isolate);
 
     // Create a stack-allocated handle scope.
-    v8::HandleScope handle_scope(isolate);
+   
 	Handle<ObjectTemplate> global_templ = ObjectTemplate::New(isolate);
 	global_templ->Set(String::NewFromUtf8(isolate, "GetSum"),
 		FunctionTemplate::New(isolate, GetSum));

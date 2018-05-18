@@ -62,5 +62,6 @@ void register_server_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* i
 
 void register_all_native()
 {
-
+	auto engine = ScriptEngine::GetInstance();
+	engine->RegisterNative(register_server_class);
 }

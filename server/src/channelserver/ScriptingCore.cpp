@@ -22,10 +22,9 @@ ScriptEngine* ScriptEngine::GetInstance()
 #ifdef V8_ENGINE
 using namespace v8;
 static std::vector<native_class_register_call> registrationList;
-bool ScriptEngine::Start(const char* arg)
+bool ScriptEngine::Start()
 {
-	v8::V8::InitializeICUDefaultLocation(arg);
-	v8::V8::InitializeExternalStartupData(arg);
+	
 	std::unique_ptr<v8::Platform> platform = v8::platform::NewDefaultPlatform();
 	v8::V8::InitializePlatform(platform.get());
 	v8::V8::Initialize();
@@ -66,9 +65,10 @@ bool ScriptEngine::ReadScriptFile(const char * path)
 
 void ScriptEngine::Eval(const char * str)
 {
+	v8::HandleScope handle_scope(m_Isolate);
 	Local<String> source = String::NewFromUtf8(m_Isolate, str);
-	v8::Context::Scope context_scope(m_Context);
-	Local<Script> script = Script::Compile(m_Context, source).ToLocalChecked();
+	
+	Local<Script> script = Script::Compile(source);
 	script->Run();
 }
 
@@ -119,6 +119,12 @@ JS_OBJECT ScriptEngine::NewObject()
 {
 	Local<Object> obj = m_GlobalObject->NewInstance();
 	return obj;
+}
+
+void ScriptEngine::InitV8(char * arg)
+{
+	v8::V8::InitializeICUDefaultLocation(arg);
+	v8::V8::InitializeExternalStartupData(arg);
 }
 
 #endif

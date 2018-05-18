@@ -1,6 +1,7 @@
 #include "Server.h"
 #include "Client.h"
 #include <Timer.h>
+#include "ScriptingCore.h"
 Server gServer;
 Server::Server()
 {
@@ -50,6 +51,11 @@ void RegisterJS()
 	engine->RunScript(gServer.m_MainScriptPath);
 	engine->CallGlobalFunction("Main");
 	engine->Stop();*/
+	register_all_native();
+	auto engine = ScriptEngine::GetInstance();
+	engine->Start();
+	engine->ReadScriptFile(gServer.m_MainScriptPath);
+	engine->CallGlobalFunction("Main");
 }
 bool Server::Init()
 {
