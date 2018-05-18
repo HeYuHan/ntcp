@@ -10,6 +10,8 @@ info/db/
 Common/Debug
 Common/Release
 Temp/
+3rd/RakNet/Lib/LibStatic/Win32
+3rd/RakNet/Lib/LibStatic/x64
 
 
 # User-specific files
