@@ -12,6 +12,7 @@ Common/Release
 Temp/
 3rd/RakNet/Lib/LibStatic/Win32
 3rd/RakNet/Lib/LibStatic/x64
+Server.VC.db
 
 
 # User-specific files
