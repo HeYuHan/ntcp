@@ -1,4 +1,0 @@
-
-loginserver 192.168.1.168:9300 ./../../exe/loginserver.json
-
-channelserver 192.168.1.168:9500 ./../../exe/Config.json

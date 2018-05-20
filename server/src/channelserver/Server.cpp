@@ -54,8 +54,6 @@ void RegisterJS()
 	register_all_native();
 	auto engine = ScriptEngine::GetInstance();
 	engine->Start();
-	engine->ReadScriptFile(gServer.m_MainScriptPath);
-	engine->CallGlobalFunction("Main");
 }
 bool Server::Init()
 {

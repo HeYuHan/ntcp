@@ -5,7 +5,9 @@ EVENT_SOURCE_DIR = ../../3rd/libevent
 LOG4CPP_SOURCE_DIR = ../../3rd/log4cpp
 RAKNET_SOURCE_DIR = ../../3rd/RakNet
 
-CFLAGS = -c -fPIC
+#LFLAGS = -m64 -pie -fPIC
+
+CFLAGS = -c -fPIC -pie
 CFLAGS += -I.
 CFLAGS += -I./$(RAKNET_SOURCE_DIR)/Source
 CFLAGS += -I./$(SPIDERMONKEY_HEAD_DIR)
@@ -96,6 +98,6 @@ $(TARGET) : $(TEMP) $(OBJS)
 	$(AR) -x $(EVENT_LIB_EXT)
 	$(AR) -x $(LOG_LIB)
 
-	$(AR) rcs $@ $(OBJS) *.o 
+	$(AR) $(LFLAGS) rcs $@ $(OBJS) *.o 
 	rm -f *.o
 	

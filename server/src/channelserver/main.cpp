@@ -27,7 +27,6 @@ struct option long_options[]=
 
 int main(int argc,char **argv)
 {
-	
 	ScriptEngine::InitV8(argv[0]);
 	bool as_daemon = false;
 	while (1)

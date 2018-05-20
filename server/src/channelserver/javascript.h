@@ -7,8 +7,10 @@
 #pragma comment(lib,"./../lib/v8.dll.lib")
 #pragma comment(lib,"./../lib/v8_libplatform.dll.lib")
 #endif
+
 #include <libplatform/libplatform.h>
 #include <v8.h>
+
 typedef void(*native_class_register_call)(v8::Handle<v8::ObjectTemplate>, v8::Isolate*);
 typedef v8::Handle<v8::Object> JS_OBJECT;
 

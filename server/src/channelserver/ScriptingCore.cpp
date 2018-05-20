@@ -2,6 +2,7 @@
 #include "FileReader.h"
 #include <string.h>
 #include <log.h>
+#include "Server.h"
 ScriptEngine * m_SharedInstance = NULL;
 ScriptEngine::ScriptEngine():m_Isolate(NULL)
 {
@@ -44,6 +45,9 @@ bool ScriptEngine::Start()
 	}
 	m_Context = v8::Context::New(m_Isolate, 0, m_GlobalObject);
 
+	v8::Context::Scope context_scope(m_Context);
+	ReadScriptFile(gServer.m_MainScriptPath);
+	CallGlobalFunction("Main");
 	
 	return true;
 }
@@ -89,7 +93,9 @@ bool ScriptEngine::CallFunction(JS_OBJECT obj, const char* name, int argc, JS_VA
 
 bool ScriptEngine::CallFunction(JS_OBJECT obj, const char * name, int argc, JS_VALUE * args)
 {
-	return CallFunction(obj,name,argc,args,Handle<Value>());
+	v8::Context::Scope context_scope(m_Context);
+	Handle<Value> ret;
+	return CallFunction(obj,name,argc,args,ret);
 }
 
 
@@ -97,7 +103,9 @@ bool ScriptEngine::CallFunction(JS_OBJECT obj, const char * name, int argc, JS_V
 
 bool ScriptEngine::CallFunction(JS_OBJECT obj, const char* name)
 {
-	return CallFunction(obj, name, 0, NULL, Handle<Value>());
+	v8::Context::Scope context_scope(m_Context);
+	Handle<Value> ret;
+	return CallFunction(obj, name, 0, NULL, ret);
 }
 
 bool ScriptEngine::CallGlobalFunction(const char * name, int argc, JS_VALUE * args, JS_VALUE & ret)
@@ -107,12 +115,16 @@ bool ScriptEngine::CallGlobalFunction(const char * name, int argc, JS_VALUE * ar
 
 bool ScriptEngine::CallGlobalFunction(const char* name, int argc, JS_VALUE *args)
 {
-	return CallFunction(m_Context->Global(), name, argc, args, Handle<Value>());
+	v8::Context::Scope context_scope(m_Context);
+	Handle<Value> ret;
+	return CallFunction(m_Context->Global(), name, argc, args, ret);
 }
 
 bool ScriptEngine::CallGlobalFunction(const char* name)
 {
-	return CallFunction(m_Context->Global(), name, 0, NULL, Handle<Value>());
+	v8::Context::Scope context_scope(m_Context);
+	Handle<Value> ret;
+	return CallFunction(m_Context->Global(), name, 0, NULL, ret);
 }
 
 JS_OBJECT ScriptEngine::NewObject()

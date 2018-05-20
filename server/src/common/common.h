@@ -36,7 +36,7 @@ typedef unsigned long long ullong;
 #define NS_MAP std
 #define NS_VECTOR std
 #else
-#define NS_MAP std
+#define NS_MAP std::tr1
 #define NS_VECTOR std
 #endif // defined(MACOS)
 
