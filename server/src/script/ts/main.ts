@@ -166,10 +166,7 @@ class RandomInt{
 
 
 
-if(Server.Platfrom() == 1)ScriptLoader.ROOT_PATH="E:/Share/ntcp/server/src/script/js/";
-else ScriptLoader.ROOT_PATH="./js/";
-
-
+ScriptLoader.ROOT_PATH=FileHelper.MainScriptPath().replace("main.js","");
 
 
 require("server.js");

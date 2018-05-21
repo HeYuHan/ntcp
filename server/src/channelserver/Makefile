@@ -2,15 +2,15 @@ CC = g++
 #yum install zlib-devel
 #yum install zlib
 
-LFLAGS = -m64 -lv8_libplatform -lv8 -L/opt/software/glibc-2.14/lib
+LFLAGS = -m64 -lv8_libplatform -lv8 -lv8_libbase -L/opt/software/glibc-2.14/lib
 LFLAGS += -ldl -lpthread -lrt -lz
-CFLAGS = -c -fPIC -std=gnu++14
+CFLAGS = -c -fPIC -std=c++11
 
 PF = LINUX
 RAKNET_SOURCE_DIR = ../../3rd/RakNet
 #SPIDERMONKEY_HEAD_DIR = ../../3rd/spidermonkey/include/linux
 #SPIDERMONKEY_LIB = ../../3rd/spidermonkey/prebuilt/linux/64-bit/libjs_static.a
-V8_INCLUDE = ../../3rd/v82/linux
+V8_INCLUDE = ../../3rd/v86.4.99/include
 
 #V8_LIBS = ../../3rd/v82/lib/libv8platform.a
 #V8_LIBS += ../../3rd/v82/lib/libv8base.a

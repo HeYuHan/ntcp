@@ -23,11 +23,107 @@ ScriptEngine* ScriptEngine::GetInstance()
 #ifdef V8_ENGINE
 using namespace v8;
 static std::vector<native_class_register_call> registrationList;
+const char* ToCString(const v8::String::Utf8Value& value) {
+	return *value ? *value : "<string conversion failed>";
+}
+void ReportException(Isolate *isolate, v8::TryCatch* try_catch) {
+	v8::HandleScope handle_scope(isolate);
+	v8::String::Utf8Value exception(try_catch->Exception());
+	const char* exception_string = ToCString(exception);
+	v8::Handle<v8::Message> message = try_catch->Message();
+	if (message.IsEmpty()) {
+		// V8 didn't provide any extra information about this error; just
+		// print the exception.
+		printf("%s\n", exception_string);
+	}
+	else {
+		// Print (filename):(line number): (message).
+		v8::String::Utf8Value filename(message->GetScriptResourceName());
+		const char* filename_string = ToCString(filename);
+		int linenum = message->GetLineNumber();
+		printf("%s:%i: %s\n", filename_string, linenum, exception_string);
+		// Print line of source code.
+		v8::String::Utf8Value sourceline(message->GetSourceLine());
+		const char* sourceline_string = ToCString(sourceline);
+		printf("%s\n", sourceline_string);
+		// Print wavy underline (GetUnderline is deprecated).
+		//int start = message->GetStartColumn();
+		//for (int i = 0; i < start; i++) {
+		//	printf(" ");
+		//}
+		//int end = message->GetEndColumn();
+		//for (int i = start; i < end; i++) {
+		//	printf("^");
+		//}
+		//printf("\n");
+		v8::String::Utf8Value stack_trace(try_catch->StackTrace());
+		if (stack_trace.length() > 0) {
+			const char* stack_trace_string = ToCString(stack_trace);
+			log_error("%s", stack_trace_string);
+		}
+	}
+}
+bool ExecuteString(Isolate *isolate,v8::Handle<v8::String> source,
+	v8::Handle<v8::String> name,
+	bool print_result,
+	bool report_exceptions)
+{
+	v8::HandleScope handle_scope(isolate);
+	v8::TryCatch try_catch(isolate);   //这里设置异常机制
+	v8::Handle<v8::Script> script = v8::Script::Compile(source, name);
+	if (script.IsEmpty()) {
+		// Print errors that happened during compilation.
+		if (report_exceptions)
+			ReportException(isolate,&try_catch);
+		return false;
+	}
+	else {
+		v8::Handle<v8::Value> result = script->Run();
+		if (result.IsEmpty()) {
+			//assert(try_catch.HasCaught());
+			// Print errors that happened during execution.
+			if (report_exceptions)
+				ReportException(isolate,&try_catch);
+			return false;
+		}
+		else {
+			//assert(!try_catch.HasCaught());
+			if (print_result && !result->IsUndefined()) {
+				// If all went well and the result wasn't undefined then print
+				// the returned value.
+				v8::String::Utf8Value str(result);
+				const char* cstr = ToCString(str);
+				printf("%s\n", cstr);
+			}
+			return true;
+		}
+	}
+}
+//提取js文件
+v8::Handle<v8::String> ReadFile(Isolate *isolate,const char* name)
+{
+	FILE* file = fopen(name, "rb");
+	if (file == NULL) return v8::Handle<v8::String>();
+	fseek(file, 0, SEEK_END);
+	int size = ftell(file);
+	rewind(file);
+	char* chars = new char[size + 1];
+	chars[size] = '\0';
+	for (int i = 0; i < size;)
+	{
+		int read = fread(&chars[i], 1, size - i, file);
+		i += read;
+	}
+	fclose(file);
+	v8::Handle<v8::String> result = v8::String::NewFromUtf8(isolate,chars);
+	delete[] chars;
+	return result;
+}
 bool ScriptEngine::Start()
 {
 	
-	std::unique_ptr<v8::Platform> platform = v8::platform::NewDefaultPlatform();
-	v8::V8::InitializePlatform(platform.get());
+	v8::Platform *platform = v8::platform::CreateDefaultPlatform();
+	v8::V8::InitializePlatform(platform);
 	v8::V8::Initialize();
 
 	// Create a new Isolate and make it the current one.
@@ -47,7 +143,7 @@ bool ScriptEngine::Start()
 
 	v8::Context::Scope context_scope(m_Context);
 	ReadScriptFile(gServer.m_MainScriptPath);
-	CallGlobalFunction("Main");
+	//CallGlobalFunction("Main");
 	
 	return true;
 }
@@ -63,17 +159,16 @@ bool ScriptEngine::ReadScriptFile(const char * path)
 {
 	std::string content;
 	if (!ReadText(content, path))return false;
-	Eval(content.c_str());
+	Eval(content.c_str(), path);
 	return true;
 }
 
-void ScriptEngine::Eval(const char * str)
+void ScriptEngine::Eval(const char * str, const char* fileName)
 {
 	v8::HandleScope handle_scope(m_Isolate);
 	Local<String> source = String::NewFromUtf8(m_Isolate, str);
-	
-	Local<Script> script = Script::Compile(source);
-	script->Run();
+	Local<String> name = String::NewFromUtf8(m_Isolate, fileName);
+	ExecuteString(m_Isolate, source, name, true, true);
 }
 
 bool ScriptEngine::CallFunction(JS_OBJECT obj, const char* name, int argc, JS_VALUE * args,JS_VALUE &ret)

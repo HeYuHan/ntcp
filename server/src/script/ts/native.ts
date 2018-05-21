@@ -18,6 +18,7 @@ declare class FileHelper{
     public static LoadScript(path:string):boolean;
     public static Write(path:string,msg:string):boolean;
     public static Read(path:string):string;
+    public static MainScriptPath():string;
 }
 declare class Timer{
     constructor(timer:number,loop:boolean);

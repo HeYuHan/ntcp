@@ -12,7 +12,7 @@ public:
 	void Stop();
 	void RegisterNative(native_class_register_call call);
 	bool ReadScriptFile(const char* path);
-	void Eval(const char* str);
+	void Eval(const char* str, const char* fileName = 0);
 	bool CallFunction(JS_OBJECT obj, const char* name,int argc, JS_VALUE *args, JS_VALUE &ret);
 	bool CallFunction(JS_OBJECT obj, const char* name, int argc, JS_VALUE *args);
 	bool CallFunction(JS_OBJECT obj, const char* name);
