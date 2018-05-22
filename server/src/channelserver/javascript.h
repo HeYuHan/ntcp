@@ -10,7 +10,7 @@
 
 #include <libplatform/libplatform.h>
 #include <v8.h>
-
+typedef void(*on_script_load_end)();
 typedef void(*native_class_register_call)(v8::Handle<v8::ObjectTemplate>, v8::Isolate*);
 typedef v8::Handle<v8::Object> JS_OBJECT;
 

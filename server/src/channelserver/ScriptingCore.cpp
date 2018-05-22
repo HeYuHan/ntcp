@@ -22,7 +22,9 @@ ScriptEngine* ScriptEngine::GetInstance()
 }
 #ifdef V8_ENGINE
 using namespace v8;
+
 static std::vector<native_class_register_call> registrationList;
+static std::vector<on_script_load_end> loadEndList;
 const char* ToCString(const v8::String::Utf8Value& value) {
 	return *value ? *value : "<string conversion failed>";
 }
@@ -121,6 +123,8 @@ v8::Handle<v8::String> ReadFile(Isolate *isolate,const char* name)
 }
 bool ScriptEngine::Start()
 {
+	v8::V8::InitializeICUDefaultLocation(V8_BIN_PATH);
+	v8::V8::InitializeExternalStartupData(V8_BIN_PATH);
 	v8::Platform *platform = v8::platform::CreateDefaultPlatform();
 	v8::V8::InitializePlatform(platform);
 	v8::V8::Initialize();
@@ -149,16 +153,10 @@ bool ScriptEngine::Start()
 	v8::Context::Scope context_scope(m_Context);
 	ReadScriptFile(gServer.m_MainScriptPath);
 
-	if (gServer.m_JSObject.IsEmpty()) {
-		Local<Value> server = m_Context->Global()->Get(String::NewFromUtf8(m_Isolate, "Server"));
-		if (server->IsFunction()) {
-			Local<Function> func = Local<Function>::Cast(server);
-			Local<Value> value = func->CallAsConstructor(m_Context, 0, NULL).ToLocalChecked();
-			gServer.m_JSObject = Local<Object>::Cast(value);
-		}
-		//gServer.m_JSObject = Local<Object>::Cast(class_template->GetFunction()->CallAsConstructor(G_ISOLATE()->GetCurrentContext(), 0, NULL).ToLocalChecked());
-	}
 	
+	for (auto& callback : loadEndList) {
+		callback();
+	}
 
 	CallGlobalFunction("Main");
 	
@@ -245,16 +243,15 @@ JS_OBJECT ScriptEngine::NewObject()
 	return obj;
 }
 
-void ScriptEngine::InitV8(char * arg)
-{
-	v8::V8::InitializeICUDefaultLocation(arg);
-	v8::V8::InitializeExternalStartupData(arg);
-}
-
 #endif
 void ScriptEngine::RegisterNative(native_class_register_call call)
 {
 	registrationList.push_back(call);
+}
+
+void ScriptEngine::RegisterOnScriptLoaded(on_script_load_end call)
+{
+	loadEndList.push_back(call);
 }
 
 

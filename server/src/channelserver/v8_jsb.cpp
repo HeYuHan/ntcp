@@ -9,8 +9,14 @@ void reg_func(Local<Template> class_template, v8::Isolate* isolate,const char* n
 	class_template->Set(String::NewFromUtf8(isolate, name), FunctionTemplate::New(isolate, call));
 }
 Local<FunctionTemplate> class_template;
+void create_server_instance() {
+	if (gServer.m_JSObject.IsEmpty()) {
+		gServer.m_JSObject = Local<Object>::Cast(class_template->GetFunction()->CallAsConstructor(G_ISOLATE()->GetCurrentContext(), 0, NULL).ToLocalChecked());
+	}
+}
 void register_server_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* isolate) 
 {
+	ScriptEngine::GetInstance()->RegisterOnScriptLoaded(create_server_instance);
 	class_template = FunctionTemplate::New(isolate);
 	reg_func(class_template, isolate, "Get", [](const FunctionCallbackInfo<Value>& args) {
 		//if (gServer.m_JSObject.IsEmpty()) {

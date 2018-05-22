@@ -12,7 +12,8 @@ enum
 	script = 0x100,
 	flag_addr,
 	flag_log,
-	flag_daemon
+	flag_daemon,
+	flag_v8
 };
 struct option long_options[]=
 {
@@ -20,17 +21,19 @@ struct option long_options[]=
 	{"addr",1,0,flag_addr },
 	{"log_path",1,0,flag_log },
 	{ "daemon",0,0,flag_daemon },
+	{"v8",1,0,flag_v8 }
 };
 #ifdef SPIDERMONKEY_ENGINE
 
 #pragma comment(lib,"./../3rd/spidermonkey/prebuilt/win32/mozjs-33.lib")
 #endif // WIN32
 
-
+char* V8_BIN_PATH=NULL;
 
 int main(int argc,char **argv)
 {
-	ScriptEngine::InitV8(argv[0]);
+	char v8_bin_path[256] = { 0 };
+	strcpy(v8_bin_path, argv[0]);
 	bool as_daemon = false;
 	while (1)
 	{
@@ -54,6 +57,10 @@ int main(int argc,char **argv)
 			gLogger.m_LogToFile = true;
 			strcpy(gLogger.filePath, optarg);
 			break;
+		case flag_v8:
+			strcpy(v8_bin_path, optarg);
+			v8_bin_path[strlen(optarg)] = 0;
+			break;
 		case '?':
 			return 1;
 			break;
@@ -61,6 +68,7 @@ int main(int argc,char **argv)
 			break;
 		}
 	}
+	V8_BIN_PATH = v8_bin_path;
 	if (as_daemon && !RunAsDaemon())
 	{
 		log_error("%s", "run as daemon error!");

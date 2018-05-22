@@ -11,6 +11,7 @@ public:
 	bool Start();
 	void Stop();
 	void RegisterNative(native_class_register_call call);
+	void RegisterOnScriptLoaded(on_script_load_end call);
 	bool ReadScriptFile(const char* path);
 	void Eval(const char* str, const char* fileName = 0);
 	bool CallFunction(JS_OBJECT obj, const char* name,int argc, JS_VALUE *args, JS_VALUE &ret);
@@ -21,7 +22,6 @@ public:
 	bool CallGlobalFunction(const char* name);
 	JS_OBJECT NewObject();
 	v8::Isolate* GetIsolate() { return m_Isolate; }
-	static void InitV8(char* arg);
 private:
 	ScriptEngine();
 	v8::Isolate* m_Isolate;
@@ -30,6 +30,6 @@ private:
 	v8::Local<v8::Context> m_Context;
 };
 
-
+extern char* V8_BIN_PATH;
 
 #endif
