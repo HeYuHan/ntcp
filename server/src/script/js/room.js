@@ -690,7 +690,7 @@ var Room = (function () {
                 shou: p.shou_pai,
                 di: p.di_pai,
                 array: p.hu_pai_info.hu_pai_array,
-                hu: p.hu_pai_info.totle_socre
+                hu: p.hu_pai_info.totle_socre,
             };
             if (p.hui_pai) {
                 msg.uid2 = p.hui_pai_uid;

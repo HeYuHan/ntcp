@@ -21,8 +21,11 @@ struct option long_options[]=
 	{"log_path",1,0,flag_log },
 	{ "daemon",0,0,flag_daemon },
 };
+#ifdef SPIDERMONKEY_ENGINE
 
 #pragma comment(lib,"./../3rd/spidermonkey/prebuilt/win32/mozjs-33.lib")
+#endif // WIN32
+
 
 
 int main(int argc,char **argv)

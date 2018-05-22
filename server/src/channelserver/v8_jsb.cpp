@@ -13,16 +13,16 @@ void register_server_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* i
 {
 	class_template = FunctionTemplate::New(isolate);
 	reg_func(class_template, isolate, "Get", [](const FunctionCallbackInfo<Value>& args) {
-		if (gServer.m_JSObject.IsEmpty()) {
-			/*auto m_Context = G_ISOLATE()->GetCurrentContext();
-			Local<Value> server = m_Context->Global()->Get(String::NewFromUtf8(G_ISOLATE(), "Server"));
-			if (server->IsFunction()) {
-				Local<Function> func = Local<Function>::Cast(server);
-				Local<Value> value = func->CallAsConstructor(m_Context, 0, NULL).ToLocalChecked();
-				gServer.m_JSObject = Local<Object>::Cast(value);
-			}*/
-			gServer.m_JSObject = Local<Object>::Cast(class_template->GetFunction()->CallAsConstructor(G_ISOLATE()->GetCurrentContext(), 0, NULL).ToLocalChecked());
-		}
+		//if (gServer.m_JSObject.IsEmpty()) {
+		//	auto m_Context = G_ISOLATE()->GetCurrentContext();
+		//	Local<Value> server = m_Context->Global()->Get(String::NewFromUtf8(G_ISOLATE(), "Server"));
+		//	if (server->IsFunction()) {
+		//		Local<Function> func = Local<Function>::Cast(server);
+		//		Local<Value> value = func->CallAsConstructor(m_Context, 0, NULL).ToLocalChecked();
+		//		gServer.m_JSObject = Local<Object>::Cast(value);
+		//	}
+		//	//gServer.m_JSObject = Local<Object>::Cast(class_template->GetFunction()->CallAsConstructor(G_ISOLATE()->GetCurrentContext(), 0, NULL).ToLocalChecked());
+		//}
 		args.GetReturnValue().Set(gServer.m_JSObject);
 	});
 	reg_func(class_template, isolate, "Platfrom", [](const FunctionCallbackInfo<Value>& args) {

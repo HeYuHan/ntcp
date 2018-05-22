@@ -149,6 +149,15 @@ bool ScriptEngine::Start()
 	v8::Context::Scope context_scope(m_Context);
 	ReadScriptFile(gServer.m_MainScriptPath);
 
+	if (gServer.m_JSObject.IsEmpty()) {
+		Local<Value> server = m_Context->Global()->Get(String::NewFromUtf8(m_Isolate, "Server"));
+		if (server->IsFunction()) {
+			Local<Function> func = Local<Function>::Cast(server);
+			Local<Value> value = func->CallAsConstructor(m_Context, 0, NULL).ToLocalChecked();
+			gServer.m_JSObject = Local<Object>::Cast(value);
+		}
+		//gServer.m_JSObject = Local<Object>::Cast(class_template->GetFunction()->CallAsConstructor(G_ISOLATE()->GetCurrentContext(), 0, NULL).ToLocalChecked());
+	}
 	
 
 	CallGlobalFunction("Main");
