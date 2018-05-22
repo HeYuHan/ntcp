@@ -1,4 +1,4 @@
-CC = g++
+CC = clang++
 AR = ar
 
 EVENT_SOURCE_DIR = ../../3rd/libevent
@@ -7,7 +7,7 @@ RAKNET_SOURCE_DIR = ../../3rd/RakNet
 
 #LFLAGS = -m64 -pie -fPIC
 
-CFLAGS = -c -fPIC -pie
+CFLAGS = -c -fPIC
 CFLAGS += -I.
 CFLAGS += -I./$(RAKNET_SOURCE_DIR)/Source
 CFLAGS += -I./$(SPIDERMONKEY_HEAD_DIR)

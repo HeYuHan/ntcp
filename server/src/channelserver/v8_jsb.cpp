@@ -8,12 +8,21 @@ void reg_func(Local<Template> class_template, v8::Isolate* isolate,const char* n
 {
 	class_template->Set(String::NewFromUtf8(isolate, name), FunctionTemplate::New(isolate, call));
 }
+Local<FunctionTemplate> class_template;
 void register_server_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* isolate) 
 {
-	
-
-	Local<FunctionTemplate> class_template = FunctionTemplate::New(isolate);
+	class_template = FunctionTemplate::New(isolate);
 	reg_func(class_template, isolate, "Get", [](const FunctionCallbackInfo<Value>& args) {
+		if (gServer.m_JSObject.IsEmpty()) {
+			/*auto m_Context = G_ISOLATE()->GetCurrentContext();
+			Local<Value> server = m_Context->Global()->Get(String::NewFromUtf8(G_ISOLATE(), "Server"));
+			if (server->IsFunction()) {
+				Local<Function> func = Local<Function>::Cast(server);
+				Local<Value> value = func->CallAsConstructor(m_Context, 0, NULL).ToLocalChecked();
+				gServer.m_JSObject = Local<Object>::Cast(value);
+			}*/
+			gServer.m_JSObject = Local<Object>::Cast(class_template->GetFunction()->CallAsConstructor(G_ISOLATE()->GetCurrentContext(), 0, NULL).ToLocalChecked());
+		}
 		args.GetReturnValue().Set(gServer.m_JSObject);
 	});
 	reg_func(class_template, isolate, "Platfrom", [](const FunctionCallbackInfo<Value>& args) {
@@ -61,9 +70,9 @@ void register_server_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* i
 		args.GetReturnValue().Set(v8::Boolean::New(G_ISOLATE(), gServer.Loop()));
 	});*/
 	class_template->InstanceTemplate()->SetInternalFieldCount(3);
-
+	
 	global->Set(String::NewFromUtf8(isolate, "Server"), class_template);
-	gServer.m_JSObject = class_template->GetFunction()->NewInstance(G_ISOLATE()->GetCurrentContext()).ToLocalChecked();
+	
 }
 void register_file_helper_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* isolate)
 {

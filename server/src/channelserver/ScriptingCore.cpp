@@ -121,7 +121,6 @@ v8::Handle<v8::String> ReadFile(Isolate *isolate,const char* name)
 }
 bool ScriptEngine::Start()
 {
-	
 	v8::Platform *platform = v8::platform::CreateDefaultPlatform();
 	v8::V8::InitializePlatform(platform);
 	v8::V8::Initialize();
@@ -136,14 +135,23 @@ bool ScriptEngine::Start()
 	v8::HandleScope handle_scope(m_Isolate);
 
 	m_GlobalObject = v8::ObjectTemplate::New(m_Isolate);
+	
 	for (auto& callback : registrationList) {
 		callback(m_GlobalObject, m_Isolate);
 	}
 	m_Context = v8::Context::New(m_Isolate, 0, m_GlobalObject);
 
+	
+
+
+
+
 	v8::Context::Scope context_scope(m_Context);
 	ReadScriptFile(gServer.m_MainScriptPath);
-	//CallGlobalFunction("Main");
+
+	
+
+	CallGlobalFunction("Main");
 	
 	return true;
 }
