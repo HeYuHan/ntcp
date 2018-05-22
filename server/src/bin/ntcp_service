@@ -79,7 +79,7 @@ function channelserver()
 		CMD="./$1"
 		CMD+=" --addr=$2"
 		CMD+=" --script=$3"
-		#CMD+=" --daemon"
+		CMD+=" --daemon"
 		CMD+=" --log_path=./log/channelserver.log"
 		add_command "$CMD"
 		add_keep_command "$CMD"
