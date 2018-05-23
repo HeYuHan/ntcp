@@ -9,7 +9,7 @@ declare class Client{
     public static Get(uid:number):Client;
     public Disconnect();
     public Send(msg:string);
-    public SendNString(msg:NString);
+    //public SendNString(msg:NString);
     public OnMessage:(msg:string)=>void;
     public OnConnected:()=>void;
     public OnDisconected:()=>void;
@@ -31,17 +31,25 @@ declare class Http{
     public Get(url:string):boolean;
     public Post(url:string,data:string,type:string):boolean;
 }
-declare class NString{
-    public Append(msg:string);
-    public Get():string;
+// declare class NString{
+//     public Append(msg:string);
+//     public Get():string;
+// }
+class NString{
+    private content:string="";
+    public Append(msg:string){
+        this.content+=msg;
+    }
+    public Get():string{
+        return this.content;
+    }
 }
 declare class Debug{
     public static Log(type:number,msg:any);
 }
-declare class AsyncWriter{
-    public static Get(path:string):number;
-    public static Free(uid:number):boolean;
-    public static Write(uid,content:string):boolean;
-    public static WriteNString(uid,content:NString):boolean;
+declare class AsyncFileWriter{
+    constructor(path:string);
+    public  Free():boolean;
+    public  Write(content:string):boolean;
 }
 

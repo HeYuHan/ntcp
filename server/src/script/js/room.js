@@ -353,7 +353,7 @@ var Room = (function () {
                 for (var i = 0; i < room.room_players.length; i++) {
                     var player = room.room_players[i];
                     balance2.push({
-                        uid: player.client.uid,
+                        uid: player.uid,
                         score: balance[player.unionid]
                     });
                 }

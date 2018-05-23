@@ -31,7 +31,7 @@ void Client::OnMessage()
 	if (!m_JSClient.IsEmpty())
 	{
 		JSArg arg(data_start, data_end - data_start);
-		ScriptEngine::GetInstance()->CallFunction(m_JSClient, "OnMessage");
+		ScriptEngine::GetInstance()->CallFunction(m_JSClient, "OnMessage",1,&arg);
 		return;
 	}
 	if (!parser.DecodeMessage(this, id))
@@ -85,7 +85,7 @@ void Client::OnDisconnected()
 		engine->RemoveObjectProxy(this);
 		m_JSClient = NULL;
 	}*/
-	ScriptEngine::GetInstance()->CallFunction(m_JSClient, "OnConnected");
+	ScriptEngine::GetInstance()->CallFunction(m_JSClient, "OnDisconected");
 	if (!m_JSClient.IsEmpty())
 	{
 		m_JSClient.Clear();

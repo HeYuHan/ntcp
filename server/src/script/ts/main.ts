@@ -5,7 +5,7 @@ let DEFINE_RANDOM_TEST = true;
 
 let INFO_SERVER_URL = "http://127.0.0.1:9800/private/";
 
-let WRITE_ROOM_RECODER = false;
+let WRITE_ROOM_RECODER = true;
 
 let AUTO_CHU_PAI_TIME = 18;
 
@@ -26,31 +26,6 @@ function PostJson(url,data,call_back){
     http.Post(url,JSON.stringify(data),"application/json");
 }
 
-class AsyncFileWriter{
-    private native:number=0;
-    constructor(path){
-        LogInfo("create write stream:"+path);
-        this.native=AsyncWriter.Get(path);
-    }
-    public Write(content):boolean{
-        if(this.native == 0)return false;
-        return AsyncWriter.Write(this.native,content);
-    }
-    public WriteNString(content:NString):boolean{
-        if(this.native == 0)return false;
-        return AsyncWriter.WriteNString(this.native,content);
-    }
-    public Free():boolean{
-        var ret=false;
-        if(this.native>0){
-            
-            ret = AsyncWriter.Free(this.native);
-            this.native=0;
-        }
-        
-        return ret;
-    }
-}
 function PrintError(msg,e){
     LogError(msg+e.message+"\nname:"+e.name+"\nstack:"+e.stack);
 }
@@ -168,7 +143,7 @@ class RandomInt{
 
 ScriptLoader.ROOT_PATH=FileHelper.MainScriptPath().replace("main.js","");
 
-
+require("native.js");
 require("server.js");
 require("client.js");
 require("pai.js");

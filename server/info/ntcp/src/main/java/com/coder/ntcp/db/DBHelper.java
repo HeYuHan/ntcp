@@ -39,7 +39,15 @@ public class DBHelper {
 			price.uid=Price.CaculateUid(price);
 			saveObject(price);
 		}
-		
+		AdminUser user = findObjectByUid("root", AdminUser.class);
+		if(user == null) {
+			user = new AdminUser();
+			user.level=5;
+			user.nick="超级管理员";
+			user.password="1234567";
+			user.uid="root";
+			saveObject(user);
+		}
 	}
 	public void saveObject(IDBObject dbobj) {
 		lock.lock();

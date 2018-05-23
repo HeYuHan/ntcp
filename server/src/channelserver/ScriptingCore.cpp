@@ -186,7 +186,7 @@ bool ScriptEngine::CallFunction(JS_OBJECT obj, const char* name,int argc, JSArg 
 	v8::TryCatch try_catch(m_Isolate);
 	Handle<String> js_func_name = String::NewFromUtf8(m_Isolate, name);
 	Handle<Value>  js_func_ref = obj->Get(js_func_name);
-	if (!js_func_ref->IsFunction())
+	if (js_func_ref.IsEmpty()||!js_func_ref->IsFunction())
 	{
 		log_error("is not function:%s", name);
 		return false;

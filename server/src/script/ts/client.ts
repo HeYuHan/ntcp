@@ -32,25 +32,26 @@ class JClient{
         this.SendNString(nstring);
     }
     public SendNString(msg:NString){
-        this.native.SendNString(msg);
+        this.native.Send(msg.Get());
         msg.Append("\n");
-        if(this.room && this.room.recoder_stream)this.room.recoder_stream.WriteNString(msg);
+        if(this.room && this.room.recoder_stream)this.room.recoder_stream.Write(msg.Get());
     }
     private OnMessage(msg:string){
-        var json=JSON.parse(msg);
-        LogInfo(CLIENT_MSG[json[0]]+":"+JSON.stringify(json[1]));
+        
         try
         {
-            
+            var json=JSON.parse(msg);
+            LogInfo(CLIENT_MSG[json[0]]+":"+JSON.stringify(json[1]));
             this.DispatchMessage(json);
         }
         catch(e){
+            LogInfo(msg);
             PrintError("parse message error:",e);
             this.native.Disconnect();
         }
     }
     private OnConnected(){
-        LogInfo("OnConnected:"+this.uid);
+        LogInfo("OnConnected=>>>>>>:"+this.uid);
         this.state=State.IN_LOGIN;
         this.RegisterAllMessage();
     }
@@ -108,9 +109,9 @@ class JClient{
             PostJson(INFO_SERVER_URL + "getRoomCard",{
                 token:INFO_ACCESS_TOKEN,
                 roomid:roomid
-            },function(state,msg){
-                LogInfo("getRoomCard:"+msg);
-                var json = JSON.parse(msg);
+            },function(state,cardinfo){
+                LogInfo("getRoomCard:"+cardinfo);
+                var json = JSON.parse(cardinfo);
                 if(state == 200 && !json.error){
                     var room_card:RoomCard=json;
                     if(room_card.canUseCount <= 0){
@@ -128,7 +129,7 @@ class JClient{
                     client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM,{
                         error:"room not found:"+roomid
                     }));
-                    //client.native.Disconnect();
+                    client.native.Disconnect();
                 }
             });
         }

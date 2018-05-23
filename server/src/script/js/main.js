@@ -1,7 +1,7 @@
 var ROOM_MAX_PLAYER_COUNT = 1;
 var DEFINE_RANDOM_TEST = true;
 var INFO_SERVER_URL = "http://127.0.0.1:9800/private/";
-var WRITE_ROOM_RECODER = false;
+var WRITE_ROOM_RECODER = true;
 var AUTO_CHU_PAI_TIME = 18;
 var INFO_ACCESS_TOKEN = "1234567";
 function LogInfo(msg) {
@@ -18,32 +18,6 @@ function PostJson(url, data, call_back) {
     http.OnResponse = call_back;
     http.Post(url, JSON.stringify(data), "application/json");
 }
-var AsyncFileWriter = (function () {
-    function AsyncFileWriter(path) {
-        this.native = 0;
-        LogInfo("create write stream:" + path);
-        this.native = AsyncWriter.Get(path);
-    }
-    AsyncFileWriter.prototype.Write = function (content) {
-        if (this.native == 0)
-            return false;
-        return AsyncWriter.Write(this.native, content);
-    };
-    AsyncFileWriter.prototype.WriteNString = function (content) {
-        if (this.native == 0)
-            return false;
-        return AsyncWriter.WriteNString(this.native, content);
-    };
-    AsyncFileWriter.prototype.Free = function () {
-        var ret = false;
-        if (this.native > 0) {
-            ret = AsyncWriter.Free(this.native);
-            this.native = 0;
-        }
-        return ret;
-    };
-    return AsyncFileWriter;
-}());
 function PrintError(msg, e) {
     LogError(msg + e.message + "\nname:" + e.name + "\nstack:" + e.stack);
 }
@@ -149,6 +123,7 @@ var RandomInt = (function () {
     return RandomInt;
 }());
 ScriptLoader.ROOT_PATH = FileHelper.MainScriptPath().replace("main.js", "");
+require("native.js");
 require("server.js");
 require("client.js");
 require("pai.js");

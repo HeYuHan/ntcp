@@ -30,6 +30,7 @@ void Server::OnTcpAccept(int socket, sockaddr *addr)
 		JSArg arg((size_t)c->uid);
 		engine->CallFunction(m_JSObject, "OnAccept", 1, &arg);
 		c->InitSocket(socket, addr, Timer::GetEventBase());
+		
 	}
 	else
 	{

@@ -1,5 +1,7 @@
 #include "Server.h"
 #include "ScriptingCore.h"
+#include <Timer.h>
+#include <HttpConnection3.h>
 using namespace v8;
 #define V8_STR(x) v8::String::NewFromUtf8(Isolate::GetCurrent(),x)
 #define G_ISOLATE() ScriptEngine::GetInstance()->GetIsolate()
@@ -97,10 +99,18 @@ void register_file_helper_class(v8::Handle<v8::ObjectTemplate> global, v8::Isola
 
 	});
 	reg_func(class_template, isolate, "Read", [](const FunctionCallbackInfo<Value>& args) {
-		//args.GetReturnValue().Set(gServer.m_JSObject);
+		String::Utf8Value path(args[0]->ToString());
+		std::string content;
+		if (ReadText(content, *path))
+		{
+			args.GetReturnValue().Set(String::NewFromUtf8(G_ISOLATE(), content.c_str()));
+		}
 	});
 	reg_func(class_template, isolate, "Write", [](const FunctionCallbackInfo<Value>& args) {
-		//args.GetReturnValue().Set(gServer.m_JSObject);
+		String::Utf8Value path(args[0]->ToString());
+		String::Utf8Value content(args[1]->ToString());
+		bool ok = WriteText(*content, *path);
+		args.GetReturnValue().Set(Boolean::New(G_ISOLATE(), ok));
 	});
 
 
@@ -162,8 +172,214 @@ void register_client_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* i
 
 	});
 
-	client_class_template->InstanceTemplate()->SetInternalFieldCount(3);
+	client_class_template->InstanceTemplate()->SetInternalFieldCount(2);
 	global->Set(String::NewFromUtf8(isolate, "Client"), client_class_template);
+}
+
+void register_async_file_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* isolate)
+{
+	Local<FunctionTemplate> class_template = FunctionTemplate::New(isolate, [](const FunctionCallbackInfo<Value>& args) {
+	
+		if (!args.IsConstructCall())return;
+		AsyncFileWriter* w = gServer.m_FileWriters.Allocate();
+		String::Utf8Value path(args[0]->ToString());
+		if (!w->Create(*path))
+		{
+			gServer.m_FileWriters.Free(w->uid);
+			w = NULL;
+			return;
+		}
+		Local<External> native_ptr = External::New(args.GetIsolate(), w);
+		args.This()->SetInternalField(0, native_ptr);
+	
+	});
+	Handle<ObjectTemplate> class_proto = class_template->PrototypeTemplate();
+	reg_func(class_proto, isolate, "Free", [](const FunctionCallbackInfo<Value>& args) {
+		Local<Object> self = args.This();
+		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+		void* ptr = wrap->Value();
+		AsyncFileWriter* w = static_cast<AsyncFileWriter*>(ptr);
+		if (w)gServer.m_FileWriters.Free(w->uid);
+
+		args.GetReturnValue().Set(Boolean::New(G_ISOLATE(), w != NULL));
+
+	});
+	reg_func(class_proto, isolate, "Write", [](const FunctionCallbackInfo<Value>& args) {
+		Local<Object> self = args.This();
+		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+		void* ptr = wrap->Value();
+		AsyncFileWriter* w = static_cast<AsyncFileWriter*>(ptr);
+		if (w)
+		{
+			String::Utf8Value content(args[0]->ToString());
+			w->PushContent(*content);
+		}
+
+	});
+	class_template->InstanceTemplate()->SetInternalFieldCount(2);
+	global->Set(String::NewFromUtf8(isolate, "AsyncFileWriter"), class_template);
+}
+struct JSTimer {
+	Timer m_Timer;
+	v8::Global<Object> m_JSObject;
+	v8::Global<Function> m_CacheFunc;
+	v8::Persistent<External> garbage;
+	~JSTimer() {
+		m_JSObject.Reset();
+		garbage.Reset();
+		m_CacheFunc.Reset();
+	}
+};
+void js_Timer_Update(float t, void* arg)
+{
+	JSTimer *js_timer = static_cast<JSTimer*>(arg);
+	
+	if (js_timer&&!js_timer->m_JSObject.IsEmpty())
+	{
+		v8::Context::Scope context_scope(G_ISOLATE()->GetCurrentContext());
+		Local<Object> obj = js_timer->m_JSObject.Get(G_ISOLATE());
+		if (js_timer->m_CacheFunc.IsEmpty())
+		{
+			
+			
+			JSArg arg(t);
+			Handle<String> js_func_name = String::NewFromUtf8(G_ISOLATE(), "OnUpdate");
+			Handle<Value>  js_func_ref = obj->Get(js_func_name);
+			if (js_func_ref->IsFunction())
+			{
+				js_timer->m_CacheFunc.Reset(G_ISOLATE(), Handle<Function>::Cast(js_func_ref));
+			}
+		}
+		if (!js_timer->m_CacheFunc.IsEmpty())
+		{
+			JS_VALUE val = v8::Number::New(G_ISOLATE(), t);
+			js_timer->m_CacheFunc.Get(G_ISOLATE())->Call(obj, 1, &val);
+		}
+
+
+		
+	}
+}
+void ClearWeakTimer(
+	const v8::WeakCallbackInfo<JSTimer>& data) {
+	printf("clear weak is called\n");
+	JSTimer *tiemr = data.GetParameter();
+	delete[] tiemr;
+}
+void register_timer_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* isolate)
+{
+	Local<FunctionTemplate> class_template = FunctionTemplate::New(isolate, [](const FunctionCallbackInfo<Value>& args) {
+
+		if (!args.IsConstructCall())return;
+		JSTimer* obj = new JSTimer();
+		float t = args[0]->NumberValue();
+		bool loop = args[1]->BooleanValue();
+		obj->m_Timer.Init(t, js_Timer_Update, obj, loop);
+		Local<External> native_ptr = External::New(args.GetIsolate(), obj);
+		args.This()->SetInternalField(0, native_ptr);
+
+		obj->m_JSObject.Reset(args.GetIsolate(),args.This());
+		obj->garbage.Reset(args.GetIsolate(), native_ptr);
+		obj->garbage.SetWeak(obj, &ClearWeakTimer, v8::WeakCallbackType::kParameter);
+
+	});
+	Handle<ObjectTemplate> class_proto = class_template->PrototypeTemplate();
+	reg_func(class_proto, isolate, "Begin", [](const FunctionCallbackInfo<Value>& args) {
+		Local<Object> self = args.This();
+		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+		void* ptr = wrap->Value();
+		JSTimer* w = static_cast<JSTimer*>(ptr);
+		if (w)w->m_Timer.Begin();
+
+	});
+	reg_func(class_proto, isolate, "Stop", [](const FunctionCallbackInfo<Value>& args) {
+		Local<Object> self = args.This();
+		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+		void* ptr = wrap->Value();
+		JSTimer* w = static_cast<JSTimer*>(ptr);
+		if (w)w->m_Timer.Stop();
+
+	});
+	class_template->InstanceTemplate()->SetInternalFieldCount(2);
+	global->Set(String::NewFromUtf8(isolate, "Timer"), class_template);
+}
+class JSHttp :public IHttpInterface
+{
+public:
+	v8::Global<Object> m_JSObject;
+	v8::Persistent<External> garbage;
+	JSHttp() {
+		m_JSObject.Reset();
+		garbage.Reset();
+	}
+public:
+	virtual void OnResponse() {
+		int state = GetState();
+		char msg[1024 + 1] = { 0 };
+		std::string ret;
+		int count = 0;
+		do {
+			if (state>0)count = ReadBuffer(msg, 1024);
+			msg[count] = 0;
+			if (count>0)ret += std::string(msg);
+		} while (count > 0);
+		if (!m_JSObject.IsEmpty())
+		{
+			JSArg args[2] = { JSArg((size_t)state),JSArg(ret.c_str(),ret.size()) };
+			ScriptEngine::GetInstance()->CallFunction(m_JSObject.Get(G_ISOLATE()), "OnResponse", 2, args);
+		}
+	}
+};
+void ClearWeakHttp(
+	const v8::WeakCallbackInfo<JSHttp>& data) {
+	printf("clear weak is called\n");
+	JSHttp *http = data.GetParameter();
+	delete[] http;
+}
+
+void register_http_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* isolate)
+{
+	Local<FunctionTemplate> http_class_template = FunctionTemplate::New(isolate, [](const FunctionCallbackInfo<Value>& args) {
+
+		if (!args.IsConstructCall())return;
+		JSHttp* obj = new JSHttp();
+		Local<External> native_ptr = External::New(args.GetIsolate(), obj);
+		args.This()->SetInternalField(0, native_ptr);
+		
+		obj->m_JSObject.Reset(args.GetIsolate(), args.This());
+		obj->garbage.Reset(args.GetIsolate(), native_ptr);
+		obj->garbage.SetWeak(obj, &ClearWeakHttp, v8::WeakCallbackType::kParameter);
+
+	});
+	Handle<ObjectTemplate> class_proto = http_class_template->PrototypeTemplate();
+	reg_func(class_proto, isolate, "Get", [](const FunctionCallbackInfo<Value>& args) {
+		Local<Object> self = args.This();
+		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+		void* ptr = wrap->Value();
+		JSHttp* w = static_cast<JSHttp*>(ptr);
+		if (w) 
+		{
+			String::Utf8Value url(args[0]->ToString());
+			gHttpManager.Get(*url, w);
+		}
+
+	});
+	reg_func(class_proto, isolate, "Post", [](const FunctionCallbackInfo<Value>& args) {
+		Local<Object> self = args.This();
+		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+		void* ptr = wrap->Value();
+		JSHttp* w = static_cast<JSHttp*>(ptr);
+		if (w)
+		{
+			String::Utf8Value url(args[0]->ToString());
+			String::Utf8Value data(args[1]->ToString());
+			String::Utf8Value content_type(args[2]->ToString());
+			gHttpManager.Post(*url, *data,*content_type,w);
+		}
+
+	});
+	http_class_template->InstanceTemplate()->SetInternalFieldCount(3);
+	global->Set(String::NewFromUtf8(isolate, "Http"), http_class_template);
 }
 void set_js_object(Local<FunctionTemplate> &f_template, JS_OBJECT &obj)
 {
@@ -176,4 +392,7 @@ void register_all_native()
 	engine->RegisterNative(register_server_class);
 	engine->RegisterNative(register_file_helper_class);
 	engine->RegisterNative(register_client_class);
+	engine->RegisterNative(register_async_file_class);
+	engine->RegisterNative(register_timer_class);
+	engine->RegisterNative(register_http_class);
 }
