@@ -4,6 +4,7 @@
 #include "Message.h"
 #include "MessageType.h"
 #include "js_tools.h"
+#include "ScriptingCore.h"
 Client::Client()
 {
 	m_Type = WEB_SOCKET;
@@ -27,6 +28,12 @@ void Client::OnMessage()
 	//	engine->CallFunction(OBJECT_TO_JSVAL(m_JSClient), "OnMessage", JS::HandleValueArray::fromMarkedLocation(1, &val));
 	//	return;
 	//}
+	if (!m_JSClient.IsEmpty())
+	{
+		JSArg arg(data_start, data_end - data_start);
+		ScriptEngine::GetInstance()->CallFunction(m_JSClient, "OnMessage");
+		return;
+	}
 	if (!parser.DecodeMessage(this, id))
 	{
 		Disconnect();
@@ -45,13 +52,21 @@ void Client::OnMessage()
 		break;
 	}
 }
-
 void Client::OnConnected()
 {
-	this->m_SetJSObject = false;
 	this->connection = this;
 	this->stream = this;
 	this->stream->Reset();
+	if (this->m_JSClient.IsEmpty())
+	{
+		Disconnect();
+		return;
+	}
+	auto engine = ScriptEngine::GetInstance();
+	m_JSClient->SetInternalField(0, v8::External::New(engine->GetIsolate(), this));
+	engine->CallFunction(m_JSClient, "OnConnected");
+
+
 	//if (m_JSClient)
 	//{
 	//	auto engine = ScriptingCore::GetInstance();
@@ -70,12 +85,12 @@ void Client::OnDisconnected()
 		engine->RemoveObjectProxy(this);
 		m_JSClient = NULL;
 	}*/
+	ScriptEngine::GetInstance()->CallFunction(m_JSClient, "OnConnected");
+	if (!m_JSClient.IsEmpty())
+	{
+		m_JSClient.Clear();
+	}
 	gServer.RemoveClient(this->uid);
 	
 	
-}
-
-void Client::SetJSObject(JS_OBJECT obj)
-{
-
 }

@@ -159,7 +159,6 @@ function Main() {
     var ret = server.Init({
         max_client: 50
     });
-    LogInfo(Server.Get() == Server.Get());
     LogInfo("init server ret:" + ret);
     var ret2 = server.Start();
     LogInfo("exit server ret:" + ret2);

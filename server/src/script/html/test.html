@@ -7,6 +7,10 @@
     <title>Document</title>
     <script>
         var socket = new WebSocket("ws://127.0.0.1:9300");
+        socket.onopen=()=>
+        {
+            socket.send("ffffffffffffffff");
+        }
     </script>
 </head>
 <body>

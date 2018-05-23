@@ -8,17 +8,19 @@ void reg_func(Local<Template> class_template, v8::Isolate* isolate,const char* n
 {
 	class_template->Set(String::NewFromUtf8(isolate, name), FunctionTemplate::New(isolate, call));
 }
-Local<FunctionTemplate> class_template;
-void create_server_instance() {
-	if (gServer.m_JSObject.IsEmpty()) {
-		gServer.m_JSObject = Local<Object>::Cast(class_template->GetFunction()->CallAsConstructor(G_ISOLATE()->GetCurrentContext(), 0, NULL).ToLocalChecked());
-	}
-}
+Local<FunctionTemplate> server_class_template;
 void register_server_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* isolate) 
 {
-	ScriptEngine::GetInstance()->RegisterOnScriptLoaded(create_server_instance);
-	class_template = FunctionTemplate::New(isolate);
-	reg_func(class_template, isolate, "Get", [](const FunctionCallbackInfo<Value>& args) {
+	server_class_template = FunctionTemplate::New(isolate);
+	ScriptEngine::GetInstance()->RegisterOnScriptLoaded([]()
+	{
+		
+		if (gServer.m_JSObject.IsEmpty()) {
+			set_js_object(server_class_template, gServer.m_JSObject);
+		}
+	});
+	
+	reg_func(server_class_template, isolate, "Get", [](const FunctionCallbackInfo<Value>& args) {
 		//if (gServer.m_JSObject.IsEmpty()) {
 		//	auto m_Context = G_ISOLATE()->GetCurrentContext();
 		//	Local<Value> server = m_Context->Global()->Get(String::NewFromUtf8(G_ISOLATE(), "Server"));
@@ -31,7 +33,7 @@ void register_server_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* i
 		//}
 		args.GetReturnValue().Set(gServer.m_JSObject);
 	});
-	reg_func(class_template, isolate, "Platfrom", [](const FunctionCallbackInfo<Value>& args) {
+	reg_func(server_class_template, isolate, "Platfrom", [](const FunctionCallbackInfo<Value>& args) {
 #ifdef WIN32
 		int p = 1;
 #else
@@ -40,7 +42,7 @@ void register_server_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* i
 		Local<Number> ret = Number::New(G_ISOLATE(), p);
 		args.GetReturnValue().Set(ret);
 	});
-	Handle<ObjectTemplate> class_proto = class_template->PrototypeTemplate();
+	Handle<ObjectTemplate> class_proto = server_class_template->PrototypeTemplate();
 	reg_func(class_proto, isolate, "Init", [](const FunctionCallbackInfo<Value>& args) {
 		String::Utf8Value profile(args[0]->ToString());
 		bool ret = false;
@@ -75,9 +77,9 @@ void register_server_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* i
 	reg_func(class_proto, isolate, "OnAccept", [](const FunctionCallbackInfo<Value>& args) {
 		args.GetReturnValue().Set(v8::Boolean::New(G_ISOLATE(), gServer.Loop()));
 	});*/
-	class_template->InstanceTemplate()->SetInternalFieldCount(3);
+	server_class_template->InstanceTemplate()->SetInternalFieldCount(3);
 	
-	global->Set(String::NewFromUtf8(isolate, "Server"), class_template);
+	global->Set(String::NewFromUtf8(isolate, "Server"), server_class_template);
 	
 }
 void register_file_helper_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* isolate)
@@ -108,7 +110,7 @@ void register_log_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* isol
 {
 	Local<FunctionTemplate> class_template = FunctionTemplate::New(isolate);
 	reg_func(class_template, isolate, "Log", [](const FunctionCallbackInfo<Value>& args) {
-		int id = args[0]->ToInt32(G_ISOLATE())->Int32Value();
+		int id = args[0]->Int32Value();
 		String::Utf8Value msg(args[1]->ToString());
 		if (id == 1)log_debug("%s", *msg);
 		if (id == 2)log_warn("%s", *msg);
@@ -118,11 +120,60 @@ void register_log_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* isol
 
 	global->Set(String::NewFromUtf8(isolate, "Debug"), class_template);
 }
+v8::Handle<v8::FunctionTemplate> client_class_template;
+void set_client_js_object(Client *c)
+{
+	set_js_object(client_class_template, c->m_JSClient);
+}
+void register_client_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* isolate)
+{
+	client_class_template = FunctionTemplate::New(isolate);
 
+	reg_func(client_class_template, isolate, "Get", [](const FunctionCallbackInfo<Value>& args) {
+		uint uid = args[0]->Uint32Value();
+		Client *c = gServer.GetClient(uid);
+		if (c)
+		{
+			
+			args.GetReturnValue().Set(c->m_JSClient);
+		}
+	});
+
+	Handle<ObjectTemplate> class_proto = client_class_template->PrototypeTemplate();
+	reg_func(class_proto, isolate, "Send", [](const FunctionCallbackInfo<Value>& args) {
+		Local<Object> self = args.This();
+		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+		void* ptr = wrap->Value();
+		Client* c = static_cast<Client*>(ptr);
+		String::Utf8Value msg(args[0]->ToString());
+		c->BeginWrite();
+		c->WriteData(*msg, msg.length());
+		c->EndWrite();
+
+	});
+	reg_func(class_proto, isolate, "Disconnect", [](const FunctionCallbackInfo<Value>& args) {
+		
+		Local<Object> self = args.This();
+		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+		void* ptr = wrap->Value();
+		Client* c = static_cast<Client*>(ptr);
+		if (c)c->Disconnect();
+
+
+	});
+
+	client_class_template->InstanceTemplate()->SetInternalFieldCount(3);
+	global->Set(String::NewFromUtf8(isolate, "Client"), client_class_template);
+}
+void set_js_object(Local<FunctionTemplate> &f_template, JS_OBJECT &obj)
+{
+	obj = Local<Object>::Cast(f_template->GetFunction()->CallAsConstructor(G_ISOLATE()->GetCurrentContext(), 0, NULL).ToLocalChecked());
+}
 void register_all_native()
 {
 	auto engine = ScriptEngine::GetInstance();
 	engine->RegisterNative(register_log_class);
 	engine->RegisterNative(register_server_class);
 	engine->RegisterNative(register_file_helper_class);
+	engine->RegisterNative(register_client_class);
 }

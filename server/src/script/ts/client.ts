@@ -41,6 +41,7 @@ class JClient{
         LogInfo(CLIENT_MSG[json[0]]+":"+JSON.stringify(json[1]));
         try
         {
+            
             this.DispatchMessage(json);
         }
         catch(e){

@@ -31,36 +31,25 @@ const char* ToCString(const v8::String::Utf8Value& value) {
 void ReportException(Isolate *isolate, v8::TryCatch* try_catch) {
 	v8::HandleScope handle_scope(isolate);
 	v8::String::Utf8Value exception(try_catch->Exception());
-	const char* exception_string = ToCString(exception);
+	//const char* exception_string = ToCString(exception);
 	v8::Handle<v8::Message> message = try_catch->Message();
 	if (message.IsEmpty()) {
 		// V8 didn't provide any extra information about this error; just
 		// print the exception.
-		printf("%s\n", exception_string);
+		return;
 	}
 	else {
 		// Print (filename):(line number): (message).
 		v8::String::Utf8Value filename(message->GetScriptResourceName());
-		const char* filename_string = ToCString(filename);
+		const char* filename_string = *filename;
 		int linenum = message->GetLineNumber();
-		printf("%s:%i: %s\n", filename_string, linenum, exception_string);
 		// Print line of source code.
 		v8::String::Utf8Value sourceline(message->GetSourceLine());
-		const char* sourceline_string = ToCString(sourceline);
+		const char* sourceline_string = *sourceline;
 		printf("%s\n", sourceline_string);
-		// Print wavy underline (GetUnderline is deprecated).
-		//int start = message->GetStartColumn();
-		//for (int i = 0; i < start; i++) {
-		//	printf(" ");
-		//}
-		//int end = message->GetEndColumn();
-		//for (int i = start; i < end; i++) {
-		//	printf("^");
-		//}
-		//printf("\n");
 		v8::String::Utf8Value stack_trace(try_catch->StackTrace());
 		if (stack_trace.length() > 0) {
-			const char* stack_trace_string = ToCString(stack_trace);
+			const char* stack_trace_string = *stack_trace;
 			log_error("%s", stack_trace_string);
 		}
 	}
@@ -186,9 +175,15 @@ void ScriptEngine::Eval(const char * str, const char* fileName)
 	ExecuteString(m_Isolate, source, name, true, true);
 }
 
-bool ScriptEngine::CallFunction(JS_OBJECT obj, const char* name, int argc, JS_VALUE * args,JS_VALUE &ret)
+bool ScriptEngine::CallFunction(JS_OBJECT obj, const char* name,int argc, JSArg * args,JS_VALUE &ret)
 {
+	if (obj.IsEmpty())
+	{
+		log_error("call obj is null function:%s", name);
+		return false;
+	};
 	v8::Context::Scope context_scope(m_Context);
+	v8::TryCatch try_catch(m_Isolate);
 	Handle<String> js_func_name = String::NewFromUtf8(m_Isolate, name);
 	Handle<Value>  js_func_ref = obj->Get(js_func_name);
 	if (!js_func_ref->IsFunction())
@@ -197,11 +192,45 @@ bool ScriptEngine::CallFunction(JS_OBJECT obj, const char* name, int argc, JS_VA
 		return false;
 	}
 	Handle<Function> js_func = Handle<Function>::Cast(js_func_ref);
-	ret = js_func->Call(obj, argc, args);
+	if (argc > 0)
+	{
+		JS_VALUE inner_arg[10];
+		for (int i = 0; i < argc; i++)
+		{
+			JSArgype t = args[i].getType();
+			switch (t)
+			{
+			case JSArgype::JS_BOOL:
+				inner_arg[i] = v8::Boolean::New(m_Isolate,args[i].getBoolValue());
+				break;
+			case JSArgype::JS_FLOAT:
+				inner_arg[i] = v8::Number::New(m_Isolate, args[i].getFloateValue());
+				break;
+			case  JSArgype::JS_NUMBER:
+				inner_arg[i] = v8::Number::New(m_Isolate, args[i].getNumberValue());
+				break;
+			case  JSArgype::JS_STRING:
+				inner_arg[i] = v8::String::NewFromUtf8(m_Isolate,args[i].getStringValue(),v8::NewStringType::kNormal,args[i].getNumberValue()).ToLocalChecked();
+				break;
+			default:
+				return false;
+			}
+		}
+		ret = js_func->Call(obj, argc, inner_arg);
+
+
+	}
+	else
+	{
+		ret = js_func->Call(obj, 0, NULL);
+	}
+	
+	ReportException(m_Isolate, &try_catch);
+	
 	return true;
 }
 
-bool ScriptEngine::CallFunction(JS_OBJECT obj, const char * name, int argc, JS_VALUE * args)
+bool ScriptEngine::CallFunction(JS_OBJECT obj, const char * name, int argc, JSArg * args)
 {
 	v8::Context::Scope context_scope(m_Context);
 	Handle<Value> ret;
@@ -218,12 +247,12 @@ bool ScriptEngine::CallFunction(JS_OBJECT obj, const char* name)
 	return CallFunction(obj, name, 0, NULL, ret);
 }
 
-bool ScriptEngine::CallGlobalFunction(const char * name, int argc, JS_VALUE * args, JS_VALUE & ret)
+bool ScriptEngine::CallGlobalFunction(const char * name, int argc, JSArg * args, JS_VALUE & ret)
 {
 	return CallFunction(m_Context->Global(),name,argc,args,ret);
 }
 
-bool ScriptEngine::CallGlobalFunction(const char* name, int argc, JS_VALUE *args)
+bool ScriptEngine::CallGlobalFunction(const char* name, int argc, JSArg *args)
 {
 	v8::Context::Scope context_scope(m_Context);
 	Handle<Value> ret;

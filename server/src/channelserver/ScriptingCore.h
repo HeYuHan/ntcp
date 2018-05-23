@@ -14,11 +14,11 @@ public:
 	void RegisterOnScriptLoaded(on_script_load_end call);
 	bool ReadScriptFile(const char* path);
 	void Eval(const char* str, const char* fileName = 0);
-	bool CallFunction(JS_OBJECT obj, const char* name,int argc, JS_VALUE *args, JS_VALUE &ret);
-	bool CallFunction(JS_OBJECT obj, const char* name, int argc, JS_VALUE *args);
+	bool CallFunction(JS_OBJECT obj, const char* name,int argc, JSArg *args, JS_VALUE &ret);
+	bool CallFunction(JS_OBJECT obj, const char* name, int argc, JSArg *args);
 	bool CallFunction(JS_OBJECT obj, const char* name);
-	bool CallGlobalFunction(const char* name, int argc, JS_VALUE *args, JS_VALUE &ret);
-	bool CallGlobalFunction(const char* name, int argc, JS_VALUE *args);
+	bool CallGlobalFunction(const char* name, int argc, JSArg *args, JS_VALUE &ret);
+	bool CallGlobalFunction(const char* name, int argc, JSArg *args);
 	bool CallGlobalFunction(const char* name);
 	JS_OBJECT NewObject();
 	v8::Isolate* GetIsolate() { return m_Isolate; }

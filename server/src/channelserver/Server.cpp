@@ -25,6 +25,10 @@ void Server::OnTcpAccept(int socket, sockaddr *addr)
 			vals = UINT_TO_JSVAL(c->uid);
 			ScriptingCore::GetInstance()->CallFunction(OBJECT_TO_JSVAL(obj), "OnAccept", JS::HandleValueArray::fromMarkedLocation(1, &vals));
 		}*/
+		set_client_js_object(c);
+		auto engine = ScriptEngine::GetInstance();
+		JSArg arg((size_t)c->uid);
+		engine->CallFunction(m_JSObject, "OnAccept", 1, &arg);
 		c->InitSocket(socket, addr, Timer::GetEventBase());
 	}
 	else
