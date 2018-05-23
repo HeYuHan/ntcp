@@ -25,11 +25,13 @@ declare class Timer{
     public OnUpdate:(frame_time:number)=>void;
     public Begin();
     public Stop();
+    public Free();
 }
 declare class Http{
     public OnResponse:(state:number,data:string)=>void;
-    public Get(url:string):boolean;
+    //public Get(url:string):boolean;
     public Post(url:string,data:string,type:string):boolean;
+    public Free();
 }
 // declare class NString{
 //     public Append(msg:string);

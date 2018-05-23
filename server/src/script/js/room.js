@@ -375,6 +375,7 @@ var Room = (function () {
         this.m_clients = [];
         if (this.m_timer) {
             this.m_timer.Stop();
+            this.m_timer.Free();
             this.m_timer = null;
         }
         if (free_room) {

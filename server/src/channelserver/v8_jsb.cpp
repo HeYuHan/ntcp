@@ -199,7 +199,11 @@ void register_async_file_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolat
 		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
 		void* ptr = wrap->Value();
 		AsyncFileWriter* w = static_cast<AsyncFileWriter*>(ptr);
-		if (w)gServer.m_FileWriters.Free(w->uid);
+		if (w)
+		{
+			gServer.m_FileWriters.Free(w->uid);
+			args.This()->SetInternalField(0, External::New(args.GetIsolate(), NULL));
+		}
 
 		args.GetReturnValue().Set(Boolean::New(G_ISOLATE(), w != NULL));
 
@@ -255,8 +259,6 @@ void js_Timer_Update(float t, void* arg)
 			JS_VALUE val = v8::Number::New(G_ISOLATE(), t);
 			js_timer->m_CacheFunc.Get(G_ISOLATE())->Call(obj, 1, &val);
 		}
-
-
 		
 	}
 }
@@ -264,7 +266,7 @@ void ClearWeakTimer(
 	const v8::WeakCallbackInfo<JSTimer>& data) {
 	printf("clear weak is called\n");
 	JSTimer *tiemr = data.GetParameter();
-	delete[] tiemr;
+	if(tiemr)delete[] tiemr;
 }
 void register_timer_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* isolate)
 {
@@ -297,7 +299,25 @@ void register_timer_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* is
 		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
 		void* ptr = wrap->Value();
 		JSTimer* w = static_cast<JSTimer*>(ptr);
-		if (w)w->m_Timer.Stop();
+		if (w)
+		{
+			w->m_Timer.Stop();
+			args.This()->SetInternalField(0, External::New(args.GetIsolate(), NULL));
+			delete w;
+		}
+
+	});
+	reg_func(class_proto, isolate, "Free", [](const FunctionCallbackInfo<Value>& args) {
+		Local<Object> self = args.This();
+		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+		void* ptr = wrap->Value();
+		JSTimer* w = static_cast<JSTimer*>(ptr);
+		if (w)
+		{
+			w->m_Timer.Stop();
+			args.This()->SetInternalField(0, External::New(args.GetIsolate(), NULL));
+			delete w;
+		}
 
 	});
 	class_template->InstanceTemplate()->SetInternalFieldCount(2);
@@ -327,6 +347,7 @@ public:
 		{
 			JSArg args[2] = { JSArg((size_t)state),JSArg(ret.c_str(),ret.size()) };
 			ScriptEngine::GetInstance()->CallFunction(m_JSObject.Get(G_ISOLATE()), "OnResponse", 2, args);
+			
 		}
 	}
 };
@@ -335,6 +356,7 @@ void ClearWeakHttp(
 	printf("clear weak is called\n");
 	JSHttp *http = data.GetParameter();
 	delete[] http;
+	
 }
 
 void register_http_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* isolate)
@@ -375,6 +397,18 @@ void register_http_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* iso
 			String::Utf8Value data(args[1]->ToString());
 			String::Utf8Value content_type(args[2]->ToString());
 			gHttpManager.Post(*url, *data,*content_type,w);
+		}
+
+	});
+	reg_func(class_proto, isolate, "Free", [](const FunctionCallbackInfo<Value>& args) {
+		Local<Object> self = args.This();
+		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+		void* ptr = wrap->Value();
+		JSHttp* w = static_cast<JSHttp*>(ptr);
+		if (w)
+		{
+			args.This()->SetInternalField(0, External::New(args.GetIsolate(), NULL));
+			delete w;
 		}
 
 	});

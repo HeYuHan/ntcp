@@ -15,7 +15,10 @@ function LogError(msg) {
 }
 function PostJson(url, data, call_back) {
     var http = new Http();
-    http.OnResponse = call_back;
+    http.OnResponse = function (state, msg) {
+        call_back(state, msg);
+        http.Free();
+    };
     http.Post(url, JSON.stringify(data), "application/json");
 }
 function PrintError(msg, e) {
