@@ -31,7 +31,7 @@ void ListenEvent2(evutil_socket_t listener, short event, void *arg)
 	struct sockaddr_in sin;
 	socklen_t slen = sizeof(sin);
 	fd = accept(listener, (struct sockaddr *)&sin, &slen);
-	if (fd <= 0) {
+	if (fd < 0) {
 		log_error("cant accept socket %d", fd);
 		return;
 	}

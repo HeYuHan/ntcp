@@ -18,12 +18,7 @@ void UpdateServer(float t, void *arg)
 
 void Server::OnTcpAccept(evutil_socket_t socket, sockaddr *addr)
 {
-	if (socket == 0)
-	{
-		log_error("accept error socket %d", socket);
-		evutil_closesocket(socket);
-		return;
-	}
+
 	Client *c = m_OnLineClients.Allocate();
 	if (c)
 	{

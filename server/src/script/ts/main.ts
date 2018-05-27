@@ -3,7 +3,7 @@ let ROOM_MAX_PLAYER_COUNT = 3;
 //关闭随机
 let DEFINE_RANDOM_TEST = true;
 
-let INFO_SERVER_URL = "http://127.0.0.1:9800/private/";
+let INFO_SERVER_URL = "http://192.168.2.103:9800/private/";
 
 let WRITE_ROOM_RECODER = true;
 

@@ -54,7 +54,7 @@ void TcpConnection::InitSocket(evutil_socket_t socket, sockaddr * addr, event_ba
 	m_Socket = socket;
 	m_BufferEvent = bufferevent_socket_new(base, socket, BEV_OPT_CLOSE_ON_FREE);
 	bufferevent_setcb(m_BufferEvent, ReadEvent, WriteEvent, SocketEvent, this);
-	bufferevent_enable(m_BufferEvent, EV_READ | EV_PERSIST);
+	bufferevent_enable(m_BufferEvent, EV_READ | EV_WRITE | EV_PERSIST);
 	OnConnected();
 	log_info("init socket %d", socket);
 }
@@ -71,7 +71,7 @@ bool TcpConnection::Connect(const char * ip, int port, event_base * base)
 	{
 		m_Socket = bufferevent_getfd(m_BufferEvent);
 		bufferevent_setcb(m_BufferEvent, ReadEvent, WriteEvent, SocketEvent, this);
-		bufferevent_enable(m_BufferEvent, EV_READ | EV_PERSIST);
+		bufferevent_enable(m_BufferEvent, EV_READ | EV_WRITE | EV_PERSIST);
 		OnConnected();
 		return true;
 	}
@@ -87,7 +87,7 @@ bool TcpConnection::Connect(const char * ip, int port, event_base * base)
 
 void TcpConnection::Disconnect()
 {
-	evutil_closesocket(m_Socket);
+	if(m_Socket>0)evutil_closesocket(m_Socket);
 	bufferevent_free(m_BufferEvent);
 	m_Socket = -1;
 	m_BufferEvent = NULL;
@@ -173,7 +173,7 @@ void TcpConnection::SocketEvent(bufferevent * bev, short events, void * arg)
 	}
 	log_info("client disconnected %d", events);
 	TcpConnection* c = (TcpConnection*)arg;
-	evutil_closesocket(c->m_Socket);
+	if(c->m_Socket>0)evutil_closesocket(c->m_Socket);
 	bufferevent_free(bev);
 	c->m_Socket = -1;
 	c->m_BufferEvent = NULL;
