@@ -1,9 +1,11 @@
-var ROOM_MAX_PLAYER_COUNT = 1;
+var ROOM_MAX_PLAYER_COUNT = 3;
 var DEFINE_RANDOM_TEST = true;
 var INFO_SERVER_URL = "http://127.0.0.1:9800/private/";
 var WRITE_ROOM_RECODER = true;
+var SET_CHU_PAIT_TIME_OUT = false;
 var AUTO_CHU_PAI_TIME = 18;
 var INFO_ACCESS_TOKEN = "1234567";
+var RECODER_PATH = "./record/";
 function LogInfo(msg) {
     Debug.Log(1, msg);
 }
@@ -17,7 +19,6 @@ function PostJson(url, data, call_back) {
     var http = new Http();
     http.OnResponse = function (state, msg) {
         call_back(state, msg);
-        http.Free();
     };
     http.Post(url, JSON.stringify(data), "application/json");
 }

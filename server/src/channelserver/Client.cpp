@@ -86,11 +86,17 @@ void Client::OnDisconnected()
 		m_JSClient = NULL;
 	}*/
 	ScriptEngine::GetInstance()->CallFunction(m_JSClient, "OnDisconected");
-	if (!m_JSClient.IsEmpty())
+	/*if (!m_JSClient.IsEmpty())
 	{
 		m_JSClient.Clear();
-	}
+	}*/
 	gServer.RemoveClient(this->uid);
+	this->connection = NULL;
+	this->stream = NULL;
 	
-	
+}
+
+bool Client::IsConnected()
+{
+	return this->connection != NULL && this->stream !=NULL;
 }

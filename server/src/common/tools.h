@@ -14,4 +14,5 @@ void ParseJsonValue(Json::Value json, const char* key, bool &value);
 void ParseJsonValue(Json::Value json, const char* key, char* str, int len);
 bool ParseSockAddr(sockaddr_in & addr, const char * str, bool by_name);
 bool RunAsDaemon();
+void CaculateSha1(const char* text, char* out);
 #endif // !__TOOLS_H__

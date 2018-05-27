@@ -11,8 +11,19 @@ Server::~Server()
 {
 }
 
-void Server::OnTcpAccept(int socket, sockaddr *addr)
+void UpdateServer(float t, void *arg)
 {
+	gServer.OnUpdate(t);
+}
+
+void Server::OnTcpAccept(evutil_socket_t socket, sockaddr *addr)
+{
+	if (socket == 0)
+	{
+		log_error("accept error socket %d", socket);
+		evutil_closesocket(socket);
+		return;
+	}
 	Client *c = m_OnLineClients.Allocate();
 	if (c)
 	{
@@ -34,6 +45,7 @@ void Server::OnTcpAccept(int socket, sockaddr *addr)
 	}
 	else
 	{
+		evutil_closesocket(socket);
 		log_error("%s", "allocate client failed");
 	}
 }
@@ -66,7 +78,12 @@ bool Server::Init()
 	{
 		return false;
 	}
+	this->m_UpdateTimer.Init(1, UpdateServer, this, true);
+	this->m_UpdateTimer.Begin();
 	RegisterJS();
+
+	
+
 
 	return true;
 }
@@ -76,6 +93,32 @@ bool Server::Init()
 int Server::Run()
 {
 	return Init() ? 0 : -1;
+}
+
+void Server::OnUpdate(float t)
+{
+	if (!m_JSObject.IsEmpty())
+	{
+		auto engine = ScriptEngine::GetInstance();
+		v8::Isolate* isolate = engine->GetIsolate();
+		v8::Context::Scope context_scope(isolate->GetCurrentContext());
+		
+		if (m_JSUpdateFunc.IsEmpty())
+		{
+			JSArg arg(t);
+			v8::Handle<v8::String> js_func_name = v8::String::NewFromUtf8(isolate, "OnUpdate");
+			v8::Handle<v8::Value>  js_func_ref = m_JSObject->Get(js_func_name);
+			if (js_func_ref->IsFunction())
+			{
+				m_JSUpdateFunc = v8::Handle<v8::Function>::Cast(js_func_ref);
+			}
+		}
+		if(!m_JSUpdateFunc.IsEmpty())
+		{
+			JS_VALUE val = v8::Number::New(isolate, t);
+			m_JSUpdateFunc->Call(m_JSObject, 1, &val);
+		}
+	}
 }
 
 int Server::Loop()

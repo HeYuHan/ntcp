@@ -52,10 +52,13 @@ void http_request_done(struct evhttp_request *req, void *arg)
 	{
 		printf("len = %d, str = %s\n", len, buf);
 	}*/
+	
 	RequestPack * http = static_cast<RequestPack*>(arg);
 	if (NULL != http)
 	{
+		log_info("response %s 1 ","SetInterface");
 		gHttpManager.SetInterface(http);
+		log_info("response %s 2 ", "SetInterface");
 		if (http->handle)http->handle->OnResponse();
 		else
 		{
@@ -117,6 +120,7 @@ bool HttpManager::Request(const char * url, const  char * data, const char* cont
 		if (!content_type || strlen(content_type) == 0)content_type = "application/x-www-form-urlencoded";
 		evhttp_add_header(req->output_headers, "Content-Type", content_type);
 	}
+	log_info("event make request end : %s", url);
 	evhttp_uri_free(uri);
 	return ret == 0;
 }

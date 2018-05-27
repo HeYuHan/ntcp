@@ -22,6 +22,9 @@ var JClient = (function () {
         this.native.OnDisconected = function () { self.OnDisconected(); };
     }
     JClient.prototype.Send = function (msg) {
+        if (!this.native) {
+            LogError("native client is null");
+        }
         var nstring = new NString();
         nstring.Append(msg);
         this.SendNString(nstring);
@@ -51,12 +54,8 @@ var JClient = (function () {
     };
     JClient.prototype.OnDisconected = function () {
         LogInfo("OnDisconected:" + this.uid);
-        try {
-            this.LeaveRoom(null);
-        }
-        catch (e) {
-            PrintError("leave room error:", e);
-        }
+        this.LeaveRoom();
+        this.native = null;
         this.uid = 0;
         this.info = null;
         this.state = State.IN_NONE;
@@ -71,6 +70,7 @@ var JClient = (function () {
         this.m_MessageCallback[CLIENT_MSG.CM_CHU_PAI] = this.ChuPai;
         this.m_MessageCallback[CLIENT_MSG.CM_RESPON_CHU_PAI] = this.ResponseChuPai;
         this.m_MessageCallback[CLIENT_MSG.CM_HUAN_PAI] = this.HuanPai;
+        this.m_MessageCallback[CLIENT_MSG.CM_MAI_ZHUANG] = this.MaiZhuang;
     };
     JClient.prototype.DispatchMessage = function (msg) {
         var hander = this.m_MessageCallback[msg[0]];
@@ -82,6 +82,12 @@ var JClient = (function () {
         }
     };
     JClient.prototype.EnterRoom = function (msg) {
+        if (this.room) {
+            this.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM, {
+                error: "is in room roomid:" + this.room.uid
+            }));
+            return;
+        }
         var roomid = msg.roomid;
         var unionid = msg.unionid;
         this.info = msg;
@@ -125,7 +131,7 @@ var JClient = (function () {
             });
         }
     };
-    JClient.prototype.LeaveRoom = function (msg) {
+    JClient.prototype.LeaveRoom = function () {
         if (this.room)
             this.room.ClientLeave(this);
         this.room = null;
@@ -133,6 +139,9 @@ var JClient = (function () {
     JClient.prototype.ReadyGame = function (msg) {
         this.state = msg.state;
         this.room.ClientReady(this, this.state);
+    };
+    JClient.prototype.SetReplayState = function () {
+        this.state = State.IN_ROOM;
     };
     JClient.prototype.Ready = function () {
         return (this.state == State.IN_READY);
@@ -145,6 +154,9 @@ var JClient = (function () {
     };
     JClient.prototype.HuanPai = function (msg) {
         this.room.ClientHuanPai(this, msg);
+    };
+    JClient.prototype.MaiZhuang = function (msg) {
+        this.room.ClientMaiZhuang(this, msg);
     };
     return JClient;
 }());

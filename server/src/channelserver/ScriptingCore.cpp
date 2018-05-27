@@ -41,8 +41,8 @@ void ReportException(Isolate *isolate, v8::TryCatch* try_catch) {
 	else {
 		// Print (filename):(line number): (message).
 		v8::String::Utf8Value filename(message->GetScriptResourceName());
-		const char* filename_string = *filename;
-		int linenum = message->GetLineNumber();
+		//const char* filename_string = *filename;
+		//int linenum = message->GetLineNumber();
 		// Print line of source code.
 		v8::String::Utf8Value sourceline(message->GetSourceLine());
 		const char* sourceline_string = *sourceline;

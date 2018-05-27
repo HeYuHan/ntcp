@@ -107,7 +107,7 @@ public class AdminControl {
 		AdminUser user=(AdminUser) request.getSession().getAttribute(LoginInterceptor.SESSION_KEY_PREFIX);
 		map.put("account", user.uid);
 		map.put("level", user.level);
-		map.put("nick", user.nick);
+		map.put("nick", user.nick==null?"":user.nick);
 		User dbUser=dbHelper.findObjectByUid(user.uid, User.class);
 		if(dbUser!=null)
 		{
@@ -150,9 +150,10 @@ public class AdminControl {
 	
 	@RequestMapping(value = "/updatePrice",method=RequestMethod.POST)
 	@ResponseBody
-	Object updatePrice(@RequestBody @Valid ReqUpdatePrice reqUpdatePrice)
+	Object updatePrice(@RequestBody @Valid ReqUpdatePrice reqUpdatePrice,HttpServletRequest request)
 	{
-		
+		AdminUser admin=(AdminUser) request.getSession().getAttribute(LoginInterceptor.SESSION_KEY_PREFIX);
+		if((1<<admin.level&ROOT_LEVEL) <=0)return new ResException("ERROR_LOW_PERMISSION");
 		String uid=Price.CaculateUid(reqUpdatePrice.itemType, reqUpdatePrice.currencyType, reqUpdatePrice.itemCount);
 		Price price = dbHelper.findObjectByUid(uid, Price.class);
 		if(!reqUpdatePrice.delete) {
@@ -289,12 +290,14 @@ public class AdminControl {
 				new_admin.password=dbUser.openid;
 				if(create_new)dbHelper.saveObject(new_admin);
 				else dbHelper.updateObject(new_admin, false);
-				ret.put("isNew", create_new);
-				if(create_new)
+				
+				if(dbUser.isProxy)
 				{
+					ret.put("setProxy", true);
 					ret.put("account", new_admin.uid);
 					ret.put("pwd",new_admin.password);
 				}
+				
 			}
 			dbHelper.updateObject(dbUser, false);
 		}

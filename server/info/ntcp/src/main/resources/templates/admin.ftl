@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
     <title>NTCP</title>
-    <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css" >
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" >
     <link href="https://cdn.bootcss.com/bootstrap-table/1.12.1/bootstrap-table.min.css" rel="stylesheet">
     <link href="https://cdn.bootcss.com/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet">
     <style>
@@ -77,8 +77,8 @@
             color: #fff;
         }
     </style>
-    <script src="../js/jquery.min.js"></script>
-    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://cdn.bootcss.com/bootstrap-table/1.12.1/bootstrap-table.min.js"></script>
     <script src="https://cdn.bootcss.com/bootstrap-table/1.12.1/locale/bootstrap-table-zh-CN.min.js"></script>
     
@@ -389,7 +389,8 @@
                         detailView: false,                  //是否显示父子表
                         editable:true,
                         columns: createCols(params,titles,editable),
-                        onDblClickRow:editTable
+                        //onDblClickRow:editTable,
+                        onClickRow:editTable
                     }
                     console.log('refresh2:'+refresh);
                     if(refresh)$(table).bootstrapTable('refresh',{url:url,query:{limit:20,offset:0}});
@@ -616,8 +617,14 @@
                 dataType:"json",
                 success:(data)=>
                 {
-                    modal.find("#update_result").html(data.error?data.error:"操作成功");
-                    $("#table").bootstrapTable('refresh',{});
+                    var ret_msg = data.error?data.error:"操作成功";
+                    if(data.setProxy)
+                    {
+                        ret_msg+="<br>账号:"+data.account+"<br>密码:"+data.pwd;
+                    }
+
+                    user_modal.find("#update_result").html(ret_msg);
+                    $("#tableUser").bootstrapTable('refresh',{});
                     if(GUser.level<5){
                         $("#logo").html(GUser.nick+'|钻石:'+data.diamondCount+'|金币:'+data.goldCount);
                     }

@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <sys/signal.h>
 #endif // LINUX
+#include <DR_SHA1.h>
 
 static bool m_RandomFirst = true;
 int RandomRange(int a, int b)
@@ -97,6 +98,13 @@ bool ParseSockAddr(sockaddr_in & addr, const char * str, bool by_name)
 	}
 
 	return false;
+}
+void CaculateSha1(const char * text, char * out)
+{
+	CSHA1 sha1;
+	sha1.Update((unsigned char*)text, strlen(text));
+	sha1.Final();
+	sha1.GetHash((unsigned char*)out);
 }
 bool RunAsDaemon()
 {

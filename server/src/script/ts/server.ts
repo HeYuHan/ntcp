@@ -3,6 +3,8 @@ class JServer{
     constructor(){
         this.native=Server.Get();
         this.native.OnAccept=this.OnAccept;
+        var content=this;
+        this.native.OnUpdate=(t)=>{content.OnUpdate(t);}
     }
     public OnAccept(uid:number){
         LogInfo("accept new client uid:"+uid);
@@ -13,5 +15,8 @@ class JServer{
     }
     public Start():number{
         return this.native.Start();
+    }
+    public OnUpdate(frame:number){
+        //LogInfo("server update:"+frame);
     }
 }

@@ -1,8 +1,13 @@
 #include "Server.h"
 #include "ScriptingCore.h"
 #include <Timer.h>
-#include <HttpConnection3.h>
+//#include <HttpConnection3.h>
+#include <HttpConnection4.h>
+#include<HTTPConnection2.h>
+#include<TCPInterface.h>
+#include <RakPeerInterface.h>
 using namespace v8;
+using namespace RakNet;
 #define V8_STR(x) v8::String::NewFromUtf8(Isolate::GetCurrent(),x)
 #define G_ISOLATE() ScriptEngine::GetInstance()->GetIsolate()
 #define GENGINE() ScriptEngine::GetInstance()
@@ -155,10 +160,16 @@ void register_client_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* i
 		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
 		void* ptr = wrap->Value();
 		Client* c = static_cast<Client*>(ptr);
-		String::Utf8Value msg(args[0]->ToString());
-		c->BeginWrite();
-		c->WriteData(*msg, msg.length());
-		c->EndWrite();
+		if (c && c->IsConnected()) {
+			String::Utf8Value msg(args[0]->ToString());
+			c->BeginWrite();
+			c->WriteData(*msg, msg.length());
+			c->EndWrite();
+		}
+		else
+		{
+			log_error("native client is null or disconnect %s","");
+		}
 
 	});
 	reg_func(class_proto, isolate, "Disconnect", [](const FunctionCallbackInfo<Value>& args) {
@@ -168,11 +179,14 @@ void register_client_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* i
 		void* ptr = wrap->Value();
 		Client* c = static_cast<Client*>(ptr);
 		if (c)c->Disconnect();
-
+		else
+		{
+			log_error("native client is null %s","");
+		}
 
 	});
 
-	client_class_template->InstanceTemplate()->SetInternalFieldCount(2);
+	client_class_template->InstanceTemplate()->SetInternalFieldCount(3);
 	global->Set(String::NewFromUtf8(isolate, "Client"), client_class_template);
 }
 
@@ -201,6 +215,7 @@ void register_async_file_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolat
 		AsyncFileWriter* w = static_cast<AsyncFileWriter*>(ptr);
 		if (w)
 		{
+			w->Close();
 			gServer.m_FileWriters.Free(w->uid);
 			args.This()->SetInternalField(0, External::New(args.GetIsolate(), NULL));
 		}
@@ -227,10 +242,8 @@ struct JSTimer {
 	Timer m_Timer;
 	v8::Global<Object> m_JSObject;
 	v8::Global<Function> m_CacheFunc;
-	v8::Persistent<External> garbage;
 	~JSTimer() {
 		m_JSObject.Reset();
-		garbage.Reset();
 		m_CacheFunc.Reset();
 	}
 };
@@ -281,8 +294,7 @@ void register_timer_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* is
 		args.This()->SetInternalField(0, native_ptr);
 
 		obj->m_JSObject.Reset(args.GetIsolate(),args.This());
-		obj->garbage.Reset(args.GetIsolate(), native_ptr);
-		obj->garbage.SetWeak(obj, &ClearWeakTimer, v8::WeakCallbackType::kParameter);
+		obj->m_JSObject.SetWeak(obj, &ClearWeakTimer, v8::WeakCallbackType::kParameter);
 
 	});
 	Handle<ObjectTemplate> class_proto = class_template->PrototypeTemplate();
@@ -302,8 +314,8 @@ void register_timer_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* is
 		if (w)
 		{
 			w->m_Timer.Stop();
-			args.This()->SetInternalField(0, External::New(args.GetIsolate(), NULL));
-			delete w;
+			/*args.This()->SetInternalField(0, External::New(args.GetIsolate(), NULL));
+			delete w;*/
 		}
 
 	});
@@ -323,17 +335,58 @@ void register_timer_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* is
 	class_template->InstanceTemplate()->SetInternalFieldCount(2);
 	global->Set(String::NewFromUtf8(isolate, "Timer"), class_template);
 }
-class JSHttp :public IHttpInterface
+class JSHttp:public HttpRequest //public IHttpInterface
 {
 public:
-	v8::Global<Object> m_JSObject;
-	v8::Persistent<External> garbage;
-	JSHttp() {
+	v8::Persistent<Object> m_JSObject;
+	Timer m_Timer;
+	~JSHttp() {
 		m_JSObject.Reset();
-		garbage.Reset();
+		m_Timer.Stop();
 	}
+
 public:
-	virtual void OnResponse() {
+	static void Update(float t, void *arg)
+	{
+		JSHttp *http = (JSHttp*)arg;
+		std::string ret;
+		int state = http->GetResponse(ret);
+		if (state > 0)http->OnResponse(state, ret.c_str(), ret.size());
+	}
+	void OnResponse(int state, const char* data,int len)
+	{
+		if (!m_JSObject.IsEmpty())
+		{
+			JSArg args[2] = { JSArg((size_t)state),JSArg(data,len) };
+
+			ScriptEngine::GetInstance()->CallFunction(m_JSObject.Get(G_ISOLATE()), "OnResponse", 2, args);
+			//log_info("js res:%s", data);
+			delete this;
+
+		}
+	}
+	bool Get(const char* url, const char* data)
+	{
+		if (!MakeRequest(HttpRequest::GET, url, data))
+		{
+			return false;
+		}
+		m_Timer.Init(0.01, Update, this, true);
+		m_Timer.Begin();
+		return true;
+	}
+	bool Post(const char* url, const char* data, const char* contentType)
+	{
+		if (!MakeRequest(HttpRequest::POST, url, data,contentType))
+		{
+			return false;
+		}
+		m_Timer.Init(0.01, Update, this, true);
+		m_Timer.Begin();
+		return true;
+	}
+	/*virtual void OnResponse() {
+		log_info("call js %s", "OnResponse");
 		int state = GetState();
 		char msg[1024 + 1] = { 0 };
 		std::string ret;
@@ -346,16 +399,19 @@ public:
 		if (!m_JSObject.IsEmpty())
 		{
 			JSArg args[2] = { JSArg((size_t)state),JSArg(ret.c_str(),ret.size()) };
+			
 			ScriptEngine::GetInstance()->CallFunction(m_JSObject.Get(G_ISOLATE()), "OnResponse", 2, args);
+			log_info("js res:%s", ret.c_str());
+			delete this;
 			
 		}
-	}
+	}*/
 };
 void ClearWeakHttp(
 	const v8::WeakCallbackInfo<JSHttp>& data) {
 	printf("clear weak is called\n");
 	JSHttp *http = data.GetParameter();
-	delete[] http;
+	if(http)delete[] http;
 	
 }
 
@@ -369,8 +425,7 @@ void register_http_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* iso
 		args.This()->SetInternalField(0, native_ptr);
 		
 		obj->m_JSObject.Reset(args.GetIsolate(), args.This());
-		obj->garbage.Reset(args.GetIsolate(), native_ptr);
-		obj->garbage.SetWeak(obj, &ClearWeakHttp, v8::WeakCallbackType::kParameter);
+		obj->m_JSObject.SetWeak(obj, &ClearWeakHttp, v8::WeakCallbackType::kParameter);
 
 	});
 	Handle<ObjectTemplate> class_proto = http_class_template->PrototypeTemplate();
@@ -382,11 +437,14 @@ void register_http_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* iso
 		if (w) 
 		{
 			String::Utf8Value url(args[0]->ToString());
-			gHttpManager.Get(*url, w);
+			String::Utf8Value data(args[1]->ToString());
+			w->Get(*url,*data);
+			//gHttpManager.Get(*url, w);
 		}
 
 	});
 	reg_func(class_proto, isolate, "Post", [](const FunctionCallbackInfo<Value>& args) {
+		
 		Local<Object> self = args.This();
 		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
 		void* ptr = wrap->Value();
@@ -396,11 +454,31 @@ void register_http_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* iso
 			String::Utf8Value url(args[0]->ToString());
 			String::Utf8Value data(args[1]->ToString());
 			String::Utf8Value content_type(args[2]->ToString());
-			gHttpManager.Post(*url, *data,*content_type,w);
+			w->Post(*url, *data, *content_type);
+			//gHttpManager.Post(*url, *data,*content_type,w);
+			
 		}
-
 	});
-	reg_func(class_proto, isolate, "Free", [](const FunctionCallbackInfo<Value>& args) {
+	reg_func(class_proto, isolate, "Post2", [](const FunctionCallbackInfo<Value>& args) {
+
+		Local<Object> self = args.This();
+		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+		void* ptr = wrap->Value();
+		JSHttp* w = static_cast<JSHttp*>(ptr);
+		if (w)
+		{
+			String::Utf8Value url(args[0]->ToString());
+			String::Utf8Value data(args[1]->ToString());
+			String::Utf8Value content_type(args[2]->ToString());
+			std::string ret;
+			HttpPost(*url, *data, *content_type, ret);
+			//log_info("post2 ret:%s", ret.c_str());
+			args.GetReturnValue().Set(String::NewFromUtf8(args.GetIsolate(), ret.c_str()));
+			
+
+		}
+	});
+	/*reg_func(class_proto, isolate, "Free", [](const FunctionCallbackInfo<Value>& args) {
 		Local<Object> self = args.This();
 		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
 		void* ptr = wrap->Value();
@@ -411,7 +489,7 @@ void register_http_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* iso
 			delete w;
 		}
 
-	});
+	});*/
 	http_class_template->InstanceTemplate()->SetInternalFieldCount(3);
 	global->Set(String::NewFromUtf8(isolate, "Http"), http_class_template);
 }

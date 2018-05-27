@@ -1,5 +1,5 @@
 //人数限制
-let ROOM_MAX_PLAYER_COUNT = 1;
+let ROOM_MAX_PLAYER_COUNT = 3;
 //关闭随机
 let DEFINE_RANDOM_TEST = true;
 
@@ -7,9 +7,11 @@ let INFO_SERVER_URL = "http://127.0.0.1:9800/private/";
 
 let WRITE_ROOM_RECODER = true;
 
+let SET_CHU_PAIT_TIME_OUT=false;
 let AUTO_CHU_PAI_TIME = 18;
 
 let INFO_ACCESS_TOKEN = "1234567";
+let RECODER_PATH = "./record/";
 
 function LogInfo(msg){
     Debug.Log(1,msg);
@@ -24,9 +26,9 @@ function PostJson(url,data,call_back){
     var http=new Http();
     http.OnResponse=(state,msg)=>{
         call_back(state,msg);
-        http.Free();
     };
     http.Post(url,JSON.stringify(data),"application/json");
+    //call_back(200,http.Post2(url,JSON.stringify(data),"application/json"));
 }
 
 function PrintError(msg,e){

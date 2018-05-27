@@ -8,7 +8,8 @@
 #include <stdio.h>
 #include <ostream>
 #include<sstream>
-#include "sha1.h"
+#include "tools.h"
+#include "log.h"
 TcpConnection::TcpConnection() :
 	m_Socket(-1),
 	m_BufferEvent(NULL),
@@ -47,13 +48,15 @@ int TcpConnection::Send(void * data, int size)
 	return 0;
 }
 
-void TcpConnection::InitSocket(int socket, sockaddr * addr, event_base * base)
+void TcpConnection::InitSocket(evutil_socket_t socket, sockaddr * addr, event_base * base)
 {
+	m_HandShake = false;
 	m_Socket = socket;
 	m_BufferEvent = bufferevent_socket_new(base, socket, BEV_OPT_CLOSE_ON_FREE);
 	bufferevent_setcb(m_BufferEvent, ReadEvent, WriteEvent, SocketEvent, this);
 	bufferevent_enable(m_BufferEvent, EV_READ | EV_PERSIST);
 	OnConnected();
+	log_info("init socket %d", socket);
 }
 
 bool TcpConnection::Connect(const char * ip, int port, event_base * base)
@@ -94,8 +97,9 @@ void TcpConnection::Disconnect()
 
 void TcpConnection::HandShake()
 {
+	log_info("HandShake1 %s %d",m_HandShake?"true":"false", __LINE__);
 	if (m_HandShake)return;
-	
+	log_info("HandShake2 %s %d", m_HandShake ? "true" : "false", __LINE__);
 	int size = Read(stream->read_offset,stream->read_buff_end-stream->read_offset);
 	// 解析http请求头信息
 	std::istringstream string_stream(stream->read_position);
@@ -148,6 +152,7 @@ void TcpConnection::HandShake()
 }
 void TcpConnection::ReadEvent(bufferevent * bev, void * arg)
 {
+	log_info("read event %d", __LINE__);
 	TcpConnection* con = static_cast<TcpConnection*>(arg);
 	if (con && !con->m_HandShake)con->HandShake();
 	else if (con&&con->stream)con->stream->OnRevcMessage();
@@ -166,6 +171,7 @@ void TcpConnection::SocketEvent(bufferevent * bev, short events, void * arg)
 	else if (events & BEV_EVENT_ERROR) {
 		//printf("some other error\n");
 	}
+	log_info("client disconnected %d", events);
 	TcpConnection* c = (TcpConnection*)arg;
 	evutil_closesocket(c->m_Socket);
 	bufferevent_free(bev);

@@ -13,11 +13,9 @@ import com.coder.ntcp.controller.PlayerScore;
 @Document(collection="play_recoder")
 public class RoomRecoder implements Serializable,IDBObject{
 	public String uid;
-	public String cardid;
-	public int roomid;
-	public ArrayList<PlayerScore[]> scores;
-	public int useIndex;
 	public Date createTime;
+	public int roomid;
+	public String[] players=new String[6];
 	@Override
 	public String getUid() {
 		// TODO Auto-generated method stub
@@ -34,30 +32,28 @@ public class RoomRecoder implements Serializable,IDBObject{
 		// TODO Auto-generated method stub
 		return this;
 	}
-	public void caculateUid() {
-		this.uid=DigestUtils.md5Hex(cardid+Integer.toString(this.roomid)+Integer.toString(this.useIndex));
-	}
-	public static RoomRecoder create(Room room,ArrayList<PlayerScore[]> scores) {
+	public static RoomRecoder create(Room room,String[] players) {
 		
 		RoomRecoder recoder = new RoomRecoder();
 		RoomCard card=room.getRoomCard();
-		recoder.cardid=card.getUid();
-		recoder.roomid=room.getRoomId();
-		recoder.scores=scores;
-		recoder.useIndex=card.maxUseCount - card.canUseCount;
+		recoder.uid=card.getUid();
+		recoder.players=players;
+		recoder.roomid=room.roomid;
 		recoder.createTime=new Date();
-		recoder.caculateUid();
 		return recoder;
 	}
 	public static RoomRecoder createTest() {
 		
 		RoomRecoder recoder = new RoomRecoder();
-		recoder.cardid="abcdef"+Integer.toString((int)(Math.random()*100000));
-		recoder.roomid=(int)(Math.random()*100000);
-		recoder.scores=new ArrayList<PlayerScore[]>();
-		recoder.useIndex=(int)(Math.random()*13);
+		recoder.players[0]="testuid33499";
+		recoder.players[1]="100";
+		recoder.players[2]="testuid33491";
+		recoder.players[3]="100";
+		recoder.players[4]="testuid33492";
+		recoder.players[5]="100";
 		recoder.createTime=new Date();
-		recoder.caculateUid();
+		recoder.roomid=123456;
+		recoder.uid="sadfsadfasdf";
 		return recoder;
 	}
 }

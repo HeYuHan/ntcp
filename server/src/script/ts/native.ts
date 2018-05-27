@@ -1,5 +1,6 @@
 declare class Server{
     public OnAccept:(uid:number)=>void;
+    public OnUpdate:(frame:null)=>void;
     public Init(json:string):boolean;
     public Start():number;
     public static Get():Server;
@@ -31,6 +32,7 @@ declare class Http{
     public OnResponse:(state:number,data:string)=>void;
     //public Get(url:string):boolean;
     public Post(url:string,data:string,type:string):boolean;
+    public Post2(url:string,data:string,type:string):string;
     public Free();
 }
 // declare class NString{

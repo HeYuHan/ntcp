@@ -115,8 +115,7 @@ public class InnerController {
 		Room.freeRoom(room);
 		logeer.info("free room:"+room.getRoomId()+" card:"+card.getUid());
 		
-		RoomRecoder recoder = RoomRecoder.create(room, reqRoomCard.scores);
-		dbHelper.saveObject(recoder);
+		
 		
 		card.canUseCount=0;
 		dbHelper.updateObject(card, false);
@@ -150,16 +149,25 @@ public class InnerController {
 		}
 		String winnerUid="";
 		int winnerScore=-1;
-		for(String key :totoleScore.keySet()) {
-			ArrayList<Integer> list=totoleScore.get(key);
-			int sum=0;
-			for(int k=0;k<list.size();k++) {
-				sum+=list.get(k);
+		if(totoleScore.size()>0)
+		{
+			String players[] = new String[totoleScore.size()*2];
+			int index=0;
+			for(String key :totoleScore.keySet()) {
+				ArrayList<Integer> list=totoleScore.get(key);
+				int sum=0;
+				for(int k=0;k<list.size();k++) {
+					sum+=list.get(k);
+				}
+				players[index++]=key;
+				players[index++]=Integer.toString(sum);
+				if(sum>winnerScore) {
+					winnerScore=sum;
+					winnerUid=key;
+				}
 			}
-			if(sum>winnerScore) {
-				winnerScore=sum;
-				winnerUid=key;
-			}
+			RoomRecoder recoder = RoomRecoder.create(room,players);
+			dbHelper.saveObject(recoder);
 		}
 		
 		

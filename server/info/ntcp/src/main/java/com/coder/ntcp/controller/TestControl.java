@@ -29,10 +29,8 @@ public class TestControl {
 		dbHelper.saveObject(recoder);
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> tipMap = new HashMap<String, Object>();
-		tipMap.put("cardid", recoder.cardid);
-		tipMap.put("roomid", recoder.roomid);
-		tipMap.put("scores", recoder.scores);
-		tipMap.put("useIndex", recoder.useIndex);
+		tipMap.put("uid", recoder.uid);
+		tipMap.put("players", recoder.players);
 		return mapper.writeValueAsString(tipMap);
 	}
 	@RequestMapping("/createRandomUser")

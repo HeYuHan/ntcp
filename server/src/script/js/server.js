@@ -2,6 +2,8 @@ var JServer = (function () {
     function JServer() {
         this.native = Server.Get();
         this.native.OnAccept = this.OnAccept;
+        var content = this;
+        this.native.OnUpdate = function (t) { content.OnUpdate(t); };
     }
     JServer.prototype.OnAccept = function (uid) {
         LogInfo("accept new client uid:" + uid);
@@ -12,6 +14,8 @@ var JServer = (function () {
     };
     JServer.prototype.Start = function () {
         return this.native.Start();
+    };
+    JServer.prototype.OnUpdate = function (frame) {
     };
     return JServer;
 }());

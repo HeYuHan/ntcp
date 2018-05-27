@@ -27,6 +27,10 @@ class JClient{
         this.native.OnDisconected=()=>{self.OnDisconected()}
     }
     public Send(msg:string){
+        if(!this.native)
+        {
+            LogError("native client is null");
+        }
         var nstring=new NString();
         nstring.Append(msg);
         this.SendNString(nstring);
@@ -57,20 +61,16 @@ class JClient{
     }
     private OnDisconected(){
         LogInfo("OnDisconected:"+this.uid);
-        try
-        {
-            this.LeaveRoom(null);
-        }
-        catch(e){
-            PrintError("leave room error:",e);
-        }
         
+        this.LeaveRoom();
+        this.native=null;
         this.uid=0;
         this.info=null;
         this.state=State.IN_NONE;
         this.room=null;
         this.player=null;
     }
+
     public RegisterAllMessage(){
         this.m_MessageCallback={};
         this.m_MessageCallback[CLIENT_MSG.CM_ENTER_ROOM]=this.EnterRoom;
@@ -79,6 +79,7 @@ class JClient{
         this.m_MessageCallback[CLIENT_MSG.CM_CHU_PAI]=this.ChuPai;
         this.m_MessageCallback[CLIENT_MSG.CM_RESPON_CHU_PAI]=this.ResponseChuPai;
         this.m_MessageCallback[CLIENT_MSG.CM_HUAN_PAI]=this.HuanPai;
+        this.m_MessageCallback[CLIENT_MSG.CM_MAI_ZHUANG]=this.MaiZhuang;
     }
     private DispatchMessage(msg){
         var hander=this.m_MessageCallback[msg[0]];
@@ -89,7 +90,14 @@ class JClient{
             this.native.Disconnect();
         }
     }
+
     public EnterRoom(msg){
+        if(this.room){
+            this.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM,{
+                error:"is in room roomid:"+this.room.uid
+            }));
+            return;
+        }
         var roomid=msg.roomid;
         var unionid=msg.unionid;
         this.info=msg;
@@ -135,13 +143,16 @@ class JClient{
         }
 
     }
-    public LeaveRoom(msg){
+    public LeaveRoom(){
         if(this.room)this.room.ClientLeave(this);
         this.room=null;
     }
     public ReadyGame(msg){
         this.state=msg.state;
         this.room.ClientReady(this,this.state);
+    }
+    public SetReplayState(){
+        this.state=State.IN_ROOM;
     }
     public Ready():boolean{
         return (this.state == State.IN_READY);
@@ -154,5 +165,8 @@ class JClient{
     }
     public HuanPai(msg){
         this.room.ClientHuanPai(this,msg);
+    }
+    public MaiZhuang(msg){
+        this.room.ClientMaiZhuang(this,msg);
     }
 }

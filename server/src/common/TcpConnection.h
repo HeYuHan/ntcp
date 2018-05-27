@@ -14,7 +14,7 @@ public:
 	virtual void Update(float time);
 	virtual int Read(void* data, int size);
 	virtual int Send(void* data, int size);
-	void InitSocket(int socket, sockaddr* addr, struct event_base *base);
+	void InitSocket(evutil_socket_t socket, sockaddr* addr, struct event_base *base);
 	bool Connect(const char* ip, int port, event_base * base);
 	virtual void Disconnect();
 	

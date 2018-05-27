@@ -1,6 +1,7 @@
 #pragma once
 #ifndef __JAVASCRIPT_H__
 #define __JAVASCRIPT_H__
+#include <stdio.h>
 typedef enum
 {
 	JS_BOOL=1,
@@ -61,6 +62,9 @@ public:
 typedef void(*on_script_load_end)();
 typedef void(*native_class_register_call)(v8::Handle<v8::ObjectTemplate>, v8::Isolate*);
 void set_js_object(v8::Local<v8::FunctionTemplate> &f_template, v8::Handle<v8::Object> &obj);
+typedef v8::Global<v8::Object> G_JS_OBJECT;
+typedef v8::Handle<v8::Function> JS_FUNC;
+
 typedef v8::Handle<v8::Object> JS_OBJECT;
 typedef v8::Handle<v8::Value> JS_VALUE;
 #define IS_EMPTY_OBJECT(x) x.IsEmpty()

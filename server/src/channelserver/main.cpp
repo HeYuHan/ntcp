@@ -33,7 +33,20 @@ char* V8_BIN_PATH=NULL;
 int main(int argc,char **argv)
 {
 	char v8_bin_path[256] = { 0 };
-	strcpy(v8_bin_path, argv[0]);
+	int len = strlen(argv[0]);
+	int dir = 0;
+	for (int i = len - 1; i >= 0; i--)
+	{
+		char c = argv[0][i];
+		if (c == '/' || c == '\\')
+		{
+			dir = i;
+			break;
+		}
+	}
+	memcpy(v8_bin_path, argv[0], dir);
+	strcpy(&v8_bin_path[dir], "/v8/");
+
 	bool as_daemon = false;
 	while (1)
 	{

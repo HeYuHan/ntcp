@@ -115,12 +115,15 @@ class ReqRoomRecoder{
 }
 class ResRoomRecoder{
 	public String cardid;
+	public String score[];
+	public Date createDate;
 	public int roomid;
-	public int useIndex;
+	
 	public ResRoomRecoder(RoomRecoder dbRecoder) {
-		this.cardid=dbRecoder.cardid;
+		this.cardid=dbRecoder.uid;
+		this.score=dbRecoder.players;
+		this.createDate=dbRecoder.createTime;
 		this.roomid=dbRecoder.roomid;
-		this.useIndex=dbRecoder.useIndex;
 	}
 }
 
@@ -170,7 +173,7 @@ public class PublicController {
 			dbUser.token=weiXinUser.access_token;
 			dbUser.nick=weiXinUserInfo.nickname;
 			dbUser.headimgurl=weiXinUserInfo.headimgurl;
-			dbUser.diamondCount=0;
+			dbUser.diamondCount=10;
 			dbUser.goldCount=0;
 			dbUser.isProxy=false;
 			dbHelper.saveObject(dbUser);

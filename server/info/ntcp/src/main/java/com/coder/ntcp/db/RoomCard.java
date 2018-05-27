@@ -49,6 +49,20 @@ public class RoomCard implements Serializable,IDBObject{
 		CurrencyType currencyType=CurrencyType.None;
 		try {
 			currencyType=CurrencyType.valueOf(option.currencyType);
+			if(currencyType == CurrencyType.Diamond)
+			{
+				if(user.diamondCount < 1)
+				{
+					throw new Exception("ERROR_HAVE_NOT_DIAMOND");
+				}
+			}
+			else if(currencyType == CurrencyType.Gold)
+			{
+				if(user.goldCount <1)
+				{
+					throw new Exception("ERROR_HAVE_NOT_GOLD");
+				}
+			}
 		} catch (Exception e) {
 			// TODO: handle exception
 			currencyType=CurrencyType.None;
@@ -91,9 +105,9 @@ public class RoomCard implements Serializable,IDBObject{
 		card.currencyType=currencyType;
 		card.maxUseCount=option.playCount;
 		card.canUseCount=card.maxUseCount;
-		card.balanceRate[0]=1;
-		card.balanceRate[1]=1;
-		card.balanceRate[2]=1;
+		card.balanceRate[0]=option.balanceRate[0];
+		card.balanceRate[1]=option.balanceRate[1];
+		card.balanceRate[2]=option.balanceRate[2];
 		card.createTime=new Date();
 		card.timeOut=false;
 		dbHelper.saveObject(card);

@@ -14,6 +14,7 @@ public:
 	virtual void OnMessage();
 	virtual void OnConnected();
 	virtual void OnDisconnected();
+	bool IsConnected();
 public:
 	uint uid;
 	JS_OBJECT m_JSClient;
