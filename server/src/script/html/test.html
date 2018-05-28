@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
     <script>
-        var socket = new WebSocket("ws://47.96.188.12:9500");
+        var socket = new WebSocket("ws://192.168.2.104:9300");
         socket.onopen=()=>
         {
             socket.send(JSON.stringify([0,{roomid:123456,unionid:"1234567"}]));

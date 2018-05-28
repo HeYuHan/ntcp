@@ -26,6 +26,7 @@ TcpListener::~TcpListener()
 }
 void ListenEvent2(evutil_socket_t listener, short event, void *arg)
 {
+	
 	//struct event_base *base = (struct event_base *)arg;
 	evutil_socket_t fd;
 	struct sockaddr_in sin;
@@ -46,7 +47,7 @@ void ListenEvent2(evutil_socket_t listener, short event, void *arg)
 	//	log_error("cant accept socket %d", fd);
 	//	return;
 	//}
-
+	log_info("socket listenner event:%d fd:%d", event,fd);
 
 	TcpListener *l = (TcpListener*)arg;
 	//sockaddr addr;
@@ -56,10 +57,10 @@ bool TcpListener::CreateTcpServer(const char * addr, int max_client)
 {
 	if (!ParseSockAddr(m_ListenAddr, addr, false))return false;
 
-	int r;
+	
 	m_Socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_Socket < 0) return -1;
-	r = evutil_make_listen_socket_reuseable(m_Socket);
+	int r = evutil_make_listen_socket_reuseable(m_Socket);
 
 	r = bind(m_Socket, (struct sockaddr*)&m_ListenAddr, sizeof(m_ListenAddr));
 	if (r < 0) return -1;
@@ -77,8 +78,8 @@ bool TcpListener::CreateTcpServer(const char * addr, int max_client)
 
 	/*m_Listener = evconnlistener_new_bind(Timer::GetEventBase(),
 		ListenEvent, this,
-		LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE | LEV_OPT_THREADSAFE,
-		-1, (sockaddr*)&m_ListenAddr, sizeof(sockaddr_in));
+		LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE,
+		-1, (sockaddr*)&m_ListenAddr, sizeof(m_ListenAddr));
 	return m_Listener != NULL;*/
 }
 bool TcpListener::CreateTcpServer(const char *ip, int port, int max_client)
@@ -91,13 +92,14 @@ bool TcpListener::CreateTcpServer(const char *ip, int port, int max_client)
 	m_Listener = evconnlistener_new_bind(Timer::GetEventBase(),
 		ListenEvent, this,
 		LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE,
-		-1, (sockaddr*)&m_ListenAddr, sizeof(sockaddr_in));
+		-1, (sockaddr*)&m_ListenAddr, sizeof(m_ListenAddr));
 	return m_Listener != NULL;
 }
 
 
 void TcpListener::ListenEvent(evconnlistener * listener, evutil_socket_t fd, sockaddr * sock, int socklen, void * arg)
 {
+	log_info("socket listenner socklen:%d fd:%d", socklen, fd);
 	TcpListener *l = (TcpListener*)arg;
 	l->OnTcpAccept(fd, sock);
 }

@@ -47,8 +47,8 @@ int TcpConnection::Send(void * data, int size)
 {
 	if (m_BufferEvent)
 	{
-		bufferevent_write(m_BufferEvent, data, size);
-		return size;
+		int ret = bufferevent_write(m_BufferEvent, data, size);
+		return ret == 0?size :0;
 	}
 	return 0;
 }
@@ -75,7 +75,6 @@ void TcpConnection::InitSocket(evutil_socket_t socket, sockaddr * addr, event_ba
 	bufferevent_setcb(m_BufferEvent, ReadEvent, WriteEvent, SocketEvent, this);
 	bufferevent_enable(m_BufferEvent, EV_READ | EV_WRITE | EV_PERSIST | EV_TIMEOUT | EV_CLOSED);
 	OnConnected();
-	log_info("init socket %d", socket);
 }
 
 bool TcpConnection::Connect(const char * ip, int port, event_base * base)
@@ -206,10 +205,10 @@ void TcpConnection::WriteEvent(bufferevent * bev, void * arg)
 void TcpConnection::SocketEvent(bufferevent * bev, short events, void * arg)
 {
 	if (events & BEV_EVENT_EOF) {
-		//printf("connection closed\n");
+		printf("connection closed\n");
 	}
 	else if (events & BEV_EVENT_ERROR) {
-		//printf("some other error\n");
+		printf("some other error\n");
 	}
 	int fd = bufferevent_getfd(bev);
 	log_info("socket error call event:%d fd:%d", events, fd);

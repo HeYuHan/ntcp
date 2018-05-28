@@ -138,6 +138,7 @@
     <ClInclude Include="..\src\common\common.h" />
     <ClInclude Include="..\src\common\ConvertUTF.h" />
     <ClInclude Include="..\src\common\FileReader.h" />
+    <ClInclude Include="..\src\common\HttpClient.h" />
     <ClInclude Include="..\src\common\HttpConnection3.h" />
     <ClInclude Include="..\src\common\HttpConnection4.h" />
     <ClInclude Include="..\src\common\HttpListenner.h" />
@@ -154,7 +155,6 @@
     <ClInclude Include="..\src\common\log.h" />
     <ClInclude Include="..\src\common\NetworkConnection.h" />
     <ClInclude Include="..\src\common\objectpool.h" />
-    <ClInclude Include="..\src\common\sha1.h" />
     <ClInclude Include="..\src\common\TcpConnection.h" />
     <ClInclude Include="..\src\common\TcpListener.h" />
     <ClInclude Include="..\src\common\ThreadPool2.h" />
@@ -173,6 +173,7 @@
     <ClCompile Include="..\src\common\ConvertUTF.cpp" />
     <ClCompile Include="..\src\common\ConvertUTFWrapper.cpp" />
     <ClCompile Include="..\src\common\FileReader.cpp" />
+    <ClCompile Include="..\src\common\HttpClient.cpp" />
     <ClCompile Include="..\src\common\HttpConnection3.cpp" />
     <ClCompile Include="..\src\common\HttpConnection4.cpp" />
     <ClCompile Include="..\src\common\HttpListenner.cpp" />
@@ -182,7 +183,6 @@
     <ClCompile Include="..\src\common\linux\getopt.cpp" />
     <ClCompile Include="..\src\common\log.cpp" />
     <ClCompile Include="..\src\common\NetworkConnection.cpp" />
-    <ClCompile Include="..\src\common\sha1.cpp" />
     <ClCompile Include="..\src\common\TcpConnection.cpp" />
     <ClCompile Include="..\src\common\TcpListener.cpp" />
     <ClCompile Include="..\src\common\ThreadPool2.cpp" />

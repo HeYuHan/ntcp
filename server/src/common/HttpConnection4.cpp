@@ -1,7 +1,6 @@
 #include "HttpConnection4.h"
 
 using namespace RakNet;
-
 HttpRequest::HttpRequest():httpConnection2(NULL),tcp(NULL)
 {
 }
@@ -10,12 +9,15 @@ HttpRequest::~HttpRequest()
 {
 	if (tcp)
 	{
+		tcp->Stop();
+		//delete tcp;
 		TCPInterface::DestroyInstance(tcp);
 	}
-	if (httpConnection2)
+	/*if (httpConnection2)
 	{
 		HTTPConnection2::DestroyInstance(httpConnection2);
-	}
+	}*/
+
 	tcp = NULL;
 	httpConnection2 = NULL;
 }
@@ -35,12 +37,22 @@ bool HttpRequest::MakeRequest(int type, const char * url, const char * data, con
 	httpConnection2 = HTTPConnection2::GetInstance();
 	tcp = TCPInterface::GetInstance();
 	tcp->Start(0, 64);
+	//tcp->Connect(parser.host, parser.port, true);
+	//SystemAddress serverAddr = tcp->HasCompletedConnectionAttempt();
+	//tcp->Send(rsRequest.C_String(), rsRequest.GetLength(), serverAddr, false);
 	tcp->AttachPlugin(httpConnection2);
 	httpConnection2->TransmitRequest(rsRequest, parser.host, parser.port);
 	return true;
 }
 int HttpRequest::GetResponse(std::string & ret)
 {
+	
+	/*Packet *p = tcp->Receive();
+	if (p)
+	{
+		printf("res:%s", (const char*)p->data);
+	}
+	return 0;*/
 	SystemAddress sa;
 	Packet *packet;
 	// This is kind of crappy, but for TCP plugins, always do HasCompletedConnectionAttempt, then Receive(), then HasFailedConnectionAttempt(),HasLostConnection()

@@ -32,6 +32,7 @@ char* V8_BIN_PATH=NULL;
 
 int main(int argc,char **argv)
 {
+
 	char v8_bin_path[256] = { 0 };
 	int len = strlen(argv[0]);
 	int dir = 0;

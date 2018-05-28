@@ -1,7 +1,7 @@
 #include "Server.h"
 #include "ScriptingCore.h"
 #include <Timer.h>
-//#include <HttpConnection3.h>
+#include <HttpConnection3.h>
 #include <HttpConnection4.h>
 #include<HTTPConnection2.h>
 #include<TCPInterface.h>
@@ -348,7 +348,7 @@ void register_timer_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* is
 	class_template->InstanceTemplate()->SetInternalFieldCount(2);
 	global->Set(String::NewFromUtf8(isolate, "Timer"), class_template);
 }
-class JSHttp:public HttpRequest //public IHttpInterface
+class JSHttp:public HttpRequest// ,public IHttpInterface
 {
 public:
 	v8::Persistent<Object> m_JSObject;
@@ -378,6 +378,24 @@ public:
 
 		}
 	}
+	/*virtual void OnResponse() {
+		int state = GetState();
+		char msg[1024 + 1] = { 0 };
+		std::string ret;
+		int count = 0;
+		do {
+			if (state>0)count = ReadBuffer(msg, 1024);
+			msg[count] = 0;
+			if (count>0)ret += std::string(msg);
+		} while (count > 0);
+		if (!m_JSObject.IsEmpty())
+		{
+			JSArg args[2] = { JSArg((size_t)state),JSArg(ret.c_str(),ret.size()) };
+			ScriptEngine::GetInstance()->CallFunction(m_JSObject.Get(G_ISOLATE()), "OnResponse", 2, args);
+			delete this;
+
+		}
+	}*/
 	bool Get(const char* url, const char* data)
 	{
 		if (!MakeRequest(HttpRequest::GET, url, data))
@@ -398,27 +416,7 @@ public:
 		m_Timer.Begin();
 		return true;
 	}
-	/*virtual void OnResponse() {
-		log_info("call js %s", "OnResponse");
-		int state = GetState();
-		char msg[1024 + 1] = { 0 };
-		std::string ret;
-		int count = 0;
-		do {
-			if (state>0)count = ReadBuffer(msg, 1024);
-			msg[count] = 0;
-			if (count>0)ret += std::string(msg);
-		} while (count > 0);
-		if (!m_JSObject.IsEmpty())
-		{
-			JSArg args[2] = { JSArg((size_t)state),JSArg(ret.c_str(),ret.size()) };
-			
-			ScriptEngine::GetInstance()->CallFunction(m_JSObject.Get(G_ISOLATE()), "OnResponse", 2, args);
-			log_info("js res:%s", ret.c_str());
-			delete this;
-			
-		}
-	}*/
+	
 };
 void ClearWeakHttp(
 	const v8::WeakCallbackInfo<JSHttp>& data) {
@@ -468,7 +466,6 @@ void register_http_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* iso
 			String::Utf8Value data(args[1]->ToString());
 			String::Utf8Value content_type(args[2]->ToString());
 			w->Post(*url, *data, *content_type);
-			//gHttpManager.Post(*url, *data,*content_type,w);
 			
 		}
 	});
@@ -484,9 +481,8 @@ void register_http_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* iso
 			String::Utf8Value data(args[1]->ToString());
 			String::Utf8Value content_type(args[2]->ToString());
 			std::string ret;
-			HttpPost(*url, *data, *content_type, ret);
-			//log_info("post2 ret:%s", ret.c_str());
-			args.GetReturnValue().Set(String::NewFromUtf8(args.GetIsolate(), ret.c_str()));
+			//HttpPost(*url, *data, *content_type, ret);
+			//gHttpManager.Post(*url, *data, *content_type, w);
 			
 
 		}

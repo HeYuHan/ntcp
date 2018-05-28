@@ -102,9 +102,6 @@
     <ClInclude Include="..\src\common\WebSocket.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\common\sha1.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\common\ccUTF8.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -112,6 +109,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\src\common\ThreadPool2.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\common\HttpClient.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -176,9 +176,6 @@
     <ClCompile Include="..\src\common\base64.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\sha1.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\common\ccUTF8.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -192,6 +189,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\src\common\WebSocket.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\HttpClient.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

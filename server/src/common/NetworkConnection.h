@@ -19,7 +19,7 @@ public:
 	~NetworkStream();
 	virtual void OnMessage()=0;
 	void Reset();
-	void OnRevcMessage();
+	virtual void OnRevcMessage();
 public:
 	void WriteBool(bool b);
 	void WriteByte(byte data);

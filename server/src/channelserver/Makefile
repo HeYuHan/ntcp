@@ -1,4 +1,4 @@
-CC = clang++
+CC = g++
 #yum install zlib-devel
 #yum install zlib
 

@@ -1,6 +1,6 @@
 var ROOM_MAX_PLAYER_COUNT = 3;
 var DEFINE_RANDOM_TEST = true;
-var INFO_SERVER_URL = "http://127.0.0.1:9800/private/";
+var INFO_SERVER_URL = "http://192.168.2.103:9800/private/";
 var WRITE_ROOM_RECODER = true;
 var SET_CHU_PAIT_TIME_OUT = false;
 var AUTO_CHU_PAI_TIME = 18;

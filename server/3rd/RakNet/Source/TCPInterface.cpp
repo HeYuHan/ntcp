@@ -248,6 +248,7 @@ bool TCPInterface::Start(unsigned short port, unsigned short maxIncomingConnecti
 }
 void TCPInterface::Stop(void)
 {
+	printf("TCPInterface stop %d", __LINE__);
 	unsigned int i;
 	for (i=0; i < messageHandlerList.Size(); i++)
 		messageHandlerList[i]->OnRakPeerShutdown();
@@ -280,7 +281,7 @@ void TCPInterface::Stop(void)
 	blockingSocketListMutex.Lock();
 	for (i=0; i < blockingSocketList.Size(); i++)
 	{
-		closesocket__(blockingSocketList[i]);
+		if(blockingSocketList[i] != 0)closesocket__(blockingSocketList[i]);
 	}
 	blockingSocketListMutex.Unlock();
 
@@ -297,7 +298,7 @@ void TCPInterface::Stop(void)
 	// Stuff from here on to the end of the function is not threadsafe
 	for (i=0; i < (unsigned int) remoteClientsLength; i++)
 	{
-		closesocket__(remoteClients[i].socket);
+		if (remoteClients[i].socket != 0)closesocket__(remoteClients[i].socket);
 #if OPEN_SSL_CLIENT_SUPPORT==1
 		remoteClients[i].FreeSSL();
 #endif
