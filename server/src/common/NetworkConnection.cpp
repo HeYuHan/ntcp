@@ -36,7 +36,12 @@ void NetworkStream::OnRevcMessage()
 	{
 		int empty_size = read_buff_end - read_offset;
 		int revc_size = connection->Read(read_offset, empty_size);
-		if (revc_size <= 0)return;
+		if (revc_size == 0)
+		{
+			//log_info("revc_size is zero closed %s", "OnRevcMessage");
+			connection->Disconnect();
+			return;
+		}
 		read_offset += revc_size;
 		int size = read_offset - read_position;
 		if (connection->m_Type == TCP_SOCKET)
@@ -66,6 +71,7 @@ void NetworkStream::OnRevcMessage()
 				int ret = parser.DecodeFrame(web_frame, size, outHead, outSize);
 				if (ret == WS_PARSE_RESULT_ERROR)
 				{
+					log_info("websocket closed %s", "WS_PARSE_RESULT_ERROR");
 					connection->Disconnect();
 					return;
 				}

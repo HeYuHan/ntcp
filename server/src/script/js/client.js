@@ -35,6 +35,10 @@ var JClient = (function () {
         if (this.room && this.room.recoder_stream)
             this.room.recoder_stream.Write(msg.Get());
     };
+    JClient.prototype.CloseOnSendEnd = function () {
+        if (this.native)
+            this.native.CloseOnSendEnd();
+    };
     JClient.prototype.OnMessage = function (msg) {
         try {
             var json = JSON.parse(msg);

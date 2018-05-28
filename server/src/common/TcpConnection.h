@@ -17,6 +17,8 @@ public:
 	void InitSocket(evutil_socket_t socket, sockaddr* addr, struct event_base *base);
 	bool Connect(const char* ip, int port, event_base * base);
 	virtual void Disconnect();
+	void HandShake();
+	void CloseOnSendEnd();
 	
 private:
 	static void ReadEvent(bufferevent *bev, void *arg);
@@ -26,7 +28,8 @@ public:
 	int m_Socket;
 	bufferevent *m_BufferEvent;
 	bool m_HandShake;
-	void HandShake();
+	
+	bool m_NeedColse;
 	
 };
 

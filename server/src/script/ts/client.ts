@@ -40,6 +40,9 @@ class JClient{
         msg.Append("\n");
         if(this.room && this.room.recoder_stream)this.room.recoder_stream.Write(msg.Get());
     }
+    public CloseOnSendEnd(){
+        if(this.native)this.native.CloseOnSendEnd();
+    }
     private OnMessage(msg:string){
         
         try

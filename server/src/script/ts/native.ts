@@ -10,10 +10,12 @@ declare class Client{
     public static Get(uid:number):Client;
     public Disconnect();
     public Send(msg:string);
+    public CloseOnSendEnd();
     //public SendNString(msg:NString);
     public OnMessage:(msg:string)=>void;
     public OnConnected:()=>void;
     public OnDisconected:()=>void;
+    
 }
 declare class FileHelper{
     public static LoadScript(path:string):boolean;

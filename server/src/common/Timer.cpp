@@ -124,15 +124,6 @@ void Timer::timeout_cb(evutil_socket_t fd, short event, void * arg)
 			{
 				t->Begin();
 			}
-			else
-			{
-				log_debug("%s", "timer stop");
-			}
-		}
-		else
-		{
-			//if(t->m_Loop)evtimer_del(&t->m_TimeOut);
-			log_debug("%s", "timer stop");
 		}
 	}
 	else

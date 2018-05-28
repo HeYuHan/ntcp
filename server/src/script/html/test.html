@@ -6,14 +6,28 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
     <script>
-        var socket = new WebSocket("ws://127.0.0.1:9300");
+        var socket = new WebSocket("ws://47.96.188.12:9500");
         socket.onopen=()=>
         {
-            socket.send("ffffffffffffffff");
+            socket.send(JSON.stringify([0,{roomid:123456,unionid:"1234567"}]));
+            socket.send(JSON.stringify([0,{roomid:123456,unionid:"1234567"}]));
+        }
+        socket.onclose=(e)=>{
+            console.log("socket close...........",e)
+        }
+        socket.onerror=(e)=>{
+            console.log(e);
+            socket.close();
+        }
+        function closeSocket()
+        {
+            socket.send("ffffffffffff");
+            console.log("begin close socket")
+            socket.close();
         }
     </script>
 </head>
 <body>
-    
+    <button onclick="closeSocket();">CLOSE</button>
 </body>
 </html>

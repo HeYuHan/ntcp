@@ -24,9 +24,10 @@ package:
 	rm -rf ntcp.server*
 	mkdir -p ntcp.server.build/v8
 	mkdir -p ntcp.server.build/js
+	mkdir -p ntcp.server.build/log
 	cp bin/channelserver ntcp.server.build/
 	cp script/js/* ntcp.server.build/js/
-	cp bin/*.bin ntcp.server.build/
+	cp bin/v8/*.bin ntcp.server.build/
 	cp bin/ntcp_service ntcp.server.build/
 	cp bin/keep_process ntcp.server.build/
 	cp ../3rd/v86.4.99/lib/relsease/* ntcp.server.build/v8

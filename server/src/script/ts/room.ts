@@ -395,6 +395,7 @@ class Room{
     private Clean(){
         Room.Remove(this.uid);
         for(var i=0;i<this.m_clients.length;i++){
+            this.m_clients[i].CloseOnSendEnd();
             this.m_clients[i].room=null;
         }
         this.m_clients=[];
@@ -464,12 +465,12 @@ class Room{
                                     card:room.room_card
                                 }));
                             }
-                            room.Clean();
+                            
                         }
                     } catch (error) {
                         PrintError("release room error:",error);
                     }
-                    
+                    room.Clean();
             });
         }
         if(!free_room && data!=null){

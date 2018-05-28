@@ -3,7 +3,11 @@
 #ifndef _WIN32
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include  <netinet/in.h>
+#include <netinet/tcp.h>
+#include <unistd.h>
 #endif // !_WIN32
+#include <sys/types.h>
 #include "base64.h"
 #include <stdio.h>
 #include <ostream>
@@ -13,7 +17,8 @@
 TcpConnection::TcpConnection() :
 	m_Socket(-1),
 	m_BufferEvent(NULL),
-	m_HandShake(false)
+	m_HandShake(false),
+	m_NeedColse(false)
 {
 	m_Type = TCP_SOCKET;
 }
@@ -21,7 +26,7 @@ TcpConnection::TcpConnection() :
 TcpConnection::~TcpConnection()
 {
 	m_BufferEvent = NULL;
-	if (m_Socket > 0)evutil_closesocket(m_Socket);
+	//if (m_Socket > 0)evutil_closesocket(m_Socket);
 	m_Socket = -1;
 }
 
@@ -50,11 +55,25 @@ int TcpConnection::Send(void * data, int size)
 
 void TcpConnection::InitSocket(evutil_socket_t socket, sockaddr * addr, event_base * base)
 {
+	m_NeedColse = false;
 	m_HandShake = false;
 	m_Socket = socket;
+	
+#ifdef LINUX
+	int keepAlive = 1; // 开启keepalive属性
+	int keepIdle = 30; // 如该连接在60秒内没有任何数据往来,则进行探测 
+	int keepInterval = 5; // 探测时发包的时间间隔为5 秒
+	int keepCount = 3; // 探测尝试的次数.如果第1次探测包就收到响应了,则后2次的不再发.
+
+	setsockopt(socket, SOL_SOCKET, SO_KEEPALIVE, (void*)&keepAlive, sizeof(keepAlive));
+	setsockopt(socket, SOL_TCP, TCP_KEEPIDLE, (void*)&keepIdle, sizeof(keepIdle));
+	setsockopt(socket, SOL_TCP, TCP_KEEPINTVL, (void *)&keepInterval, sizeof(keepInterval));
+	setsockopt(socket, SOL_TCP, TCP_KEEPCNT, (void *)&keepCount, sizeof(keepCount));
+#endif
+
 	m_BufferEvent = bufferevent_socket_new(base, socket, BEV_OPT_CLOSE_ON_FREE);
 	bufferevent_setcb(m_BufferEvent, ReadEvent, WriteEvent, SocketEvent, this);
-	bufferevent_enable(m_BufferEvent, EV_READ | EV_WRITE | EV_PERSIST);
+	bufferevent_enable(m_BufferEvent, EV_READ | EV_WRITE | EV_PERSIST | EV_TIMEOUT | EV_CLOSED);
 	OnConnected();
 	log_info("init socket %d", socket);
 }
@@ -71,7 +90,7 @@ bool TcpConnection::Connect(const char * ip, int port, event_base * base)
 	{
 		m_Socket = bufferevent_getfd(m_BufferEvent);
 		bufferevent_setcb(m_BufferEvent, ReadEvent, WriteEvent, SocketEvent, this);
-		bufferevent_enable(m_BufferEvent, EV_READ | EV_WRITE | EV_PERSIST);
+		bufferevent_enable(m_BufferEvent, EV_READ | EV_WRITE | EV_PERSIST| EV_TIMEOUT|EV_CLOSED);
 		OnConnected();
 		return true;
 	}
@@ -87,19 +106,34 @@ bool TcpConnection::Connect(const char * ip, int port, event_base * base)
 
 void TcpConnection::Disconnect()
 {
-	if(m_Socket>0)evutil_closesocket(m_Socket);
+	log_info("client disconnected fd:%d,line:%d", m_Socket,__LINE__);
+	bufferevent_flush(m_BufferEvent, EV_WRITE, BEV_NORMAL);
 	bufferevent_free(m_BufferEvent);
+	evutil_closesocket(m_Socket);
 	m_Socket = -1;
 	m_BufferEvent = NULL;
 	m_HandShake = false;
 	OnDisconnected();
 }
 
+void TcpConnection::CloseOnSendEnd()
+{
+	//m_NeedColse = true;
+	//struct evbuffer *buffer = bufferevent_get_output(m_BufferEvent);
+	//if (buffer)
+	//{
+	//	size_t t = evbuffer_get_length(buffer);
+	//	if (t == 0)
+	//	{
+	//		m_NeedColse = false;
+	//		Disconnect();
+	//	}
+	//}
+}
+
 void TcpConnection::HandShake()
 {
-	log_info("HandShake1 %s %d",m_HandShake?"true":"false", __LINE__);
 	if (m_HandShake)return;
-	log_info("HandShake2 %s %d", m_HandShake ? "true" : "false", __LINE__);
 	int size = Read(stream->read_offset,stream->read_buff_end-stream->read_offset);
 	// 解析http请求头信息
 	std::istringstream string_stream(stream->read_position);
@@ -152,7 +186,6 @@ void TcpConnection::HandShake()
 }
 void TcpConnection::ReadEvent(bufferevent * bev, void * arg)
 {
-	log_info("read event %d", __LINE__);
 	TcpConnection* con = static_cast<TcpConnection*>(arg);
 	if (con && !con->m_HandShake)con->HandShake();
 	else if (con&&con->stream)con->stream->OnRevcMessage();
@@ -160,7 +193,12 @@ void TcpConnection::ReadEvent(bufferevent * bev, void * arg)
 
 void TcpConnection::WriteEvent(bufferevent * bev, void * arg)
 {
-	
+	/*TcpConnection* c = (TcpConnection*)arg;
+	if (c->m_NeedColse)
+	{
+		c->m_NeedColse = false;
+		c->Disconnect();
+	}*/
 }
 
 void TcpConnection::SocketEvent(bufferevent * bev, short events, void * arg)
@@ -171,11 +209,8 @@ void TcpConnection::SocketEvent(bufferevent * bev, short events, void * arg)
 	else if (events & BEV_EVENT_ERROR) {
 		//printf("some other error\n");
 	}
-	log_info("client disconnected %d", events);
+	int fd = bufferevent_getfd(bev);
+	log_info("socket error call event:%d fd:%d", events, fd);
 	TcpConnection* c = (TcpConnection*)arg;
-	if(c->m_Socket>0)evutil_closesocket(c->m_Socket);
-	bufferevent_free(bev);
-	c->m_Socket = -1;
-	c->m_BufferEvent = NULL;
-	c->OnDisconnected();
+	c->Disconnect();
 }

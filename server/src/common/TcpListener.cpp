@@ -56,7 +56,7 @@ bool TcpListener::CreateTcpServer(const char * addr, int max_client)
 
 	r = bind(m_Socket, (struct sockaddr*)&m_ListenAddr, sizeof(m_ListenAddr));
 	if (r < 0) return -1;
-	r = listen(m_Socket, max_client);
+	r = listen(m_Socket, 65535);
 	if (r < 0) return -1;
 	if (evutil_make_socket_nonblocking(m_Socket) < 0)
 	{
@@ -83,7 +83,7 @@ bool TcpListener::CreateTcpServer(const char *ip, int port, int max_client)
 	m_ListenAddr.sin_port = htons(port);
 	m_Listener = evconnlistener_new_bind(Timer::GetEventBase(),
 		ListenEvent, this,
-		LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE | LEV_OPT_THREADSAFE,
+		LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE,
 		-1, (sockaddr*)&m_ListenAddr, sizeof(sockaddr_in));
 	return m_Listener != NULL;
 }

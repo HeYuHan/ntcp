@@ -185,6 +185,19 @@ void register_client_class(v8::Handle<v8::ObjectTemplate> global, v8::Isolate* i
 		}
 
 	});
+	reg_func(class_proto, isolate, "CloseOnSendEnd", [](const FunctionCallbackInfo<Value>& args) {
+
+		Local<Object> self = args.This();
+		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+		void* ptr = wrap->Value();
+		Client* c = static_cast<Client*>(ptr);
+		if (c)c->CloseOnSendEnd();
+		else
+		{
+			log_error("native client is null %s", "");
+		}
+
+	});
 
 	client_class_template->InstanceTemplate()->SetInternalFieldCount(3);
 	global->Set(String::NewFromUtf8(isolate, "Client"), client_class_template);
