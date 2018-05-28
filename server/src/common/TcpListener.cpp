@@ -30,10 +30,17 @@ void ListenEvent2(evutil_socket_t listener, short event, void *arg)
 	evutil_socket_t fd;
 	struct sockaddr_in sin;
 	socklen_t slen = sizeof(sin);
+	memset(&sin, 0, slen);
 	fd = accept(listener, (struct sockaddr *)&sin, &slen);
 	if (fd < 0) {
 		log_error("cant accept socket %d", fd);
 		return;
+	}
+	//if (fd == 0)
+	{
+		int code = evutil_socket_geterror(fd);
+		log_error("accept fd error:%s", evutil_socket_error_to_string(code));
+		//return;
 	}
 	//if (fd > FD_SETSIZE) { //这个if是参考了那个ROT13的例子，貌似是官方的疏漏，从select-based例子里抄过来忘了改
 	//	log_error("cant accept socket %d", fd);

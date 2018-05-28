@@ -186,6 +186,8 @@ void TcpConnection::HandShake()
 }
 void TcpConnection::ReadEvent(bufferevent * bev, void * arg)
 {
+	//int fd = bufferevent_getfd(bev);
+	//log_info("socket reade event fd:%d", fd);
 	TcpConnection* con = static_cast<TcpConnection*>(arg);
 	if (con && !con->m_HandShake)con->HandShake();
 	else if (con&&con->stream)con->stream->OnRevcMessage();
