@@ -7,6 +7,7 @@
 #include <Timer.h>
 #include <FileReader.h>
 #include "ScriptingCore.h"
+#include <HttpClient.h>
 enum
 {
 	script = 0x100,
@@ -32,6 +33,9 @@ char* V8_BIN_PATH=NULL;
 
 int main(int argc,char **argv)
 {
+	HttpClient c;
+	c.Post("http://127.0.0.1:9800/public/getUserInfo", "xxx", "application/json");
+	//c.Get("https://www.baidu.com");
 
 	char v8_bin_path[256] = { 0 };
 	int len = strlen(argv[0]);

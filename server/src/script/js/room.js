@@ -370,14 +370,15 @@ var Room = (function () {
             }
         }
         if (free_room) {
-            LogInfo("free room scores:" + JSON.stringify(this.score_recoder));
-            var room = this;
-            PostJson(INFO_SERVER_URL + "useRoomCard", {
+            var sumbit_blance_data = {
                 cardid: this.room_card.cardid,
                 roomid: this.uid,
                 token: INFO_ACCESS_TOKEN,
                 scores: this.score_recoder
-            }, function (state, msg) {
+            };
+            LogInfo("free room scores:" + JSON.stringify(sumbit_blance_data));
+            var room = this;
+            PostJson(INFO_SERVER_URL + "useRoomCard", sumbit_blance_data, function (state, msg) {
                 try {
                     LogInfo("release room:" + msg);
                     var balance = JSON.parse(msg);

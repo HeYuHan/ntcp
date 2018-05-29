@@ -438,14 +438,15 @@ class Room{
         }
         
         if(free_room){
-            LogInfo("free room scores:"+JSON.stringify(this.score_recoder));
+            var sumbit_blance_data={
+                    cardid:this.room_card.cardid,
+                    roomid:this.uid,
+                    token:INFO_ACCESS_TOKEN,
+                    scores:this.score_recoder
+            }
+            LogInfo("free room scores:"+JSON.stringify(sumbit_blance_data));
             var room=this;
-            PostJson(INFO_SERVER_URL+"useRoomCard",{
-                cardid:this.room_card.cardid,
-                roomid:this.uid,
-                token:INFO_ACCESS_TOKEN,
-                scores:this.score_recoder
-                },function(state,msg){
+            PostJson(INFO_SERVER_URL+"useRoomCard",sumbit_blance_data,function(state,msg){
                     try {
                         LogInfo("release room:"+msg);
                         var balance = JSON.parse(msg);

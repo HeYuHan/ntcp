@@ -58,47 +58,31 @@ void TcpConnection::InitSocket(evutil_socket_t socket, sockaddr * addr, event_ba
 	m_NeedColse = false;
 	m_HandShake = false;
 	m_Socket = socket;
-	
-#ifdef LINUX
-	int keepAlive = 1; // 开启keepalive属性
-	int keepIdle = 30; // 如该连接在60秒内没有任何数据往来,则进行探测 
-	int keepInterval = 5; // 探测时发包的时间间隔为5 秒
-	int keepCount = 3; // 探测尝试的次数.如果第1次探测包就收到响应了,则后2次的不再发.
-
-	setsockopt(socket, SOL_SOCKET, SO_KEEPALIVE, (void*)&keepAlive, sizeof(keepAlive));
-	setsockopt(socket, SOL_TCP, TCP_KEEPIDLE, (void*)&keepIdle, sizeof(keepIdle));
-	setsockopt(socket, SOL_TCP, TCP_KEEPINTVL, (void *)&keepInterval, sizeof(keepInterval));
-	setsockopt(socket, SOL_TCP, TCP_KEEPCNT, (void *)&keepCount, sizeof(keepCount));
-#endif
 
 	m_BufferEvent = bufferevent_socket_new(base, socket, BEV_OPT_CLOSE_ON_FREE);
 	bufferevent_setcb(m_BufferEvent, ReadEvent, WriteEvent, SocketEvent, this);
-	bufferevent_enable(m_BufferEvent, EV_READ | EV_WRITE | EV_PERSIST | EV_TIMEOUT | EV_CLOSED);
+	bufferevent_enable(m_BufferEvent, EV_READ | EV_WRITE | EV_PERSIST);
 	OnConnected();
 }
 
 bool TcpConnection::Connect(const char * ip, int port, event_base * base)
 {
-	m_BufferEvent = bufferevent_socket_new(base, -1, BEV_OPT_CLOSE_ON_FREE);
+	
 	sockaddr_in addr;
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
 	addr.sin_addr.s_addr = inet_addr(ip);
-	if (0 == bufferevent_socket_connect(m_BufferEvent, (sockaddr*)&addr, sizeof(addr)))
+	m_Socket = socket(AF_INET, SOCK_STREAM, 0);
+	if (0 == connect(m_Socket, (sockaddr*)&addr, sizeof(addr)))
 	{
-		m_Socket = bufferevent_getfd(m_BufferEvent);
+		m_BufferEvent = bufferevent_socket_new(base, m_Socket, BEV_OPT_CLOSE_ON_FREE);
 		bufferevent_setcb(m_BufferEvent, ReadEvent, WriteEvent, SocketEvent, this);
-		bufferevent_enable(m_BufferEvent, EV_READ | EV_WRITE | EV_PERSIST| EV_TIMEOUT|EV_CLOSED);
+		bufferevent_enable(m_BufferEvent, EV_READ | EV_WRITE | EV_PERSIST);
 		OnConnected();
 		return true;
 	}
-	else
-	{
-		bufferevent_free(m_BufferEvent);
-		m_BufferEvent = NULL;
-		return false;
-	}
+	return false;
 
 	
 }
@@ -188,7 +172,7 @@ void TcpConnection::ReadEvent(bufferevent * bev, void * arg)
 	//int fd = bufferevent_getfd(bev);
 	//log_info("socket reade event fd:%d", fd);
 	TcpConnection* con = static_cast<TcpConnection*>(arg);
-	if (con && !con->m_HandShake)con->HandShake();
+	if (con && (con->m_Type == WEB_SOCKET)&&!con->m_HandShake)con->HandShake();
 	else if (con&&con->stream)con->stream->OnRevcMessage();
 }
 
