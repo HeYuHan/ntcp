@@ -12,5 +12,6 @@ public class ReqRoomCardOption{
 	public String payType;
 	public int playCount;
 	public int[] balanceRate=new int[3];
+	public int maxScore=0;
 
 }

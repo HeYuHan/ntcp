@@ -19,6 +19,7 @@ public class RoomCard implements Serializable,IDBObject{
 	public String uid;
 	public int maxUseCount=0;
 	public int canUseCount=0;
+	public int maxScore=0;
 	public RoomCardPayType payType;
 	public int[] balanceRate=new int[3];
 	public boolean includexi=true;
@@ -105,6 +106,7 @@ public class RoomCard implements Serializable,IDBObject{
 		card.currencyType=currencyType;
 		card.maxUseCount=option.playCount;
 		card.canUseCount=card.maxUseCount;
+		card.maxScore = option.maxScore;
 		card.balanceRate[0]=option.balanceRate[0];
 		card.balanceRate[1]=option.balanceRate[1];
 		card.balanceRate[2]=option.balanceRate[2];

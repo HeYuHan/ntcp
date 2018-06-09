@@ -12,6 +12,7 @@ var JClient = (function () {
     function JClient(uid) {
         this.state = State.IN_NONE;
         this.info = {};
+        this.requestCreateRoom = false;
         this.native = Client.Get(uid);
         if (!this.native)
             return null;
@@ -54,6 +55,7 @@ var JClient = (function () {
     JClient.prototype.OnConnected = function () {
         LogInfo("OnConnected=>>>>>>:" + this.uid);
         this.state = State.IN_LOGIN;
+        this.requestCreateRoom = false;
         this.RegisterAllMessage();
     };
     JClient.prototype.OnDisconected = function () {
@@ -107,10 +109,13 @@ var JClient = (function () {
             room.ClientJoin(client);
         }
         else {
+            if (this.requestCreateRoom)
+                return;
             PostJson(INFO_SERVER_URL + "getRoomCard", {
                 token: INFO_ACCESS_TOKEN,
                 roomid: roomid
             }, function (state, cardinfo) {
+                client.requestCreateRoom = false;
                 LogInfo("getRoomCard:" + cardinfo);
                 var json = JSON.parse(cardinfo);
                 if (state == 200 && !json.error) {

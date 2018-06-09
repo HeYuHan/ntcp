@@ -13,10 +13,10 @@ HttpRequest::~HttpRequest()
 		//delete tcp;
 		TCPInterface::DestroyInstance(tcp);
 	}
-	/*if (httpConnection2)
+	if (httpConnection2)
 	{
 		HTTPConnection2::DestroyInstance(httpConnection2);
-	}*/
+	}
 
 	tcp = NULL;
 	httpConnection2 = NULL;

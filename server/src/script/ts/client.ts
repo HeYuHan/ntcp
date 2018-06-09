@@ -16,6 +16,7 @@ class JClient{
     public player:RoomPlayer;
     public room:Room;
     public info:any={};
+    private requestCreateRoom:boolean=false;
     constructor(uid:number){
         
         this.native=Client.Get(uid);
@@ -60,6 +61,7 @@ class JClient{
     private OnConnected(){
         LogInfo("OnConnected=>>>>>>:"+this.uid);
         this.state=State.IN_LOGIN;
+        this.requestCreateRoom=false;
         this.RegisterAllMessage();
     }
     private OnDisconected(){
@@ -117,10 +119,12 @@ class JClient{
         }
         else
         {
+            if(this.requestCreateRoom)return;
             PostJson(INFO_SERVER_URL + "getRoomCard",{
                 token:INFO_ACCESS_TOKEN,
                 roomid:roomid
             },function(state,cardinfo){
+                client.requestCreateRoom=false;
                 LogInfo("getRoomCard:"+cardinfo);
                 var json = JSON.parse(cardinfo);
                 if(state == 200 && !json.error){

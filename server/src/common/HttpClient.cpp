@@ -27,6 +27,7 @@ void HttpClient::OnDisconnected()
 
 void HttpClient::Disconnect()
 {
+
 }
 
 void HttpClient::OnRevcMessage()
@@ -34,15 +35,15 @@ void HttpClient::OnRevcMessage()
 	struct evbuffer *buffer = bufferevent_get_input(m_BufferEvent);
 	if (buffer)
 	{
-	
+
 		char* line = NULL;
 		do
 		{
 			size_t size = 0;
-			line = evbuffer_readln(buffer, &size, EVBUFFER_EOL_ANY);
-			log_info("res :%s", line);
+			line = evbuffer_readln(buffer, &size, EVBUFFER_EOL_CRLF);
+			if(line)log_info("res :%s is \\r\\n:%s", line,strcmp(line,"\r\n")==0?"true":"false");
 		} while (line);
-		
+
 	}
 }
 

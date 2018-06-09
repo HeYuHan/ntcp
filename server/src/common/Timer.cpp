@@ -106,9 +106,9 @@ void Timer::timeout_cb(evutil_socket_t fd, short event, void * arg)
 			timeval current;
 			evutil_gettimeofday(&current, NULL);
 			float d_time = DiffTime(current, t->m_LastTime);
-#ifdef _DEBUG
+#if _DEBUG && WIN32
 			//下断点时跳过本次计时
-			if (d_time > t->m_Time * 10)
+			if (d_time > t->m_Time * 100)
 			{
 				if (t->m_Loop && !t->m_Stop)
 				{

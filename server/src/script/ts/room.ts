@@ -6,6 +6,7 @@ class RoomCard{
     public canUseCount:number;
     public includexi:boolean;
     public balanceRate:number;
+    public maxScore:number;
 }
 class ScoreRecoder{
     public maizhuang:boolean;
@@ -412,6 +413,17 @@ class Room{
         this.room_card=null;
         this.state=RoomState.IN_RELEASED;
     }
+    public static CaculateScore(p1,p2,rate):number{
+        var d=p1.score-p2.score;
+		var scale=rate[0];
+		if(p1.maizhuang && p2.maizhuang) {
+			scale=rate[2];
+		}
+		else if(p1.maizhuang || p2.maizhuang) {
+			scale=rate[1];
+		}
+		return d*scale;
+    }
     public Release(data){
         if(this.state == RoomState.IN_RELEASED){
             LogError("room is released");
@@ -429,49 +441,81 @@ class Room{
             score.maizhuang=player.maizhuang;
             score.uid=player.unionid;
             score.score=player.hu_pai_info?player.hu_pai_info.totle_socre:0;
+            if(this.room_card.maxScore>0)score.score = Math.min(score.score,this.room_card.maxScore);
             recoder.push(score);
             if(player.client){
                 player.client.SetReplayState();
                 player.client.player=null;
             }
-            //if(this.room_players[i].client)this.room_players[i].client.player=null;
         }
-        
         if(free_room){
+            var player_score_map = new Array();
+            var map_len=0;
+            for(var i=0;i<this.score_recoder.length;i++)
+            {
+                var scores = this.score_recoder[i];
+                for(var j=0;j<scores.length;j++){
+                    var p1 = scores[j];
+				    var p2 = scores[(j+1)%scores.length];
+                    var p3 = scores[(j+2)%scores.length];
+                    var s1 = Room.CaculateScore(p1,p2,this.room_card.balanceRate);
+                    var s2 = Room.CaculateScore(p1,p3,this.room_card.balanceRate);
+                    var list = player_score_map[p1.uid];
+                    if(!list)
+                    {
+                        list=[];
+                        player_score_map[p1.uid]=list;
+                        map_len++;
+                    }
+                    list.push(s1+s2);
+                }
+            }
+           
+            var winnerUid="";
+            var winnerScore=-1;
+            var final_score=new Array();
+            
+            if(map_len>0){
+                var index = 0;
+                for(var key in player_score_map){
+                    var list = player_score_map[key];
+                    var sum =0;
+                    for(var k=0;k<list.length;k++)sum += list[k];
+                    final_score.push(key);
+                    final_score.push(sum);
+                    if(sum>winnerScore){
+                        winnerScore = sum;
+                        winnerUid=key;
+                    }
+                }
+            }
+            if(this.state == RoomState.IN_BLANCE){
+                var send_score=[];
+                for(var i=0;i<this.room_players.length;i++){
+                    var player = this.room_players[i];
+                    send_score.push({
+                        uid:player.uid,
+                        score:player_score_map[player.unionid]
+                    });
+                }
+
+                this.BroadCastMessage(CreateMsg(SERVER_MSG.SM_GAME_BALANCE,{
+                    score:send_score,
+                    card:this.room_card,
+                    data:data
+                }));
+            }
             var sumbit_blance_data={
                     cardid:this.room_card.cardid,
                     roomid:this.uid,
                     token:INFO_ACCESS_TOKEN,
-                    scores:this.score_recoder
+                    scores:final_score
             }
+            this.Clean();
             LogInfo("free room scores:"+JSON.stringify(sumbit_blance_data));
-            var room=this;
             PostJson(INFO_SERVER_URL+"useRoomCard",sumbit_blance_data,function(state,msg){
-                    try {
-                        LogInfo("release room:"+msg);
-                        var balance = JSON.parse(msg);
-                        var balance2=[];
-                        for(var i=0;i<room.room_players.length;i++){
-                            var player = room.room_players[i];
-                            balance2.push({
-                                uid:player.uid,
-                                score:balance[player.unionid]
-                            });
-                        }
-                        if(data){
-                            if(room.state == RoomState.IN_BLANCE){
-                                room.BroadCastMessage(CreateMsg(SERVER_MSG.SM_GAME_BALANCE,{
-                                    data:data,
-                                    score:balance2,
-                                    card:room.room_card
-                                }));
-                            }
-                            
-                        }
-                    } catch (error) {
-                        PrintError("release room error:",error);
-                    }
-                    room.Clean();
+                LogInfo("release room:"+msg);
+                    
             });
         }
         if(!free_room && data!=null){
@@ -483,10 +527,6 @@ class Room{
             }
             this.state=RoomState.IN_NONE;
         }
-        // for(var i=0;i<this.m_clients.length;i++){
-        //     this.m_clients[i].room=null;
-        // }
-        // this.m_clients=[];
         
     }
     public GetRoomStateInfo(c:JClient){
@@ -553,6 +593,7 @@ class Room{
             var other=this.m_clients[i];
             if(other.uid == c.uid){
                 other.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM,{
+                    card:this.room_card,
                     self:c.uid,
                     state:this.state,
                     clients:all_clients

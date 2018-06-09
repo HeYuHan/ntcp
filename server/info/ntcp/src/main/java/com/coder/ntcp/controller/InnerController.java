@@ -45,7 +45,7 @@ class ReqRoomCard{
 class ReqUseRoomCard extends ReqRoomCard{
 	@NotBlank(message = "cardid is need")
 	public String cardid;
-	public ArrayList<PlayerScore[]> scores;
+	public String[] scores;
 	//public boolean freecard;
 }
 class ResRoomCardDetail{
@@ -121,52 +121,22 @@ public class InnerController {
 		dbHelper.updateObject(card, false);
 		
 		
-		//blance
-		HashMap<String, ArrayList<Integer>> totoleScore=new HashMap<>();
-
-		for(int i=0;i<reqRoomCard.scores.size();i++) {
-			PlayerScore[] scores = reqRoomCard.scores.get(i);
-			for(int j=0;j<scores.length;j++) {
-				PlayerScore p1 = scores[j];
-				PlayerScore p2 = scores[(j+1)%scores.length];
-				PlayerScore p3 = scores[(j+2)%scores.length];
-				
-				int s1=CaculateScore(p1,p2,card.balanceRate);
-				int s2=CaculateScore(p1,p3,card.balanceRate);
-				ArrayList<Integer> list=null;
-				if(!totoleScore.containsKey(p1.uid)) {
-					list = new ArrayList<>();
-					list.add(s1+s2);
-					totoleScore.put(p1.uid, list);
-					
-				}
-				else {
-					list = totoleScore.get(p1.uid);
-					list.add(s1+s2);
-				}
-				
-			}
-		}
+		
 		String winnerUid="";
 		int winnerScore=-1;
-		if(totoleScore.size()>0)
+		if(reqRoomCard.scores.length>0)
 		{
-			String players[] = new String[totoleScore.size()*2];
-			int index=0;
-			for(String key :totoleScore.keySet()) {
-				ArrayList<Integer> list=totoleScore.get(key);
-				int sum=0;
-				for(int k=0;k<list.size();k++) {
-					sum+=list.get(k);
-				}
-				players[index++]=key;
-				players[index++]=Integer.toString(sum);
-				if(sum>winnerScore) {
-					winnerScore=sum;
-					winnerUid=key;
+			for(int i=0;i<reqRoomCard.scores.length;i+=2)
+			{
+				String uid = reqRoomCard.scores[i];
+				int score = Integer.parseInt(reqRoomCard.scores[i+1]);
+				if(score>winnerScore)
+				{
+					winnerScore=score;
+					winnerUid=uid;
 				}
 			}
-			RoomRecoder recoder = RoomRecoder.create(room,players);
+			RoomRecoder recoder = RoomRecoder.create(room,reqRoomCard.scores);
 			dbHelper.saveObject(recoder);
 		}
 		
@@ -178,10 +148,10 @@ public class InnerController {
 			
 		}
 		else if (card.payType == RoomCardPayType.AA||winnerScore <= 0) {
-			float userCount=totoleScore.size();
+			float userCount=reqRoomCard.scores.length;
 			int cost=Math.round(card.price/userCount);
-			for(String key : totoleScore.keySet()) {
-				if(!userCost(key, cost, card.currencyType)) {
+			for(int i=0;i<reqRoomCard.scores.length;i+=2) {
+				if(!userCost(reqRoomCard.scores[i], cost, card.currencyType)) {
 					return new ResException("ERROR_USER_NOT_FOUND");
 				}
 			}
@@ -191,18 +161,7 @@ public class InnerController {
 				return new ResException("ERROR_USER_NOT_FOUND");
 			}
 		}
-		return totoleScore;
-	}
-	int CaculateScore(PlayerScore p1,PlayerScore p2,int[] rate) {
-		int d=p1.score-p2.score;
-		int scale=rate[0];
-		if(p1.maizhuang && p2.maizhuang) {
-			scale=rate[2];
-		}
-		else if(p1.maizhuang || p2.maizhuang) {
-			scale=rate[1];
-		}
-		return d*scale;
+		return "{\"winner\":\""+winnerUid+"\",\"score\":"+winnerScore+"}";
 	}
 	boolean userCost(String uid,int cost,CurrencyType currencyType) {
 		User costUser=dbHelper.findObjectByUid(uid, User.class);

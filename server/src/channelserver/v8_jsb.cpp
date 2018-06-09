@@ -361,6 +361,7 @@ public:
 public:
 	static void Update(float t, void *arg)
 	{
+		
 		JSHttp *http = (JSHttp*)arg;
 		std::string ret;
 		int state = http->GetResponse(ret);
@@ -402,7 +403,7 @@ public:
 		{
 			return false;
 		}
-		m_Timer.Init(0.01, Update, this, true);
+		m_Timer.Init(0, Update, this, true);
 		m_Timer.Begin();
 		return true;
 	}
@@ -412,7 +413,7 @@ public:
 		{
 			return false;
 		}
-		m_Timer.Init(0.01, Update, this, true);
+		m_Timer.Init(0, Update, this, true);
 		m_Timer.Begin();
 		return true;
 	}
