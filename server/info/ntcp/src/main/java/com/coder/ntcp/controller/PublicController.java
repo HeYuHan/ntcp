@@ -79,6 +79,7 @@ class ResUser{
 	public boolean isProxy;
 	public int diamondCount;
 	public String nick;
+	public int activeRoomId;
 	public ResUser() {}
 	public ResUser(User dbUser){
 		this.uid=dbUser.uid;
@@ -89,6 +90,7 @@ class ResUser{
 		this.nick=dbUser.nick;
 		//this.token=dbUser.token;
 		this.headimgurl= dbUser.headimgurl;
+		this.activeRoomId=dbUser.activeRoomId;
 	}
 }
 class ResRoomCard{
@@ -191,6 +193,19 @@ public class PublicController {
 	@CrossOrigin
 	Object getRoomCard(@RequestBody @Valid ReqRoomCardOption reqRoomCardOption) {
 		User user = dbHelper.findObjectByUid(reqRoomCardOption.uid, User.class);
+		
+		if(user.activeRoomId>0)
+		{
+			Room room = Room.getRoom(user.activeRoomId);
+			if((room !=null) && room.haveUser(user.uid))
+			{
+				return new ResException("ERROR_USER_STATE_INROOM",Integer.toString(user.activeRoomId));
+			}
+			user.activeRoomId=0;
+			dbHelper.updateObjectValues(user.uid, "activeRoomId", 0, User.class);
+
+		}
+		
 		if(user == null) {
 			ResRoomCard resRoomCard=new ResRoomCard();
 			resRoomCard.error="ERROR_USER_NOT_FOUND";

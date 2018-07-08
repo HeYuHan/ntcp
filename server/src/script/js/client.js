@@ -25,6 +25,7 @@ var JClient = (function () {
     JClient.prototype.Send = function (msg) {
         if (!this.native) {
             LogError("native client is null");
+            return;
         }
         var nstring = new NString();
         nstring.Append(msg);
@@ -40,6 +41,11 @@ var JClient = (function () {
         if (this.native)
             this.native.CloseOnSendEnd();
     };
+    JClient.prototype.CloseTimeOut = function (time) {
+        gServer.AddTask(new Task(this, this, function (sender, arg) {
+            sender.Disconnect();
+        }, time));
+    };
     JClient.prototype.OnMessage = function (msg) {
         try {
             var json = JSON.parse(msg);
@@ -53,7 +59,6 @@ var JClient = (function () {
         }
     };
     JClient.prototype.OnConnected = function () {
-        LogInfo("OnConnected=>>>>>>:" + this.uid);
         this.state = State.IN_LOGIN;
         this.requestCreateRoom = false;
         this.RegisterAllMessage();
@@ -77,6 +82,8 @@ var JClient = (function () {
         this.m_MessageCallback[CLIENT_MSG.CM_RESPON_CHU_PAI] = this.ResponseChuPai;
         this.m_MessageCallback[CLIENT_MSG.CM_HUAN_PAI] = this.HuanPai;
         this.m_MessageCallback[CLIENT_MSG.CM_MAI_ZHUANG] = this.MaiZhuang;
+        this.m_MessageCallback[CLIENT_MSG.CM_BROADCAST] = this.Broadcast;
+        this.m_MessageCallback[CLIENT_MSG.CM_DISMISS_GAME] = this.GameLeave;
     };
     JClient.prototype.DispatchMessage = function (msg) {
         var hander = this.m_MessageCallback[msg[0]];
@@ -86,6 +93,20 @@ var JClient = (function () {
             LogError("msg hander is null id : " + msg.id);
             this.native.Disconnect();
         }
+    };
+    JClient.prototype.Disconnect = function () {
+        if (this.native)
+            this.native.Disconnect();
+    };
+    JClient.prototype.CheckUserState = function (unionid, roomid, call_back) {
+        var uid = Room.CheckRoomEnter(roomid, unionid);
+        if (uid === null)
+            call_back({});
+        else
+            call_back({
+                error: "ERROR_USER_STATE_INROOM",
+                msg: uid
+            });
     };
     JClient.prototype.EnterRoom = function (msg) {
         if (this.room) {
@@ -101,44 +122,50 @@ var JClient = (function () {
             this.native.Disconnect();
             return;
         }
+        if (this.requestCreateRoom)
+            return;
         var client = this;
-        var room = Room.Get(roomid);
-        if (room) {
-            client.state = State.IN_ROOM;
-            client.room = room;
-            room.ClientJoin(client);
-        }
-        else {
-            if (this.requestCreateRoom)
+        this.CheckUserState(unionid, roomid, function (result) {
+            if (result.error) {
+                client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM, result));
                 return;
-            PostJson(INFO_SERVER_URL + "getRoomCard", {
-                token: INFO_ACCESS_TOKEN,
-                roomid: roomid
-            }, function (state, cardinfo) {
-                client.requestCreateRoom = false;
-                LogInfo("getRoomCard:" + cardinfo);
-                var json = JSON.parse(cardinfo);
-                if (state == 200 && !json.error) {
-                    var room_card = json;
-                    if (room_card.canUseCount <= 0) {
-                        client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM, {
-                            error: "room card is used"
-                        }));
-                        return;
+            }
+            var room = Room.Get(roomid);
+            if (room) {
+                client.state = State.IN_ROOM;
+                client.room = room;
+                room.ClientJoin(client);
+            }
+            else {
+                PostJson(INFO_SERVER_URL + "getRoomCard", {
+                    token: INFO_ACCESS_TOKEN,
+                    roomid: roomid
+                }, function (state, cardinfo) {
+                    client.requestCreateRoom = false;
+                    LogInfo("getRoomCard:" + cardinfo);
+                    var json = JSON.parse(cardinfo);
+                    if (state == 200 && !json.error) {
+                        var room_card = json;
+                        if (room_card.canUseCount <= 0) {
+                            client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM, {
+                                error: "room card is used"
+                            }));
+                            return;
+                        }
+                        var room = Room.Create(roomid, room_card);
+                        client.state = State.IN_ROOM;
+                        client.room = room;
+                        room.ClientJoin(client);
                     }
-                    var room = Room.Create(roomid, room_card);
-                    client.state = State.IN_ROOM;
-                    client.room = room;
-                    room.ClientJoin(client);
-                }
-                else {
-                    client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM, {
-                        error: "room not found:" + roomid
-                    }));
-                    client.native.Disconnect();
-                }
-            });
-        }
+                    else {
+                        client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM, {
+                            error: "room not found:" + roomid
+                        }));
+                        client.native.Disconnect();
+                    }
+                });
+            }
+        });
     };
     JClient.prototype.LeaveRoom = function () {
         if (this.room)
@@ -166,6 +193,14 @@ var JClient = (function () {
     };
     JClient.prototype.MaiZhuang = function (msg) {
         this.room.ClientMaiZhuang(this, msg);
+    };
+    JClient.prototype.Broadcast = function (msg) {
+        if (this.room)
+            this.room.ClientBroadcast(this, msg);
+    };
+    JClient.prototype.GameLeave = function (msg) {
+        if (this.room)
+            this.room.GameLeave(this, msg.dismiss);
     };
     return JClient;
 }());

@@ -248,7 +248,6 @@ bool TCPInterface::Start(unsigned short port, unsigned short maxIncomingConnecti
 }
 void TCPInterface::Stop(void)
 {
-	printf("TCPInterface stop %d", __LINE__);
 	unsigned int i;
 	for (i=0; i < messageHandlerList.Size(); i++)
 		messageHandlerList[i]->OnRakPeerShutdown();

@@ -49,10 +49,11 @@ var RoomPlayer = (function () {
             this.qi_pai.push(pais[i]);
         }
     };
-    RoomPlayer.prototype.SetPlayerInfo = function (client, unionid) {
+    RoomPlayer.prototype.SetPlayerInfo = function (client) {
         this.uid = client.uid;
         this.client = client;
-        this.unionid = unionid;
+        this.unionid = client.info.unionid;
+        this.info = client.info;
         client.player = this;
         client.state = State.IN_GAME;
     };
@@ -160,7 +161,7 @@ var RoomPlayer = (function () {
         this.hui_pai = false;
         this.di_pai.sort(Pai.SortNumber);
         this.hu_pai_info = pais.CaculateDiHu(this.shou_pai, this.di_pai, this.an_gang_array, this.jiao_pai_array);
-        this.hu_pai_info.CaculateTotleScore(null);
+        this.hu_pai_info.CaculateTotleScore(null, pais.includ_xipai);
     };
     RoomPlayer.prototype.Hu = function (pai, pais) {
         var ret = false;
@@ -184,7 +185,7 @@ var RoomPlayer = (function () {
                 if (this.tian_ting) {
                     info.hu_pai_type |= HuPaiType.TIANG_TING;
                 }
-                info.CaculateTotleScore(pais.GetPaiDetail(pai));
+                info.CaculateTotleScore(pais.GetPaiDetail(pai), pais.includ_xipai);
                 di_info_array.push(info);
             }
             this.hu_pai_info = di_info_array[0];
@@ -219,7 +220,7 @@ var RoomPlayer = (function () {
                 if (this.tian_hu) {
                     info.hu_pai_type |= HuPaiType.TIANG_HU;
                 }
-                info.CaculateTotleScore(pai);
+                info.CaculateTotleScore(pai, pais.includ_xipai);
                 di_info_array.push(info);
             }
             this.hu_pai_info = di_info_array[0];
@@ -260,6 +261,8 @@ var Room = (function () {
         this.last_mo_pai_player = null;
         this.auto_chu_pai_timer = 0;
         this.player_maizhuang_count = 0;
+        this.request_dismiss_room_info = {};
+        this.set_room_info = false;
         this.recoder_stream = null;
         this.score_recoder = [];
     }
@@ -292,7 +295,14 @@ var Room = (function () {
             }
         }
     };
+    Room.CheckRoomEnter = function (roomid, unionid) {
+        var recoder_room = Room.gPlayers[unionid];
+        if (recoder_room == null || recoder_room == roomid || Room.Get(recoder_room) == null)
+            return null;
+        return recoder_room;
+    };
     Room.prototype.AddClient = function (client) {
+        Room.gPlayers[client.info.unionid] = this.uid;
         this.m_clients.push(client);
     };
     Room.prototype.RemoveClient = function (c) {
@@ -333,7 +343,8 @@ var Room = (function () {
     Room.prototype.Clean = function () {
         Room.Remove(this.uid);
         for (var i = 0; i < this.m_clients.length; i++) {
-            this.m_clients[i].CloseOnSendEnd();
+            Room.gPlayers[this.m_clients[i].info.unionid] = null;
+            this.m_clients[i].CloseTimeOut(30);
             this.m_clients[i].room = null;
         }
         this.m_clients = [];
@@ -373,6 +384,7 @@ var Room = (function () {
             var player = this.room_players[i];
             score.maizhuang = player.maizhuang;
             score.uid = player.unionid;
+            score.nick = player.info.nick;
             score.score = player.hu_pai_info ? player.hu_pai_info.totle_socre : 0;
             if (this.room_card.maxScore > 0)
                 score.score = Math.min(score.score, this.room_card.maxScore);
@@ -395,11 +407,14 @@ var Room = (function () {
                     var s2 = Room.CaculateScore(p1, p3, this.room_card.balanceRate);
                     var list = player_score_map[p1.uid];
                     if (!list) {
-                        list = [];
+                        list = {
+                            nick: p1.nick,
+                            score: []
+                        };
                         player_score_map[p1.uid] = list;
                         map_len++;
                     }
-                    list.push(s1 + s2);
+                    list.score.push(s1 + s2);
                 }
             }
             var winnerUid = "";
@@ -410,9 +425,10 @@ var Room = (function () {
                 for (var key in player_score_map) {
                     var list = player_score_map[key];
                     var sum = 0;
-                    for (var k = 0; k < list.length; k++)
-                        sum += list[k];
+                    for (var k = 0; k < list.score.length; k++)
+                        sum += list.score[k];
                     final_score.push(key);
+                    final_score.push(list.nick);
                     final_score.push(sum);
                     if (sum > winnerScore) {
                         winnerScore = sum;
@@ -457,26 +473,36 @@ var Room = (function () {
             this.state = RoomState.IN_NONE;
         }
     };
-    Room.prototype.GetRoomStateInfo = function (c) {
+    Room.prototype.SyncRoomState = function () {
         var palyers = [];
         for (var i = 0; i < this.room_players.length; i++) {
             var p = this.room_players[i];
             var info = {
                 size1: p.GetShouPaiSize(),
                 di: p.di_pai,
-                qi: p.qi_pai
+                qi: p.qi_pai,
+                uid: p.uid,
+                info: p.info,
             };
-            if (c.uid = p.uid)
-                info.shou = p.shou_pai;
             palyers.push(info);
         }
-        return {
-            self: c.uid,
-            jiang: this.pais.jiang_pai,
-            size2: this.pais.GetSize(),
-            players: palyers,
-            next_player: this.room_players[this.next_chu_palyer].uid
-        };
+        for (var i = 0; i < this.room_players.length; i++) {
+            var p = this.room_players[i];
+            if (p.client) {
+                p.client.Send(CreateMsg(SERVER_MSG.SM_SYNC_ROOM_STATE, {
+                    self: p.uid,
+                    shou: p.shou_pai,
+                    jiang: this.pais.jiang_pai,
+                    size2: this.pais.GetSize(),
+                    players: palyers,
+                    next_player: this.room_players[this.next_chu_palyer].uid,
+                    card: this.room_card
+                }));
+            }
+            else {
+                LogError("sync room state client is null");
+            }
+        }
     };
     Room.prototype.ClientJoin = function (c) {
         if (this.state == RoomState.IN_NONE)
@@ -486,8 +512,9 @@ var Room = (function () {
                 var p = this.room_players[i];
                 if (c.info.unionid == p.unionid) {
                     var old_uid = p.uid;
-                    p.SetPlayerInfo(c, c.info.unionid);
-                    this.BroadCastMessageByPlayer(p, CreateMsg(SERVER_MSG.SM_SYNC_ROOM_STATE, this.GetRoomStateInfo(c)), CreateMsg(SERVER_MSG.SM_ENTER_ROOM, { uid: p.uid, origin: old_uid }));
+                    p.SetPlayerInfo(c);
+                    this.AddClient(c);
+                    this.SyncRoomState();
                     return;
                 }
             }
@@ -539,7 +566,6 @@ var Room = (function () {
         }
     };
     Room.prototype.ClientLeave = function (c) {
-        this.PrintClientInfo();
         this.RemoveClient(c);
         for (var i = 0; i < this.m_clients.length; i++) {
             this.m_clients[i].Send(CreateMsg(SERVER_MSG.SM_LEAVE_ROOM, { uid: c.uid }));
@@ -573,7 +599,7 @@ var Room = (function () {
                 this.recoder_stream = new AsyncFileWriter(RECODER_PATH + this.room_card.cardid);
                 var infos = [];
                 for (var i = 0; i < this.m_clients.length; i++) {
-                    infos.push([this.m_clients[i].uid, this.m_clients[i].info.unionid]);
+                    infos.push([this.m_clients[i].uid, this.m_clients[i].info]);
                 }
                 this.recoder_stream.Write(JSON.stringify(infos) + "\n");
             }
@@ -595,11 +621,15 @@ var Room = (function () {
         this.last_mo_pai_player = null;
         this.auto_chu_pai_timer = 0;
         this.player_maizhuang_count = 0;
+        this.request_dismiss_room_info = { count1: 0, count2: 0 };
+        if (!this.set_room_info) {
+            this.set_room_info = true;
+        }
         for (var i = 0; i < this.m_clients.length; i++) {
             var p = new RoomPlayer();
             p.index = i;
             var c = this.m_clients[i];
-            p.SetPlayerInfo(c, c.info.unionid);
+            p.SetPlayerInfo(c);
             this.room_players.push(p);
         }
         this.pais = new PaiDui(this.room_card.includexi);
@@ -753,6 +783,61 @@ var Room = (function () {
                 p.client.SendNString(nstring);
         }
         nstring = null;
+    };
+    Room.prototype.ClientBroadcast = function (client, msg) {
+        for (var i = 0; i < this.m_clients.length; i++) {
+            var p = this.m_clients[i];
+            if (p)
+                p.Send(CreateMsg(SERVER_MSG.SM_BROADCAST, {
+                    uid: client.uid,
+                    msg: msg
+                }));
+        }
+    };
+    Room.prototype.GameLeave = function (client, dismiss) {
+        var client_index = -1;
+        for (var i = 0; i < this.m_clients.length; i++) {
+            if (this.m_clients[i].uid == client.uid) {
+                client_index = i;
+            }
+        }
+        if (client_index < 0)
+            return;
+        this.request_dismiss_room_info.count2 |= 1 << client_index;
+        if (this.request_dismiss_room_info.count1 == 0) {
+            this.request_dismiss_room_info.count1 |= 1 << client_index;
+            var msg = CreateMsg(SERVER_MSG.SM_DISMISS_GAME, { uid: client.uid });
+            for (var i = 0; i < this.m_clients.length; i++) {
+                if (this.m_clients[i].uid != client.uid) {
+                    this.m_clients[i].Send(msg);
+                }
+            }
+        }
+        else if (dismiss) {
+            this.request_dismiss_room_info.count1 |= 1 << client_index;
+        }
+        var all_count = true;
+        var free = true;
+        for (var i = 0; i < this.m_clients.length; i++) {
+            if ((this.request_dismiss_room_info.count2 & (1 << i)) == 0) {
+                all_count = false;
+                break;
+            }
+            if ((this.request_dismiss_room_info.count1 & (1 << i)) == 0) {
+                free = false;
+            }
+        }
+        if (all_count) {
+            if (free) {
+                this.room_card.canUseCount = 0;
+                this.BalanceGame();
+            }
+            else {
+                this.request_dismiss_room_info.count2 = this.request_dismiss_room_info.count1 = 0;
+                var msg = CreateMsg(SERVER_MSG.SM_DISMISS_GAME_RESULT, { dismiss: false });
+                this.BroadCastMessage(msg);
+            }
+        }
     };
     Room.prototype.BalanceGame = function () {
         this.state = RoomState.IN_BLANCE;
@@ -982,5 +1067,6 @@ var Room = (function () {
         }
     };
     Room.gRoomList = [];
+    Room.gPlayers = {};
     return Room;
 }());

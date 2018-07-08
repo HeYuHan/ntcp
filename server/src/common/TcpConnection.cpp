@@ -89,7 +89,7 @@ bool TcpConnection::Connect(const char * ip, int port, event_base * base)
 
 void TcpConnection::Disconnect()
 {
-	log_info("client disconnected fd:%d,line:%d", m_Socket,__LINE__);
+	//log_info("client disconnected fd:%d,line:%d", m_Socket,__LINE__);
 	bufferevent_flush(m_BufferEvent, EV_WRITE, BEV_NORMAL);
 	bufferevent_free(m_BufferEvent);
 	evutil_closesocket(m_Socket);
@@ -101,17 +101,17 @@ void TcpConnection::Disconnect()
 
 void TcpConnection::CloseOnSendEnd()
 {
-	//m_NeedColse = true;
-	//struct evbuffer *buffer = bufferevent_get_output(m_BufferEvent);
-	//if (buffer)
-	//{
-	//	size_t t = evbuffer_get_length(buffer);
-	//	if (t == 0)
-	//	{
-	//		m_NeedColse = false;
-	//		Disconnect();
-	//	}
-	//}
+	m_NeedColse = true;
+	struct evbuffer *buffer = bufferevent_get_output(m_BufferEvent);
+	if (buffer)
+	{
+		size_t t = evbuffer_get_length(buffer);
+		if (t == 0)
+		{
+			m_NeedColse = false;
+			Disconnect();
+		}
+	}
 }
 
 void TcpConnection::HandShake()
@@ -178,12 +178,12 @@ void TcpConnection::ReadEvent(bufferevent * bev, void * arg)
 
 void TcpConnection::WriteEvent(bufferevent * bev, void * arg)
 {
-	/*TcpConnection* c = (TcpConnection*)arg;
+	TcpConnection* c = (TcpConnection*)arg;
 	if (c->m_NeedColse)
 	{
 		c->m_NeedColse = false;
 		c->Disconnect();
-	}*/
+	}
 }
 
 void TcpConnection::SocketEvent(bufferevent * bev, short events, void * arg)
@@ -194,8 +194,8 @@ void TcpConnection::SocketEvent(bufferevent * bev, short events, void * arg)
 	else if (events & BEV_EVENT_ERROR) {
 		printf("some other error\n");
 	}
-	int fd = bufferevent_getfd(bev);
-	log_info("socket error call event:%d fd:%d", events, fd);
+	//int fd = bufferevent_getfd(bev);
+	//log_info("socket error call event:%d fd:%d", events, fd);
 	TcpConnection* c = (TcpConnection*)arg;
 	c->Disconnect();
 }

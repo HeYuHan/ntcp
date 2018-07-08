@@ -8,6 +8,8 @@ enum CLIENT_MSG{
     CM_RESPON_CHU_PAI,//回复出牌
     CM_HUAN_PAI,//换牌
     CM_MAI_ZHUANG,//买庄
+    CM_BROADCAST,
+    CM_DISMISS_GAME,
 }
 enum SERVER_MSG{
     SM_ENTER_ROOM,
@@ -23,6 +25,9 @@ enum SERVER_MSG{
     SM_GAME_BALANCE,//进入结算,
     SM_SYNC_ROOM_STATE,//断线重新连接
     SM_MAI_ZHUANG,//买庄
+    SM_BROADCAST,
+    SM_DISMISS_GAME,
+    SM_DISMISS_GAME_RESULT,
 }
 function CreateMsg(id:number,msg:any):string{
     return JSON.stringify([id,msg]);

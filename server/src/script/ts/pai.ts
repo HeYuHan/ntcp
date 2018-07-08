@@ -85,7 +85,7 @@ class HuPaiInfo{
     public static SortInfo(a:HuPaiInfo,b:HuPaiInfo){
         return a.totle_socre-b.totle_socre;
     }
-    public CaculateTotleScore(hu_pai:PaiDetail){
+    public CaculateTotleScore(hu_pai:PaiDetail,includ_xipai:boolean){
         //喜牌分数
         var qiong_xi=false;
         
@@ -125,11 +125,16 @@ class HuPaiInfo{
                 var d=this.dui_zi_array[i];
                 if(d.pai.value == hu_pai.pai.value && d.pai.type == hu_pai.pai.type){
                     temp_hu_pai_type |= HuPaiType.DANG_DIAO;
-                    LogInfo("dang diao......");
+                    //LogInfo("dang diao......");
                 }
             }
+            var have_bian_zhang=false;
             for(var i=0;i<this.sun_zi_array.length;i++){
                 var d = this.sun_zi_array[i];
+                if(d.pai.type == hu_pai.pai.type && ((d.pai.value == 1 && hu_pai.pai.value == 3) || (hu_pai.pai.value == 7 && d.pai.value == 7)))
+                {
+                    have_bian_zhang = true;
+                }
                 if(d.pai.value==1 && d.pai.type == PaiType.PAI_TONG){
                     wen_qiang_count++;
                 }
@@ -137,13 +142,13 @@ class HuPaiInfo{
                 if(temp_hu_pai_type == HuPaiType.NONE&&(d.pai.value == hu_pai.pai.value - 1) && d.pai.type == hu_pai.pai.type){
     
                     temp_hu_pai_type |= HuPaiType.YA_ZI;
-                    LogInfo("ya zi..........");
+                    //LogInfo("ya zi..........");
                     
                 }
             }
-            if(temp_hu_pai_type == HuPaiType.NONE&&(hu_pai.pai.value == 3||hu_pai.pai.value == 7)){
+            if(temp_hu_pai_type == HuPaiType.NONE&&have_bian_zhang){
                 temp_hu_pai_type |= HuPaiType.BIAN_ZHANG;
-                LogInfo("bian zhang..........");
+                //LogInfo("bian zhang..........");
             }
             this.hu_pai_type |=temp_hu_pai_type;
             
@@ -191,7 +196,7 @@ class HuPaiInfo{
                 socre_rate = 2;
             }
             else if(this.hu_pai_type & HuPaiType.QIONG_XI){
-                LogInfo("qiong xi......."+this.totle_socre);
+                //LogInfo("qiong xi......."+this.totle_socre);
                 socre_rate = 2;
             }
             //全是对子或者文钱
@@ -211,7 +216,7 @@ class HuPaiInfo{
                 this.hu_type=HuType.TAZI_HU;
                 this.totle_socre +=20;
             }
-            if(qiong_xi){
+            if(qiong_xi&&includ_xipai){
                 socre_rate*=2;
                 this.hu_pai_type |=HuPaiType.QIONG_XI;
             }
@@ -365,7 +370,7 @@ class PaiDui{
     public jiang_pai:Array<number>=[];
     public jiang_pai_type:JiangType=JiangType.NONE;
     private pai_detail_array:Array<PaiDetail>=[];
-    private includ_xipai=false;
+    public includ_xipai=false;
     constructor(include_xipai:boolean){
         this.jiang_pai[0]=Math.floor(Math.random()*120)+1;
         this.jiang_pai[1]=Math.floor(Math.random()*120)+1;
@@ -805,7 +810,7 @@ class PaiDui{
             jiao_hu += hu;
             if(detail.is_laojiang && detail.pai.type !=PaiType.PAI_TIAO && have_san_hua)jiao_hu+=hu;
         }
-        LogInfo("ming ke:"+ming_ke_hu+" an ke:"+an_ke_hu+" ming gang:"+ming_gang_hu+" an gang:"+an_gang_hu+" jiao hu:"+jiao_hu);
+        //LogInfo("ming ke:"+ming_ke_hu+" an ke:"+an_ke_hu+" ming gang:"+ming_gang_hu+" an gang:"+an_gang_hu+" jiao hu:"+jiao_hu);
         var di_hu = ming_ke_hu+an_ke_hu+ming_gang_hu+an_gang_hu+jiao_hu;
         var ret_info = new HuPaiInfo();
         ret_info.ming_ke_array=ming_ke_array;

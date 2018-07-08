@@ -23,8 +23,9 @@ import com.coder.ntcp.controller.ReqRoomCardOption;
 
 @Component
 public class DBHelper {
+	public static DBHelper gDbHelper;
 	public DBHelper() {
-		
+		gDbHelper = this;
 	}
 	private ReentrantLock lock = new ReentrantLock();
 	@Autowired
@@ -81,6 +82,26 @@ public class DBHelper {
 		else {
 			mongoTemplate.updateFirst(query, update, dbobj.getObject().getClass());
 		}
+		lock.unlock();
+	}
+	public <T> void updateObjectValues(String uid,String key,Object value,Class<T> entityClass)
+	{
+		lock.lock();
+		Query query = new Query(Criteria.where("uid").is(uid));
+		Update update = new Update();
+		update.set(key, value);
+		mongoTemplate.updateFirst(query, update, entityClass);
+		lock.unlock();
+	}
+	public <T> void updateObjectValues(String uid,HashMap<String,Object> map,Class<T> entityClass)
+	{
+		lock.lock();
+		Query query = new Query(Criteria.where("uid").is(uid));
+		Update update = new Update();
+		for (Entry<String, Object> entry : map.entrySet()) {
+			update.set(entry.getKey(), entry.getValue());
+		}
+		mongoTemplate.updateFirst(query, update, entityClass);
 		lock.unlock();
 	}
 	public void deleteObject(IDBObject dbobj) {

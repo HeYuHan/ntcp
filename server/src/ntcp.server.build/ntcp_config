@@ -1,0 +1,2 @@
+export LD_LIBRARY_PATH=./v8:D_LIBRARY_PATH
+channelserver channelserver 0.0.0.0:9500 ./js/main.js

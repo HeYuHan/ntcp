@@ -133,13 +133,14 @@ require("client.js");
 require("pai.js");
 require("room.js");
 require("message_type.js");
+var gServer;
 function Main() {
-    var server = new JServer();
-    var ret = server.Init({
+    gServer = new JServer();
+    var ret = gServer.Init({
         max_client: 50
     });
     LogInfo("init server ret:" + ret);
-    var ret2 = server.Start();
+    var ret2 = gServer.Start();
     LogInfo("exit server ret:" + ret2);
     return 0;
 }

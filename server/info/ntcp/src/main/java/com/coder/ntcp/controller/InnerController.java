@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
+import org.apache.logging.log4j.message.ReusableMessage;
 import org.mockito.internal.matchers.InstanceOf.VarArgAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,18 @@ class ReqUseRoomCard extends ReqRoomCard{
 	public String[] scores;
 	//public boolean freecard;
 }
+class ReqUserState
+{
+	@NotBlank(message = "token is need")
+	public String token;
+	@NotBlank(message = "unionid is need")
+	public String unionid;
+	public int roomid;
+}
+class ReqSetRoomInfo extends ReqRoomCard
+{
+	public String[] players;
+}
 class ResRoomCardDetail{
 	public String cardid;
 	public int maxUseCount;
@@ -56,6 +69,7 @@ class ResRoomCardDetail{
 	public int[] balanceRate=new int[3];
 	public boolean includexi;
 	public String owner;
+	public int maxScore;
 	//public boolean isPay;
 	
 	public ResRoomCardDetail(Room room){
@@ -67,6 +81,7 @@ class ResRoomCardDetail{
 		this.balanceRate=dbCard.balanceRate;
 		this.includexi=dbCard.includexi;
 		this.owner=dbCard.ownerid;
+		this.maxScore=dbCard.maxScore;
 		//this.isPay = dbCard.isPay;
 	}
 }
@@ -100,6 +115,53 @@ public class InnerController {
 		//if(!room.getRoomCard().uid.equals(reqRoomCard.cardid)) return new ResException("ERROR_CHECK_ROOM_CARD");
 		return new ResRoomCardDetail(room);
 	}
+	@RequestMapping(value = "/setRoomInfo",method=RequestMethod.POST)
+	@ResponseBody
+	Object setRoomInfo(@RequestBody @Valid ReqSetRoomInfo setRoomInfo)
+	{
+		if(!setRoomInfo.token.equals(config.channel_token))return new ResException("ERROR_ACCESS_TOKEN");
+		Room room = Room.getRoom(setRoomInfo.roomid);
+		if(room == null)
+		{
+			return new ResException("ERROR_ROOM_NOT_FOUND");
+		}
+		room.playUsers = setRoomInfo.players;
+		for(int i=0;i<setRoomInfo.players.length;i++)
+		{
+			dbHelper.updateObjectValues(setRoomInfo.players[i], "activeRoomId", room.getRoomId(), User.class);
+		}
+		return "{}";
+	}
+	@RequestMapping(value = "/getUserState",method=RequestMethod.POST)
+	@ResponseBody
+	Object getUserState(@RequestBody @Valid ReqUserState reqUserState)
+	{
+		if(!reqUserState.token.equals(config.channel_token))return new ResException("ERROR_ACCESS_TOKEN");
+		User dbUser=dbHelper.findObjectByUid(reqUserState.unionid, User.class);
+		if(dbUser == null)
+		{
+			return new ResException("ERROR_NOT_FOUND");
+		}
+		if(dbUser.activeRoomId>0)
+		{
+			Room room = Room.getRoom(dbUser.activeRoomId);
+			if(room !=null)
+			{
+				if(room.getRoomId() == reqUserState.roomid)
+				{
+					return "{}";
+				}
+				else if(room.haveUser(reqUserState.unionid))
+				{
+					return new ResException("ERROR_USER_STATE_INROOM",Integer.toString(dbUser.activeRoomId));
+				}
+			}
+			dbUser.activeRoomId=0;
+			dbHelper.updateObjectValues(dbUser.uid, "activeRoomId", 0, User.class);
+
+		}
+		return "{}";
+	}
 	@RequestMapping(value = "/useRoomCard",method=RequestMethod.POST)
 	@ResponseBody
 	Object useRoomCard(@RequestBody @Valid ReqUseRoomCard reqRoomCard) {
@@ -126,10 +188,10 @@ public class InnerController {
 		int winnerScore=-1;
 		if(reqRoomCard.scores.length>0)
 		{
-			for(int i=0;i<reqRoomCard.scores.length;i+=2)
+			for(int i=0;i<reqRoomCard.scores.length;i+=3)
 			{
 				String uid = reqRoomCard.scores[i];
-				int score = Integer.parseInt(reqRoomCard.scores[i+1]);
+				int score = Integer.parseInt(reqRoomCard.scores[i+2]);
 				if(score>winnerScore)
 				{
 					winnerScore=score;
@@ -148,9 +210,9 @@ public class InnerController {
 			
 		}
 		else if (card.payType == RoomCardPayType.AA||winnerScore <= 0) {
-			float userCount=reqRoomCard.scores.length;
+			float userCount=reqRoomCard.scores.length/3;
 			int cost=Math.round(card.price/userCount);
-			for(int i=0;i<reqRoomCard.scores.length;i+=2) {
+			for(int i=0;i<reqRoomCard.scores.length;i+=3) {
 				if(!userCost(reqRoomCard.scores[i], cost, card.currencyType)) {
 					return new ResException("ERROR_USER_NOT_FOUND");
 				}

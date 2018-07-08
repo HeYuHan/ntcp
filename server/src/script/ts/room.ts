@@ -12,6 +12,7 @@ class ScoreRecoder{
     public maizhuang:boolean;
     public score:number;
     public uid:string;
+    public nick:string;
 }
 
 
@@ -38,6 +39,7 @@ class RoomPlayer{
     public uid:number;
 
     public unionid:string;
+    public info:any;
     //天听
     public tian_ting:boolean=true;
     //天胡
@@ -76,10 +78,11 @@ class RoomPlayer{
             this.qi_pai.push(pais[i]);
         }
     }
-    public SetPlayerInfo(client:JClient,unionid:string){
+    public SetPlayerInfo(client:JClient){
         this.uid=client.uid;
         this.client=client;
-        this.unionid=unionid;
+        this.unionid=client.info.unionid;
+        this.info=client.info;
         client.player=this;
         client.state=State.IN_GAME;
     }
@@ -208,7 +211,7 @@ class RoomPlayer{
         //this.shou_pai.sort(Pai.SortNumber);
         this.di_pai.sort(Pai.SortNumber);
         this.hu_pai_info = pais.CaculateDiHu(this.shou_pai,this.di_pai,this.an_gang_array,this.jiao_pai_array);
-        this.hu_pai_info.CaculateTotleScore(null);
+        this.hu_pai_info.CaculateTotleScore(null,pais.includ_xipai);
     }
     public Hu(pai:number,pais:PaiDui):boolean{
         var ret =false;
@@ -232,7 +235,7 @@ class RoomPlayer{
                 if(this.tian_ting){
                     info.hu_pai_type |= HuPaiType.TIANG_TING;
                 }
-                info.CaculateTotleScore(pais.GetPaiDetail(pai));
+                info.CaculateTotleScore(pais.GetPaiDetail(pai),pais.includ_xipai);
                 di_info_array.push(info);
             }
             this.hu_pai_info=di_info_array[0];
@@ -273,7 +276,7 @@ class RoomPlayer{
                 if(this.tian_hu){
                     info.hu_pai_type |=HuPaiType.TIANG_HU;
                 }
-                info.CaculateTotleScore(pai);
+                info.CaculateTotleScore(pai,pais.includ_xipai);
                 di_info_array.push(info);
             }
             this.hu_pai_info=di_info_array[0];
@@ -317,11 +320,16 @@ class Room{
     public auto_chu_pai_timer:number=0;
     //买庄人数
     private player_maizhuang_count:number=0;
+    //请求解散房间人数
+    private request_dismiss_room_info:any={};
+    //向info设置房间参数
+    private set_room_info:boolean=false;
 
     //记录写入流
     public recoder_stream:AsyncFileWriter=null;
     private score_recoder:Array<Array<ScoreRecoder>>=[];
     private static gRoomList:Array<Room>=[];
+    private static gPlayers:any={};
     public static Create(roomid:number, info:any):Room{
         var room = Room.Get(roomid);
         if(room){
@@ -354,7 +362,26 @@ class Room{
             }
         }
     }
+    public static CheckRoomEnter(roomid,unionid)
+    {
+        var recoder_room = Room.gPlayers[unionid];
+        if(recoder_room == null || recoder_room == roomid || Room.Get(recoder_room) == null )return null;
+        return recoder_room;
+        // for(var i=0;i<Room.gRoomList.length;i++)
+        // {
+        //     var room=Room.gRoomList[i];
+        //     for(var j=0;j<room.room_players.length;j++)
+        //     {
+        //         if(room.room_players[j].info.unionid == unionid && room.uid != roomid)
+        //         {
+        //             return room.uid;
+        //         }
+        //     }
+        // }
+        // return null;
+    }
     public AddClient(client:JClient){
+        Room.gPlayers[client.info.unionid]=this.uid;
         this.m_clients.push(client);
     }
    
@@ -362,7 +389,6 @@ class Room{
         for(var i=0;i<this.m_clients.length;i++){
             if(this.m_clients[i].uid == c.uid){
                 this.m_clients.splice(i,1);
-               
                 return true;
             }
         }
@@ -396,7 +422,8 @@ class Room{
     private Clean(){
         Room.Remove(this.uid);
         for(var i=0;i<this.m_clients.length;i++){
-            this.m_clients[i].CloseOnSendEnd();
+            Room.gPlayers[this.m_clients[i].info.unionid]=null;
+            this.m_clients[i].CloseTimeOut(30);
             this.m_clients[i].room=null;
         }
         this.m_clients=[];
@@ -440,7 +467,9 @@ class Room{
             var player = this.room_players[i];
             score.maizhuang=player.maizhuang;
             score.uid=player.unionid;
+            score.nick=player.info.nick;
             score.score=player.hu_pai_info?player.hu_pai_info.totle_socre:0;
+            
             if(this.room_card.maxScore>0)score.score = Math.min(score.score,this.room_card.maxScore);
             recoder.push(score);
             if(player.client){
@@ -463,11 +492,14 @@ class Room{
                     var list = player_score_map[p1.uid];
                     if(!list)
                     {
-                        list=[];
+                        list={
+                            nick:p1.nick,
+                            score:[]
+                        };
                         player_score_map[p1.uid]=list;
                         map_len++;
                     }
-                    list.push(s1+s2);
+                    list.score.push(s1+s2);
                 }
             }
            
@@ -480,8 +512,9 @@ class Room{
                 for(var key in player_score_map){
                     var list = player_score_map[key];
                     var sum =0;
-                    for(var k=0;k<list.length;k++)sum += list[k];
+                    for(var k=0;k<list.score.length;k++)sum += list.score[k];
                     final_score.push(key);
+                    final_score.push(list.nick);
                     final_score.push(sum);
                     if(sum>winnerScore){
                         winnerScore = sum;
@@ -529,24 +562,39 @@ class Room{
         }
         
     }
-    public GetRoomStateInfo(c:JClient){
+    public SyncRoomState(){
         var palyers=[];
         for(var i=0;i<this.room_players.length;i++){
             var p=this.room_players[i];
             var info:any={
                 size1:p.GetShouPaiSize(),
                 di:p.di_pai,
-                qi:p.qi_pai
+                qi:p.qi_pai,
+                uid:p.uid,
+                info:p.info,
+                //state:p.client.state
             }
-            if(c.uid=p.uid)info.shou=p.shou_pai;
             palyers.push(info);
         }
-        return {
-            self:c.uid,
-            jiang:this.pais.jiang_pai,
-            size2:this.pais.GetSize(),
-            players:palyers,
-            next_player:this.room_players[this.next_chu_palyer].uid
+        for(var i=0;i<this.room_players.length;i++){
+            var p = this.room_players[i];
+            if(p.client)
+            {
+                p.client.Send(CreateMsg(SERVER_MSG.SM_SYNC_ROOM_STATE,{
+                    self:p.uid,
+                    shou:p.shou_pai,
+                    jiang:this.pais.jiang_pai,
+                    size2:this.pais.GetSize(),
+                    players:palyers,
+                    next_player:this.room_players[this.next_chu_palyer].uid,
+                    card:this.room_card
+                }))
+                
+            }
+            else
+            {
+                LogError("sync room state client is null");
+            }
         }
     }
     public ClientJoin(c:JClient){
@@ -559,8 +607,10 @@ class Room{
                 var p=this.room_players[i];
                 if(c.info.unionid==p.unionid){
                     var old_uid=p.uid;
-                    p.SetPlayerInfo(c,c.info.unionid);
-                    this.BroadCastMessageByPlayer(p,CreateMsg(SERVER_MSG.SM_SYNC_ROOM_STATE,this.GetRoomStateInfo(c)),CreateMsg(SERVER_MSG.SM_ENTER_ROOM,{uid:p.uid,origin:old_uid}));
+                    p.SetPlayerInfo(c);
+                    //this.BroadCastMessageByPlayer(p,CreateMsg(SERVER_MSG.SM_SYNC_ROOM_STATE,this.GetRoomStateInfo(c)),CreateMsg(SERVER_MSG.SM_ENTER_ROOM,{uid:p.uid,origin:old_uid,reconnected:true}));
+                    this.AddClient(c);
+                    this.SyncRoomState();
                     return;
                 }
             }
@@ -613,12 +663,13 @@ class Room{
         }
     }
     public ClientLeave(c:JClient){
-        this.PrintClientInfo();
+        //this.PrintClientInfo();
         this.RemoveClient(c);
         for(var i=0;i<this.m_clients.length;i++)
         {
             this.m_clients[i].Send(CreateMsg(SERVER_MSG.SM_LEAVE_ROOM,{uid:c.uid}));
         }
+        //this.PrintClientInfo();
         if(c.player)c.player.client=null;
         if(this.m_clients.length==0){
             this.Release(null);
@@ -648,7 +699,7 @@ class Room{
                 this.recoder_stream=new AsyncFileWriter(RECODER_PATH+this.room_card.cardid);
                 var infos=[];
                 for(var i=0;i<this.m_clients.length;i++){
-                    infos.push([this.m_clients[i].uid,this.m_clients[i].info.unionid]);
+                    infos.push([this.m_clients[i].uid,this.m_clients[i].info]);
                 }
                 this.recoder_stream.Write(JSON.stringify(infos)+"\n");
             }
@@ -671,6 +722,21 @@ class Room{
         this.last_mo_pai_player=null;
         this.auto_chu_pai_timer=0;
         this.player_maizhuang_count=0;
+        this.request_dismiss_room_info={count1:0,count2:0};
+        if(!this.set_room_info)
+        {
+            this.set_room_info=true;
+            // var players=[];
+            // for(var i=0;i<this.m_clients.length;i++)
+            // {
+            //     players.push(this.m_clients[i].info.unionid);
+            // }
+            // PostJson(INFO_SERVER_URL + "setRoomInfo",{
+            //     token:INFO_ACCESS_TOKEN,
+            //     players:players,
+            //     roomid:this.uid
+            // },(data)=>{});
+        }
 
         //set room player
         for(var i=0;i<this.m_clients.length;i++)
@@ -678,7 +744,7 @@ class Room{
             var p = new RoomPlayer();
             p.index=i;
             var c = this.m_clients[i];
-            p.SetPlayerInfo(c,c.info.unionid);
+            p.SetPlayerInfo(c);
             this.room_players.push(p);
         }
         //create pai
@@ -847,6 +913,76 @@ class Room{
             if(p.client)p.client.SendNString(nstring);
         }
         nstring=null;
+    }
+    public ClientBroadcast(client:JClient,msg:string)
+    {
+        for(var i=0;i<this.m_clients.length;i++){
+            var p=this.m_clients[i];
+            if(p)p.Send(CreateMsg(SERVER_MSG.SM_BROADCAST,{
+                uid:client.uid,
+                msg:msg
+            }))
+        }
+    }
+    public GameLeave(client:JClient,dismiss:boolean)
+    {
+        var client_index=-1;
+        for(var i=0;i<this.m_clients.length;i++)
+        {
+            if(this.m_clients[i].uid == client.uid)
+            {
+                client_index=i;
+            }
+        }
+        if(client_index<0)return;
+        this.request_dismiss_room_info.count2 |= 1<<client_index;
+        if(this.request_dismiss_room_info.count1 == 0)
+        {
+            this.request_dismiss_room_info.count1 |= 1<<client_index;
+
+            var msg = CreateMsg(SERVER_MSG.SM_DISMISS_GAME,{uid:client.uid});
+            for(var i=0;i<this.m_clients.length;i++)
+            {
+                if(this.m_clients[i].uid != client.uid)
+                {
+                    this.m_clients[i].Send(msg);
+                }
+            }
+        }
+        else if(dismiss)
+        {
+            this.request_dismiss_room_info.count1 |= 1<<client_index;
+            
+        }
+        var all_count=true;
+        var free = true;
+        for(var i=0;i<this.m_clients.length;i++)
+        {
+            if((this.request_dismiss_room_info.count2 & ( 1<< i))==0)
+            {
+                all_count = false;
+                break;
+            }
+            if((this.request_dismiss_room_info.count1 & ( 1<< i))==0)
+            {
+                free = false;
+            }
+        }
+        if(all_count)
+        {
+            if(free)
+            {
+                this.room_card.canUseCount=0;
+                this.BalanceGame();
+            }
+            else
+            {
+                this.request_dismiss_room_info.count2=this.request_dismiss_room_info.count1=0;
+                var msg = CreateMsg(SERVER_MSG.SM_DISMISS_GAME_RESULT,{dismiss:false});
+                this.BroadCastMessage(msg);
+            }
+        }
+
     }
     //结算
     public BalanceGame(){

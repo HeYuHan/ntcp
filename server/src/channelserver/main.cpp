@@ -34,8 +34,8 @@ char* V8_BIN_PATH=NULL;
 int main(int argc,char **argv)
 {
 #ifdef WIN32
-	HttpClient c;
-	c.Post("http://127.0.0.1:9800/public/getUserInfo", "{\"uid\":\"12345\",\"code\":\"32333\"}", "application/json");
+	//HttpClient c;
+	//c.Post("http://127.0.0.1:9800/public/getUserInfo", "{\"uid\":\"12345\",\"code\":\"32333\"}", "application/json");
 	//c.Get("https://www.baidu.com");
 
 #endif // WIN32

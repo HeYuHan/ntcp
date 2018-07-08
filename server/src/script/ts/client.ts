@@ -31,6 +31,7 @@ class JClient{
         if(!this.native)
         {
             LogError("native client is null");
+            return;
         }
         var nstring=new NString();
         nstring.Append(msg);
@@ -43,6 +44,13 @@ class JClient{
     }
     public CloseOnSendEnd(){
         if(this.native)this.native.CloseOnSendEnd();
+    }
+    public CloseTimeOut(time:number)
+    {
+        gServer.AddTask(new Task(this,this,function(sender:Client,arg){
+            sender.Disconnect();
+        },time));
+         
     }
     private OnMessage(msg:string){
         
@@ -59,7 +67,7 @@ class JClient{
         }
     }
     private OnConnected(){
-        LogInfo("OnConnected=>>>>>>:"+this.uid);
+        //LogInfo("OnConnected=>>>>>>:"+this.uid);
         this.state=State.IN_LOGIN;
         this.requestCreateRoom=false;
         this.RegisterAllMessage();
@@ -85,6 +93,8 @@ class JClient{
         this.m_MessageCallback[CLIENT_MSG.CM_RESPON_CHU_PAI]=this.ResponseChuPai;
         this.m_MessageCallback[CLIENT_MSG.CM_HUAN_PAI]=this.HuanPai;
         this.m_MessageCallback[CLIENT_MSG.CM_MAI_ZHUANG]=this.MaiZhuang;
+        this.m_MessageCallback[CLIENT_MSG.CM_BROADCAST]=this.Broadcast;
+        this.m_MessageCallback[CLIENT_MSG.CM_DISMISS_GAME]=this.GameLeave;
     }
     private DispatchMessage(msg){
         var hander=this.m_MessageCallback[msg[0]];
@@ -95,7 +105,28 @@ class JClient{
             this.native.Disconnect();
         }
     }
-
+    public Disconnect()
+    {
+        if(this.native)this.native.Disconnect();
+    }
+    public CheckUserState(unionid,roomid,call_back)
+    {
+        var uid = Room.CheckRoomEnter(roomid,unionid);
+        if(uid === null)call_back({});
+        else call_back({
+            error:"ERROR_USER_STATE_INROOM",
+            msg:uid
+        });
+        // return;
+        // PostJson(INFO_SERVER_URL + "getUserState",{
+        //     token:INFO_ACCESS_TOKEN,
+        //     unionid:unionid,
+        //     roomid:roomid
+        // },function(state,data){
+        //     //LogInfo("getUserState:"+data)
+        //     call_back(JSON.parse(data));
+        // });
+    }
     public EnterRoom(msg){
         if(this.room){
             this.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM,{
@@ -110,44 +141,52 @@ class JClient{
             this.native.Disconnect();
             return;
         }
+        if(this.requestCreateRoom)return;
         var client=this;
-        var room=Room.Get(roomid);
-        if(room){
-            client.state=State.IN_ROOM;
-            client.room=room;
-            room.ClientJoin(client);
-        }
-        else
-        {
-            if(this.requestCreateRoom)return;
-            PostJson(INFO_SERVER_URL + "getRoomCard",{
-                token:INFO_ACCESS_TOKEN,
-                roomid:roomid
-            },function(state,cardinfo){
-                client.requestCreateRoom=false;
-                LogInfo("getRoomCard:"+cardinfo);
-                var json = JSON.parse(cardinfo);
-                if(state == 200 && !json.error){
-                    var room_card:RoomCard=json;
-                    if(room_card.canUseCount <= 0){
-                        client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM,{
-                            error:"room card is used"
-                        }));
-                        return;
+        this.CheckUserState(unionid,roomid,function(result){
+            if(result.error)
+            {
+                client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM,result));
+                return;
+            }
+            var room=Room.Get(roomid);
+            if(room){
+                client.state=State.IN_ROOM;
+                client.room=room;
+                room.ClientJoin(client);
+            }
+            else
+            {
+               
+                PostJson(INFO_SERVER_URL + "getRoomCard",{
+                    token:INFO_ACCESS_TOKEN,
+                    roomid:roomid
+                },function(state,cardinfo){
+                    client.requestCreateRoom=false;
+                    LogInfo("getRoomCard:"+cardinfo);
+                    var json = JSON.parse(cardinfo);
+                    if(state == 200 && !json.error){
+                        var room_card:RoomCard=json;
+                        if(room_card.canUseCount <= 0){
+                            client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM,{
+                                error:"room card is used"
+                            }));
+                            return;
+                        }
+                        var room = Room.Create(roomid,room_card);
+                        client.state=State.IN_ROOM;
+                        client.room=room;
+                        room.ClientJoin(client);
                     }
-                    var room = Room.Create(roomid,room_card);
-                    client.state=State.IN_ROOM;
-                    client.room=room;
-                    room.ClientJoin(client);
-                }
-                else{
-                    client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM,{
-                        error:"room not found:"+roomid
-                    }));
-                    client.native.Disconnect();
-                }
-            });
-        }
+                    else{
+                        client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM,{
+                            error:"room not found:"+roomid
+                        }));
+                        client.native.Disconnect();
+                    }
+                });
+            }
+        });
 
     }
     public LeaveRoom(){
@@ -175,5 +214,13 @@ class JClient{
     }
     public MaiZhuang(msg){
         this.room.ClientMaiZhuang(this,msg);
+    }
+    public Broadcast(msg)
+    {
+        if(this.room)this.room.ClientBroadcast(this,msg);
+    }
+    public GameLeave(msg)
+    {
+        if(this.room)this.room.GameLeave(this,msg.dismiss);
     }
 }

@@ -264,13 +264,14 @@ require("message_type.js");
 // //     check.CheckWin();
 // // }
 // // start();
+var gServer:JServer;
 function Main(){
-    var server = new JServer();
-    var ret = server.Init({
+    gServer = new JServer();
+    var ret = gServer.Init({
         max_client:50
     });
     LogInfo("init server ret:"+ret);
-    var ret2 = server.Start();
+    var ret2 = gServer.Start();
     LogInfo("exit server ret:"+ret2);
     return 0;
 }

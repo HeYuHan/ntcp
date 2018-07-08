@@ -41,7 +41,7 @@ void HttpClient::OnRevcMessage()
 		{
 			size_t size = 0;
 			line = evbuffer_readln(buffer, &size, EVBUFFER_EOL_CRLF);
-			if(line)log_info("res :%s is \\r\\n:%s", line,strcmp(line,"\r\n")==0?"true":"false");
+			//if(line)log_info("res :%s is \\r\\n:%s", line,strcmp(line,"\r\n")==0?"true":"false");
 		} while (line);
 
 	}

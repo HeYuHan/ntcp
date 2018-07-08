@@ -24,6 +24,7 @@ public class User implements Serializable,IDBObject{
 	public int goldCount;
 	public int diamondCount;
 	public boolean isProxy;
+	public int activeRoomId;
 	
 	@Override
 	public String getUid() {
@@ -36,6 +37,7 @@ public class User implements Serializable,IDBObject{
 		.set("isProxy", isProxy)
 		.set("nick", nick)
 		.set("headimgurl", headimgurl)
+		.set("activeRoomId", activeRoomId)
 		.set("token", token);
 	}
 	@Override

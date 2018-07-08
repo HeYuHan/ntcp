@@ -15,7 +15,7 @@ public class RoomRecoder implements Serializable,IDBObject{
 	public String uid;
 	public Date createTime;
 	public int roomid;
-	public String[] players=new String[6];
+	public String[] players=new String[9];
 	@Override
 	public String getUid() {
 		// TODO Auto-generated method stub

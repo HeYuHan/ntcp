@@ -1,4 +1,6 @@
 package com.coder.ntcp.db;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ public class Room {
 	static HashMap<String, Room> gCardRoomMap;
 	int roomid;
 	RoomCard roomCard;
+	public String[] playUsers;
 	private Room(int id,RoomCard card) {
 		this.roomid=id;
 		this.roomCard=card;
@@ -23,6 +26,15 @@ public class Room {
 	}
 	public RoomCard getRoomCard() {
 		return this.roomCard;
+	}
+	public boolean haveUser(String unionid)
+	{
+		if(playUsers == null)return false;
+		for(int i=0;i<playUsers.length;i++)
+		{
+			if(playUsers[i].equals(unionid))return true;
+		}
+		return false;
 	}
 	static RandomInt getIdCreater() {
 		if(roomCreater == null) {
@@ -72,6 +84,13 @@ public class Room {
 		gRoomMap.remove(r2.getRoomId());
 		gCardRoomMap.remove(r2.getRoomCard().uid);
 		if(roomCreater != null)roomCreater.releaseValue(r2.getRoomId());
+		if(r.playUsers!=null&&DBHelper.gDbHelper!=null)
+		{
+			for(int i=0;i<r.playUsers.length;i++)
+			{
+				DBHelper.gDbHelper.updateObjectValues(r.playUsers[i], "activeRoomId", 0, User.class);
+			}
+		}
 	}
 	public static Room getRoom(int id) {
 		if(gRoomMap!=null)return gRoomMap.get(id);
