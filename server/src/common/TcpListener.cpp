@@ -99,7 +99,7 @@ bool TcpListener::CreateTcpServer(const char *ip, int port, int max_client)
 
 void TcpListener::ListenEvent(evconnlistener * listener, evutil_socket_t fd, sockaddr * sock, int socklen, void * arg)
 {
-	log_info("socket listenner socklen:%d fd:%d", socklen, fd);
+	//log_info("socket listenner socklen:%d fd:%d", socklen, fd);
 	TcpListener *l = (TcpListener*)arg;
 	l->OnTcpAccept(fd, sock);
 }

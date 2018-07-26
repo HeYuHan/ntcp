@@ -297,8 +297,13 @@ var Room = (function () {
     };
     Room.CheckRoomEnter = function (roomid, unionid) {
         var recoder_room = Room.gPlayers[unionid];
-        if (recoder_room == null || recoder_room == roomid || Room.Get(recoder_room) == null)
+        if (recoder_room == null || recoder_room == roomid)
             return null;
+        var room = Room.Get(recoder_room);
+        if (room == null) {
+            Room.gPlayers[unionid] = null;
+            return null;
+        }
         return recoder_room;
     };
     Room.prototype.AddClient = function (client) {
@@ -505,6 +510,11 @@ var Room = (function () {
         }
     };
     Room.prototype.ClientJoin = function (c) {
+        for (var i = 0; i < this.m_clients.length; i++) {
+            if (this.m_clients[i].info.unionid == c.info.unionid) {
+                return "ERROR_IS_INROOM";
+            }
+        }
         if (this.state == RoomState.IN_NONE)
             this.state = RoomState.IN_WAIT;
         else if (this.state > RoomState.IN_WAIT) {
@@ -559,6 +569,7 @@ var Room = (function () {
                 }));
             }
         }
+        return null;
     };
     Room.prototype.PrintClientInfo = function () {
         for (var i = 0; i < this.m_clients.length; i++) {
@@ -1007,7 +1018,6 @@ var Room = (function () {
                 this.last_chu_pai_player.AddQiPais(this.last_chu_pai);
             this.wait_result = false;
             this.MoPai();
-            LogInfo("time out:" + time_out);
         }
     };
     Room.prototype.ClientHuanPai = function (client, msg) {

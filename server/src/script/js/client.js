@@ -49,7 +49,6 @@ var JClient = (function () {
     JClient.prototype.OnMessage = function (msg) {
         try {
             var json = JSON.parse(msg);
-            LogInfo(CLIENT_MSG[json[0]] + ":" + JSON.stringify(json[1]));
             this.DispatchMessage(json);
         }
         catch (e) {
@@ -64,7 +63,6 @@ var JClient = (function () {
         this.RegisterAllMessage();
     };
     JClient.prototype.OnDisconected = function () {
-        LogInfo("OnDisconected:" + this.uid);
         this.LeaveRoom();
         this.native = null;
         this.uid = 0;
@@ -84,6 +82,7 @@ var JClient = (function () {
         this.m_MessageCallback[CLIENT_MSG.CM_MAI_ZHUANG] = this.MaiZhuang;
         this.m_MessageCallback[CLIENT_MSG.CM_BROADCAST] = this.Broadcast;
         this.m_MessageCallback[CLIENT_MSG.CM_DISMISS_GAME] = this.GameLeave;
+        this.m_MessageCallback[CLIENT_MSG.CM_CHECK_IN_ROOM] = this.CheckInRoom;
     };
     JClient.prototype.DispatchMessage = function (msg) {
         var hander = this.m_MessageCallback[msg[0]];
@@ -134,7 +133,13 @@ var JClient = (function () {
             if (room) {
                 client.state = State.IN_ROOM;
                 client.room = room;
-                room.ClientJoin(client);
+                var ret = room.ClientJoin(client);
+                if (ret != null) {
+                    client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM, {
+                        error: ret
+                    }));
+                    return;
+                }
             }
             else {
                 PostJson(INFO_SERVER_URL + "getRoomCard", {
@@ -142,9 +147,12 @@ var JClient = (function () {
                     roomid: roomid
                 }, function (state, cardinfo) {
                     client.requestCreateRoom = false;
-                    LogInfo("getRoomCard:" + cardinfo);
                     var json = JSON.parse(cardinfo);
                     if (state == 200 && !json.error) {
+                        if (client.native == null) {
+                            LogError("on create room but client is disconnect!!!");
+                            return;
+                        }
                         var room_card = json;
                         if (room_card.canUseCount <= 0) {
                             client.Send(CreateMsg(SERVER_MSG.SM_ENTER_ROOM, {
@@ -166,6 +174,9 @@ var JClient = (function () {
                 });
             }
         });
+    };
+    JClient.prototype.CheckInRoom = function (msg) {
+        this.Send(CreateMsg(SERVER_MSG.SM_CHECK_IN_ROOM, { roomid: Room.CheckRoomEnter(msg.roomid, msg.unionid) }));
     };
     JClient.prototype.LeaveRoom = function () {
         if (this.room)

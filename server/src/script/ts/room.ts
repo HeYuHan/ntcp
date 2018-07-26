@@ -365,7 +365,13 @@ class Room{
     public static CheckRoomEnter(roomid,unionid)
     {
         var recoder_room = Room.gPlayers[unionid];
-        if(recoder_room == null || recoder_room == roomid || Room.Get(recoder_room) == null )return null;
+        if(recoder_room == null || recoder_room == roomid)return null;
+        var room = Room.Get(recoder_room);
+        if(room == null)
+        {
+            Room.gPlayers[unionid]=null;
+            return null;
+        }
         return recoder_room;
         // for(var i=0;i<Room.gRoomList.length;i++)
         // {
@@ -599,6 +605,12 @@ class Room{
     }
     public ClientJoin(c:JClient){
 
+        for(var i=0;i<this.m_clients.length;i++){
+            if(this.m_clients[i].info.unionid == c.info.unionid)
+            {
+                return "ERROR_IS_INROOM";
+            }
+        }
         if(this.state==RoomState.IN_NONE)this.state=RoomState.IN_WAIT;
         else if(this.state > RoomState.IN_WAIT)
         {
@@ -656,6 +668,7 @@ class Room{
                 }));
             }
         }
+        return null;
     }
     public PrintClientInfo(){
         for(var i=0;i<this.m_clients.length;i++){
@@ -1178,7 +1191,6 @@ class Room{
             if(this.last_chu_pai_player)this.last_chu_pai_player.AddQiPais(this.last_chu_pai);
             this.wait_result=false;
             this.MoPai();
-            LogInfo("time out:"+time_out);
         }
     }
     public ClientHuanPai(client:JClient,msg){
